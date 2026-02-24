@@ -8,3 +8,4 @@
 	- Postgres; _dockerized_
 # Research to be done
 - is there already a map for volunteers?
+- what technologies are the smartest to use?
