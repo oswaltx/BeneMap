@@ -1,0 +1,36 @@
+# ---------------------------
+# Backend / Spring Boot
+# ---------------------------
+/backend/build/
+/backend/.gradle/
+/backend/logs/
+*.log
+
+# IDE files
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# ---------------------------
+# Frontend / Svelte + Node
+# ---------------------------
+/frontend/node_modules/
+/frontend/dist/
+/frontend/dist-ssr/
+/frontend/.cache/
+
+# npm / yarn / pnpm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------------------------
+# Obsidian vault
+# ---------------------------
+.obsidian/
+
+# Optional: other common stuff
+*.local
