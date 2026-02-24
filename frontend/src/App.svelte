@@ -1,31 +1,13 @@
-<script lang="ts">
-    import { onMount } from 'svelte';
+<script>
+    let message = "";
 
-    type VolunteerActivity = {
-        id: number;
-        name: string;
-        latitude: number;
-        longitude: number;
+    async function fetchMessage() {
+        const res = await fetch("http://localhost:8080/api");
+        message = await res.json().then(data => data.message);
     }
 
-    let activities: VolunteerActivity[] = [];
-
-    onMount(async () => {
-        const res = await fetch('http://localhost:8080/activities');
-        activities = await res.json(); // parse JSON automatically
-    });
+    fetchMessage();
 </script>
 
-<h1>Volunteer Activities</h1>
-
-{#if activities.length === 0}
-    <p>Loading…</p>
-{:else}
-    <ul>
-        {#each activities as activity}
-            <li>
-                <strong>{activity.name}</strong> — {activity.latitude}, {activity.longitude} — {activity.date}
-            </li>
-        {/each}
-    </ul>
-{/if}
+<p>{message}</p>
+<p>Here stuff is displayed. Someday maybe a map :skull:</p>
