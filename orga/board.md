@@ -6,15 +6,23 @@ kanban-plugin: board
 
 ## Todo
 
-- [ ] create datamodel
+- [ ] Add map library to frontend (Leaflet or MapLibre)
+- [ ] Create basic Map component in Svelte
+- [ ] Implement `GET /api/activities` in backend
+- [ ] Implement `POST /api/activities` in backend
+- [ ] Research: Existing volunteer map solutions
+- [ ] Research: Calendar sync implementation (iCal/Google API)
+- [ ] Setup `docker-compose.yml` for PostgreSQL
 
 
 ## Doing
 
-- [ ] create basic springboot application
 
 
 ## Done
+- [x] create datamodel
+- [x] create basic springboot application
+
 
 
 
