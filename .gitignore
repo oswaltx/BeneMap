@@ -6,12 +6,16 @@
 /backend/logs/
 *.log
 
-# IDE files
+# IntelliJ / IDE files
 .idea/
 *.iml
 
 # OS
 .DS_Store
+
+# Gradle wrapper
+/gradle/wrapper/gradle-wrapper.jar
+/gradle/wrapper/gradle-wrapper.properties
 
 # ---------------------------
 # Frontend / Svelte + Node
@@ -24,7 +28,6 @@
 # npm / yarn / pnpm logs
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 
 # ---------------------------
