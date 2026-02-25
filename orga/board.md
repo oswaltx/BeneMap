@@ -13,7 +13,7 @@ kanban-plugin: board
 - [ ] Research: Existing volunteer map solutions
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Setup `docker-compose.yml` for PostgreSQL
-
+- [ ] Checkout Coolify and Dockploy and Dokku
 
 ## Doing
 
