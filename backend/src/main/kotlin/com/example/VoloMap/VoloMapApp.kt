@@ -4,9 +4,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class DemoApplication
+class VoloMapApp
 
 fun main(args: Array<String>) {
     println("Hello World")
-	runApplication<DemoApplication>(*args)
+    runApplication<VoloMapApp>(*args) // Change to VoloMapApp instead of DemoApplication
 }
