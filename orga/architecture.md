@@ -1,6 +1,7 @@
 # Architecture
 ## Frontend
 - Svelte
+- Sveaflet
 ## Backend
 - Springboot Backend (Kotlin)
 ## Database
