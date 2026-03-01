@@ -46,4 +46,12 @@
         {/each}
 
     </Map>
+    <Button on:click={()=>fetchMarkers("2026-07-20","Umweltpflege")}>
+        Events on 2026-07-20 and Umweltpflege category
+    </Button>
+    <Button on:click={()=>fetchMarkers()}>
+        Reset Filter
+    </Button>
+
+
 </div>
