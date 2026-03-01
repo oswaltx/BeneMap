@@ -1,13 +1,10 @@
 <script>
-    let message = "";
+    import Map from "./lib/Map.svelte";
 
-    async function fetchMessage() {
-        const res = await fetch("http://localhost:8080/api");
-        message = await res.json().then(data => data.message);
-    }
 
-    fetchMessage();
 </script>
+<h1>VOLOMAP</h1>
+<Map></Map>
 
-<p>{message}</p>
-<p>Here stuff is displayed. Someday maybe a map :skull:</p>
+
+
