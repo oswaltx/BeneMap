@@ -26,6 +26,7 @@
         implementation("org.springframework.boot:spring-boot-starter-web")
         runtimeOnly("com.h2database:h2")
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+        implementation("org.jsoup:jsoup:1.17.2") //Scraping
 
 
 
