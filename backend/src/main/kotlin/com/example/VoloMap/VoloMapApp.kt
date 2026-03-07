@@ -13,4 +13,3 @@ fun main(args: Array<String>) {
     //scraper.scrapeWebsite("https://engagementdatenbank.stadt-koeln.de/ergebnisse?fulltext=&id=&area_of_activity=All&target_group=All&postal_code=")
     runApplication<VoloMapApp>(*args) // Change to VoloMapApp instead of DemoApplication
 }
-// is the server down?
