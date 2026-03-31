@@ -6,8 +6,11 @@
 /backend/logs/
 *.log
 
-# IntelliJ / IDE files
-.idea/
+# IntelliJ / IDE files - nutzerspezifische Dateien ignorieren, Projektkonfiguration tracken
+.idea/workspace.xml
+.idea/dataSources.local.xml
+.idea/dataSources/
+.idea/shelf/
 *.iml
 
 # OS
