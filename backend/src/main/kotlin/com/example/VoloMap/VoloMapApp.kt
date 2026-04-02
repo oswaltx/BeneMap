@@ -8,7 +8,11 @@ import org.springframework.boot.runApplication
 class VoloMapApp
 
 fun main(args: Array<String>) {
-    //val scraper = Scraper()
-    //scraper.scrapeWebsite("https://engagementdatenbank.stadt-koeln.de/ergebnisse?fulltext=&id=&area_of_activity=All&target_group=All&postal_code=&page=1", "page")
-    runApplication<VoloMapApp>(*args) // Change to VoloMapApp instead of DemoApplication
+    val context = runApplication<VoloMapApp>(*args)
+    val scraper = context.getBean(Scraper::class.java)
+    scraper.scrapeWebsite(
+        "https://engagementdatenbank.stadt-koeln.de/ergebnisse?fulltext=&id=&area_of_activity=All&target_group=All&postal_code=&page=1",
+        "page", 10
+    )
+    //runApplication<VoloMapApp>(*args) // Change to VoloMapApp instead of DemoApplication
 }

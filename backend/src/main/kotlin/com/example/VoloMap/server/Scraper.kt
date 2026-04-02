@@ -1,31 +1,49 @@
 package com.example.VoloMap.server
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.springframework.stereotype.Component
 
-open class Scraper {
-    fun scrapeWebsite(url: String, pageString: String?){
-        fun getDocument(url: String): Document {
-            val document = Jsoup.connect(url)
-                .userAgent("VoloMap-Scraper/1.0 (TH Köln; david_ari_ikerimma.oswalt@smail.th-koeln.de)")
-                .get()
-            return document
+@Component
+class Scraper(
+    private val repository: VolunteerActivityRepository
+) {
+    fun getDocument(url: String): Document {
+        return Jsoup.connect(url)
+            .userAgent("VoloMap-Scraper/1.0 (TH Köln; david_ari_ikerimma.oswalt@smail.th-koeln.de)")
+            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+            .header("Accept-Language", "de-DE,de;q=0.9")
+            .header("Referer", "https://engagementdatenbank.stadt-koeln.de")
+            .timeout(10000)
+            .get()
+    }
+
+    fun scrapeWebsite(url: String, pageString: String?, limit: Int = Int.MAX_VALUE) {
+        var count = 0
+
+        fun scrapeWithLimit(document: Document) {
+            val links = document.select("a.btn.btn-primary")
+            for (link in links) {
+                if (count >= limit) return
+                val href = link.attr("href").removePrefix("/index.php")
+                val fullUrl = "https://engagementdatenbank.stadt-koeln.de$href"
+                if (href.isEmpty()) continue
+                println("Scraping: $fullUrl")
+                scrapeEhrenamtDetails(fullUrl)
+                count++
+            }
         }
 
-        // Scrape first page
-        val firstDocument = getDocument(url)
-        scrapeEhrenamtLinks(firstDocument)
+        scrapeWithLimit(getDocument(url))
 
-        if (pageString == null)
-            return
+        if (pageString == null || count >= limit) return
 
-        // Iterate through all pages
         var page = 2
-        while(true){
+        while (count < limit) {
             val newUrl = url.replace("page=1", "page=$page")
             try {
                 println("Scraping page $page")
-                val document = getDocument(newUrl)
-                scrapeEhrenamtLinks(document)
+                scrapeWithLimit(getDocument(newUrl))
                 page++
             } catch (e: Exception) {
                 println("No more pages")
@@ -36,45 +54,76 @@ open class Scraper {
 
     fun scrapeEhrenamtLinks(document: Document) {
         val links = document.select("a.btn.btn-primary")
-
         links.forEach { link ->
-            val href = link.attr("href")
+            val href = link.attr("href").removePrefix("/index.php")
             val fullUrl = "https://engagementdatenbank.stadt-koeln.de$href"
-
+            if (href.isEmpty()) return@forEach
             println("Scraping: $fullUrl")
             scrapeEhrenamtDetails(fullUrl)
         }
     }
 
     fun scrapeEhrenamtDetails(url: String) {
-        val document = Jsoup.connect(url)
-            .userAgent("Mozilla/5.0")
-            .get()
+        // Skip if already in DB
+        if (repository.existsBySourceUrl(url)) {
+            println("Skipping (already exists): $url")
+            return
+        }
 
-        // Alle Field-Divs finden
+        val document = getDocument(url)
         val fields = document.select("div.field")
-
-        val ehrenamtData = mutableMapOf<String, String>()
+        val data = mutableMapOf<String, String>()
 
         fields.forEach { field ->
-            // Label extrahieren
             val label = field.select("div.field__label").text()
-
-            // Items extrahieren (kann mehrere geben)
             val items = field.select("div.field__item")
-            val itemsText = items.joinToString(", ") { item ->
-                // Wenn es ein Link ist, nimm den href, sonst den Text
-                val link = item.select("a").attr("href")
-                link.ifEmpty { item.text() }
+            val value = items.joinToString(", ") { item ->
+                val link = item.select("a")
+                when {
+                    link.isEmpty() -> item.text()
+                    link.attr("href").startsWith("mailto:") -> item.text()
+                    link.attr("href").startsWith("http") -> link.attr("href")
+                    else -> item.text()
+                }
             }
-
-            if (label.isNotEmpty() && itemsText.isNotEmpty()) {
-                ehrenamtData[label] = itemsText
-                println("$label: $itemsText")
+            if (label.isNotEmpty() && value.isNotEmpty()) {
+                data[label] = value
             }
         }
 
-        // Hier könntest du die Daten speichern (z.B. in DB oder Liste)
-        println("---")
+        val coords = data["Adresse der Vermittlungsstelle"]?.let {
+            Thread.sleep(1100) // Nominatim rate limit: 1 req/s
+            geocode(it)
+        }
+
+        val activity = VolunteerActivity(
+            name = data["Projektname"] ?: "Unbekannt",
+            description = data["Beschreibung"],
+            addressText = data["Adresse der Vermittlungsstelle"],
+            sourceUrl = url,
+            category = data["Tätigkeitsbereich"],
+            latitude = coords?.first,
+            longitude = coords?.second
+        )
+
+        repository.save(activity)
+        println("Saved: ${activity.name} (lat=${coords?.first}, lng=${coords?.second})")
+    }
+    fun geocode(address: String): Pair<Double, Double>? {
+        val encoded = java.net.URLEncoder.encode(address, "UTF-8")
+        val url = "https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=1"
+
+        val response = Jsoup.connect(url)
+            .userAgent("VoloMap-Scraper/1.0 (TH Köln; david_ari_ikerimma.oswalt@smail.th-koeln.de)")
+            .ignoreContentType(true)
+            .get()
+            .body()
+            .text()
+
+        val json = org.json.JSONArray(response)
+        if (json.length() == 0) return null
+
+        val first = json.getJSONObject(0)
+        return Pair(first.getDouble("lat"), first.getDouble("lon"))
     }
 }

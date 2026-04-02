@@ -4,6 +4,8 @@
         id("org.springframework.boot") version "4.0.3"
         id("io.spring.dependency-management") version "1.1.7"
         kotlin("plugin.jpa") version "2.2.21"
+
+
     }
 
     group = "com.example"
@@ -27,6 +29,8 @@
         runtimeOnly("com.h2database:h2")
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         implementation("org.jsoup:jsoup:1.17.2") //Scraping
+
+        implementation("org.json:json:20240303")
 
 
 
