@@ -1,7 +1,7 @@
 <script>
     import Map from "./lib/Map.svelte";
-
-
+    let categories = [];
+    let markers = [];
 </script>
 <h1>VOLOMAP</h1>
 <Map></Map>
