@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import java.time.Instant
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "volunteer_activities")
@@ -40,7 +41,7 @@ class VolunteerActivity constructor(
     var isActive: Boolean = true,
 
     // Timestamp of when this record was inserted into our database
-    var createdAt: Instant = Instant.now()
+    var createdAt: Instant = Instant.now(),
 
-    
+    var dateTime: LocalDateTime = LocalDateTime.now(),
 )
