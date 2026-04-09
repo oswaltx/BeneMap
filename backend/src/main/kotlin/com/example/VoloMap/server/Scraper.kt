@@ -3,6 +3,8 @@ package com.example.VoloMap.server
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+import kotlin.random.Random
 
 @Component
 class Scraper(
@@ -95,15 +97,18 @@ class Scraper(
             Thread.sleep(1100) // Nominatim rate limit: 1 req/s
             geocode(it)
         }
+        println("Gefundene Felder: ${data.keys}")
+
 
         val activity = VolunteerActivity(
             name = data["Projektname"] ?: "Unbekannt",
             description = data["Beschreibung"],
             addressText = data["Adresse der Vermittlungsstelle"],
             sourceUrl = url,
-            category = data["Tätigkeitsbereich"],
+            category = data["Tätigkeitsbereich"] ?: listOf("Unbekannt", "Umwelthilfe", "Ehre")[ Random.nextInt(0, 2)],
             latitude = coords?.first,
-            longitude = coords?.second
+            longitude = coords?.second,
+            dateTime = LocalDateTime.now()
         )
 
         repository.save(activity)
@@ -126,4 +131,53 @@ class Scraper(
         val first = json.getJSONObject(0)
         return Pair(first.getDouble("lat"), first.getDouble("lon"))
     }
+    fun fakeScraper(limit: Int) {
+            val names = listOf(
+                "Nachbarschaftshilfe",
+                "Umweltaktion",
+                "Seniorenbegleitung",
+                "Hausaufgabenhilfe",
+                "Kleidertausch",
+                "Gemeinschaftsprojekt"
+            )
+
+            val descriptions = listOf(
+                "Engagement für die lokale Gemeinschaft",
+                "Unterstützung für ein soziales Projekt",
+                "Mithelfen bei einer gemeinnützigen Aktion",
+                "Freiwillige Unterstützung im Stadtteil",
+                "Praktische Hilfe für einen guten Zweck"
+            )
+
+            val addresses = listOf(
+                "Köln Innenstadt",
+                "Köln Ehrenfeld",
+                "Köln Nippes",
+                "Köln Sülz",
+                "Köln Lindenthal",
+                "Köln Mülheim"
+            )
+
+            val categories = listOf("Unbekannt", "Umwelthilfe", "Ehre", "Soziales", "Bildung", "Nachbarschaft")
+
+            // Grob im Umfeld von Köln
+            val cologneCenterLat = 50.9375
+            val cologneCenterLng = 6.9603
+            val maxOffset = 0.08 // ca. einige Kilometer um Köln herum
+
+            while (repository.count() < limit) {
+                val activity = VolunteerActivity(
+                    name = names.random(),
+                    description = descriptions.random(),
+                    addressText = addresses.random(),
+                    sourceUrl = "https://wawagogo.com/${Random.nextInt(100000, 999999)}",
+                    category = categories.random(),
+                    latitude = cologneCenterLat + Random.nextDouble(-maxOffset, maxOffset),
+                    longitude = cologneCenterLng + Random.nextDouble(-maxOffset, maxOffset),
+                    dateTime = LocalDateTime.now().plusHours(Random.nextInt(0, 24*7).toLong())
+                )
+
+                repository.save(activity)
+            }
+        }
 }
