@@ -10,8 +10,9 @@
 
 
 
-        let markers = [{category: "Brono", id: 1, lat: 50.9375, lng: 6.9603, name: "Erroror 1", address: "Erroror 1", dateTime: "2023-01-01T00:00:00Z" }];
-        let categories = ["Brono", "Kino", "Kultur", "Sport"];
+        let markers: any[] = [];
+        let categories: string[] = [];
+        let errorMessage: string | null = null;
 
         let query = {
             date: "",
@@ -22,8 +23,12 @@
         };
 
         onMount(async () => {
-            const res = await fetch("http://localhost:8080/categories");
-            categories = await res.json();
+            try {
+                const res = await fetch("http://localhost:8080/categories");
+                categories = await res.json();
+            } catch (e) {
+                errorMessage = "Kategorien konnten nicht geladen werden. Ist der Server erreichbar?";
+            }
             fetchMarkers();
         });
 
@@ -36,11 +41,16 @@
             if (query.timeTo) params.append("timeTo", query.timeTo);
             if (query.search) params.append("search", query.search);
 
-            const res = await fetch(
-                "http://localhost:8080/markers?" + params.toString()
-            );
-
-            markers = await res.json();
+            try {
+                const res = await fetch(
+                    "http://localhost:8080/markers?" + params.toString()
+                );
+                if (!res.ok) throw new Error("Request failed");
+                markers = await res.json();
+                errorMessage = null;
+            } catch (e) {
+                errorMessage = "Aktivitäten konnten nicht geladen werden. Ist der Server erreichbar?";
+            }
         }
 
         function handleSearch(event: CustomEvent<string>) {
@@ -69,6 +79,7 @@
 
     <SearchBar on:search={handleSearch} />
     <FilterBar {categories} on:filter={handleFilter} />
+    {#if errorMessage}<p class="error">{errorMessage}</p>{/if}
 
     <div style="width:100%;height:500px;">
         <Map options={{ center: [50.9375, 6.9603], zoom: 13 }}>
@@ -90,3 +101,9 @@
         </Map>
     </div>
     <VolunteerList {markers}></VolunteerList>
+
+<style>
+    .error {
+        color: #a00;
+    }
+</style>

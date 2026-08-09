@@ -95,7 +95,6 @@ class Scraper(
         }
 
         val coords = data["Adresse der Vermittlungsstelle"]?.let {
-            Thread.sleep(1100) // Nominatim rate limit: 1 req/s
             geocodingService.geocode(it)
         }
         println("Gefundene Felder: ${data.keys}")

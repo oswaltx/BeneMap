@@ -52,6 +52,9 @@
             addressText = "";
             category = "";
             dateTime = "";
+        } catch (e) {
+            statusMessage = "Server nicht erreichbar. Bitte versuche es später erneut.";
+            statusIsWarning = true;
         } finally {
             submitting = false;
         }
