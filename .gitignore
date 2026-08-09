@@ -42,3 +42,8 @@ pnpm-debug.log*
 
 # Optional: other common stuff
 *.local
+
+# ---------------------------
+# Superpowers scratch (visual brainstorm mockups etc.)
+# ---------------------------
+/.superpowers/
