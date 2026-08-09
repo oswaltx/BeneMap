@@ -4,6 +4,6 @@
 
 <nav>
     <Link href="/">Home</Link>
-    <Link href="/map">Map</Link>
+    <Link href="/add">Aktivität hinzufügen</Link>
     <Link href="/about">About</Link>
 </nav>

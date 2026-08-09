@@ -1,12 +1,10 @@
 <script>
-    import Map from "./lib/Map.svelte";
     import NavBar from "./lib/NavBar.svelte";
-    let categories = [];
-    let markers = [];
+    import Router from "./lib/Router.svelte";
 </script>
 <NavBar />
 <h1>Benemap</h1>
-<Map></Map>
+<Router />
 
 
 
