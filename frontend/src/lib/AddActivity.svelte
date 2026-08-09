@@ -28,7 +28,7 @@
                     description: description || null,
                     addressText: addressText || null,
                     category: category || null,
-                    dateTime: dateTime ? new Date(dateTime).toISOString().slice(0, 19) : undefined,
+                    dateTime: dateTime ? dateTime + ":00" : undefined,
                 }),
             });
 
