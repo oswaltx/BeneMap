@@ -27,8 +27,10 @@ class MainController(
         @RequestParam(required = false) date: String?, // format: YYYY-MM-DD
         @RequestParam(required = false) timeFrom: Int?,
         @RequestParam(required = false) timeTo: Int?,
+        @RequestParam(required = false) search: String?,
     ): List<Marker> {
         val filterDate = date?.let { LocalDate.parse(it) }
+        val searchText = search?.trim()?.lowercase()
 
         return repository.findAll()
             .filter { category == null || it.category == category }
@@ -48,6 +50,12 @@ class MainController(
             .filter { filterDate == null || it.dateTime?.toLocalDate() == filterDate }
             .filter { timeFrom == null || (it.dateTime?.hour ?: 0) >= timeFrom }
             .filter { timeTo == null || (it.dateTime?.hour ?: 0) < timeTo }
+            .filter {
+                searchText == null ||
+                        it.name.lowercase().contains(searchText) ||
+                        it.address.lowercase().contains(searchText) ||
+                        it.description.lowercase().contains(searchText)
+            }
     }
     @GetMapping("/categories")
     fun categories(): List<String> {
