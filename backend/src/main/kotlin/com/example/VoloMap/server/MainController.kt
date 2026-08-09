@@ -13,7 +13,8 @@ import java.time.LocalDateTime
 @CrossOrigin(origins = ["http://localhost:5173"])
 @RestController
 class MainController(
-    private val repository: VolunteerActivityRepository
+    private val repository: VolunteerActivityRepository,
+    private val geocodingService: GeocodingService
 ) {
 
     @GetMapping("/")
@@ -59,6 +60,13 @@ class MainController(
     fun addActivity(
         @RequestBody activity: VolunteerActivity
     ): ResponseEntity<VolunteerActivity> {
+        if (activity.latitude == null && activity.longitude == null && !activity.addressText.isNullOrBlank()) {
+            val coords = geocodingService.geocode(activity.addressText!!)
+            if (coords != null) {
+                activity.latitude = coords.first
+                activity.longitude = coords.second
+            }
+        }
         val savedActivity = repository.save(activity)
         return ResponseEntity.ok(savedActivity)
     }
