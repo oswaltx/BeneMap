@@ -8,7 +8,8 @@ import kotlin.random.Random
 
 @Component
 class Scraper(
-    private val repository: VolunteerActivityRepository
+    private val repository: VolunteerActivityRepository,
+    private val geocodingService: GeocodingService
 ) {
     fun getDocument(url: String): Document {
         return Jsoup.connect(url)
@@ -95,7 +96,7 @@ class Scraper(
 
         val coords = data["Adresse der Vermittlungsstelle"]?.let {
             Thread.sleep(1100) // Nominatim rate limit: 1 req/s
-            geocode(it)
+            geocodingService.geocode(it)
         }
         println("Gefundene Felder: ${data.keys}")
 
@@ -113,23 +114,6 @@ class Scraper(
 
         repository.save(activity)
         println("Saved: ${activity.name} (lat=${coords?.first}, lng=${coords?.second})")
-    }
-    fun geocode(address: String): Pair<Double, Double>? {
-        val encoded = java.net.URLEncoder.encode(address, "UTF-8")
-        val url = "https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=1"
-
-        val response = Jsoup.connect(url)
-            .userAgent("VoloMap-Scraper/1.0 (TH Köln; david_ari_ikerimma.oswalt@smail.th-koeln.de)")
-            .ignoreContentType(true)
-            .get()
-            .body()
-            .text()
-
-        val json = org.json.JSONArray(response)
-        if (json.length() == 0) return null
-
-        val first = json.getJSONObject(0)
-        return Pair(first.getDouble("lat"), first.getDouble("lon"))
     }
     fun fakeScraper(limit: Int) {
             val names = listOf(
