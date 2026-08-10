@@ -136,7 +136,7 @@
         top: 12px;
         left: 12px;
         right: 12px;
-        z-index: 1000;
+        z-index: 1001;
         background: var(--color-surface);
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-panel);
@@ -157,7 +157,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 1000;
+        z-index: 1001;
         background: var(--color-surface);
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         box-shadow: 0 -3px 10px rgba(47, 82, 51, 0.15);
