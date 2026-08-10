@@ -1,6 +1,5 @@
 <script lang="ts">
     import {onMount} from "svelte";
-    import { ControlZoom } from 'sveaflet';
     import {Map, Marker, Popup, TileLayer} from "sveaflet";
     import FilterBar from "./FilterBar.svelte";
     import SearchBar from "./SearchBar.svelte";
@@ -83,7 +82,7 @@
     </div>
 
     <div class="map-container">
-        <Map options={{ center: [50.9375, 6.9603], zoom: 13 }}>
+        <Map options={{ center: [50.9375, 6.9603], zoom: 13, zoomControl: false, attributionControl: false }}>
             <TileLayer
                 url={'https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png'}
                 options={{ attribution }}
@@ -103,9 +102,12 @@
     </div>
 
     <div class="bottom-sheet" class:expanded={sheetExpanded}>
-        <button class="sheet-handle" on:click={() => sheetExpanded = !sheetExpanded}>
-            {markers.length} Aktivitäten {sheetExpanded ? "▼" : "▲"}
-        </button>
+        <div class="sheet-header">
+            <button class="sheet-handle" on:click={() => sheetExpanded = !sheetExpanded}>
+                {markers.length} Aktivitäten {sheetExpanded ? "▼" : "▲"}
+            </button>
+            <span class="attribution">© CARTO © OpenStreetMap</span>
+        </div>
         {#if sheetExpanded}
             <div class="sheet-content">
                 <VolunteerList {markers} />
@@ -166,15 +168,30 @@
         flex-direction: column;
     }
 
+    .sheet-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 0 12px;
+    }
+
     .sheet-handle {
-        width: 100%;
+        flex: 1;
         background: none;
         border: none;
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        padding: 12px;
+        padding: 12px 0;
         font-weight: 600;
         color: var(--color-primary);
         cursor: pointer;
+        text-align: left;
+    }
+
+    .attribution {
+        font-size: 0.65rem;
+        color: var(--color-text-muted);
+        white-space: nowrap;
     }
 
     .sheet-content {
