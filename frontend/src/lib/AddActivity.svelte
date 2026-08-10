@@ -61,48 +61,63 @@
     }
 </script>
 
-<form on:submit|preventDefault={handleSubmit}>
-    <label>
-        Name *
-        <input type="text" bind:value={name} required />
-    </label>
+<div class="page">
+    <form on:submit|preventDefault={handleSubmit}>
+        <label>
+            Name *
+            <input type="text" bind:value={name} required />
+        </label>
 
-    <label>
-        Beschreibung
-        <textarea bind:value={description}></textarea>
-    </label>
+        <label>
+            Beschreibung
+            <textarea bind:value={description}></textarea>
+        </label>
 
-    <label>
-        Adresse
-        <input type="text" bind:value={addressText} placeholder="Straße, Hausnummer, Stadt" />
-    </label>
+        <label>
+            Adresse
+            <input type="text" bind:value={addressText} placeholder="Straße, Hausnummer, Stadt" />
+        </label>
 
-    <label>
-        Kategorie
-        <input type="text" bind:value={category} />
-    </label>
+        <label>
+            Kategorie
+            <input type="text" bind:value={category} />
+        </label>
 
-    <label>
-        Datum/Uhrzeit
-        <input type="datetime-local" bind:value={dateTime} />
-    </label>
+        <label>
+            Datum/Uhrzeit
+            <input type="datetime-local" bind:value={dateTime} />
+        </label>
 
-    <button type="submit" disabled={submitting}>
-        {submitting ? "Speichert…" : "Aktivität hinzufügen"}
-    </button>
+        <button type="submit" disabled={submitting}>
+            {submitting ? "Speichert…" : "Aktivität hinzufügen"}
+        </button>
 
-    {#if statusMessage}
-        <p class:warning={statusIsWarning}>{statusMessage}</p>
-    {/if}
-</form>
+        {#if statusMessage}
+            <p class:warning={statusIsWarning}>{statusMessage}</p>
+        {/if}
+    </form>
+</div>
 
 <style>
+    .page {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        padding: 24px 16px;
+    }
+
     form {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
+        width: 100%;
         max-width: 420px;
-        margin: 16px 0;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        box-shadow: var(--shadow-panel);
+        height: fit-content;
     }
 
     label {
@@ -110,26 +125,28 @@
         flex-direction: column;
         gap: 4px;
         font-size: 0.9rem;
+        color: var(--color-text);
     }
 
     input,
     textarea {
         font-family: inherit;
         font-size: 0.9rem;
-        padding: 6px 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 8px 10px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-bg);
+        color: var(--color-text);
+    }
+
+    input:focus,
+    textarea:focus {
+        outline: none;
+        border-color: var(--color-primary);
     }
 
     button {
         align-self: flex-start;
-        font-family: inherit;
-        font-size: 0.9rem;
-        padding: 6px 14px;
-        border: 1px solid #333;
-        border-radius: 4px;
-        background: white;
-        cursor: pointer;
     }
 
     button:disabled {
@@ -138,6 +155,8 @@
     }
 
     p.warning {
-        color: #a15c00;
+        color: var(--color-error);
+        font-size: 0.85rem;
+        margin: 0;
     }
 </style>
