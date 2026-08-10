@@ -110,7 +110,6 @@
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-bottom: 6px;
     }
 
     select,
@@ -118,28 +117,30 @@
         font-family: inherit;
         font-size: 0.85rem;
         padding: 5px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background: white;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+        color: var(--color-text);
         cursor: pointer;
-        transition: border-color 0.15s;
+        transition: border-color 0.15s, background 0.15s;
     }
 
     select:hover,
     button:hover {
-        border-color: #888;
+        border-color: var(--color-primary);
     }
 
     select:focus,
     button:focus {
         outline: none;
-        border-color: #555;
+        border-color: var(--color-primary);
     }
 
     .active {
         font-weight: bold;
-        border-color: #333;
-        background: #f0f0f0;
+        border-color: var(--color-primary);
+        background: var(--color-accent);
+        color: var(--color-accent-text);
         outline: none;
     }
 </style>
