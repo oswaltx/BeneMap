@@ -1,13 +1,29 @@
 <script lang="ts">
     import Link from "./Link.svelte";
+    import { currentUser, logout } from "../auth";
+    import { navigate } from "../router";
+
+    async function handleLogout() {
+        await logout();
+        navigate("/");
+    }
 </script>
 
 <nav>
     <span class="brand">Benemap</span>
     <div class="links">
         <Link href="/" activeClass="active">Home</Link>
-        <Link href="/add" activeClass="active">Aktivität hinzufügen</Link>
+        {#if $currentUser?.role === "ANBIETER"}
+            <Link href="/add" activeClass="active">Aktivität hinzufügen</Link>
+        {/if}
         <Link href="/about" activeClass="active">About</Link>
+        {#if $currentUser}
+            <span class="user-info">Hallo {$currentUser.name}</span>
+            <button class="logout" on:click={handleLogout}>Abmelden</button>
+        {:else}
+            <Link href="/login" activeClass="active">Login</Link>
+            <Link href="/register" activeClass="active">Registrieren</Link>
+        {/if}
     </div>
 </nav>
 
@@ -31,6 +47,7 @@
 
     .links {
         display: flex;
+        align-items: center;
         gap: 16px;
         flex-wrap: wrap;
     }
@@ -46,5 +63,25 @@
     .links :global(a.active) {
         opacity: 1;
         text-decoration: underline;
+    }
+
+    .user-info {
+        color: var(--color-primary-text);
+        font-size: 0.9rem;
+        opacity: 0.85;
+    }
+
+    .logout {
+        background: none;
+        border: 1px solid var(--color-primary-text);
+        color: var(--color-primary-text);
+        padding: 4px 10px;
+        font-size: 0.85rem;
+    }
+
+    .logout:hover {
+        filter: none;
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.1);
     }
 </style>
