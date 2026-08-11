@@ -67,53 +67,87 @@
         selectedTimeSlot = null;
         apply();
     }
+
+    let expanded = false;
+
+    $: activeCount = [selectedCategory, selectedWeekday, selectedTimeSlot].filter(
+        (v) => v !== null
+    ).length;
 </script>
 
-<div>
-    <select bind:value={selectedCategory} on:change={apply}>
-        <option value={null}>Alle Kategorien</option>
-        {#each categories as cat}
-            <option value={cat}>{cat}</option>
-        {/each}
-    </select>
+<div class="filter">
+    <button
+            class="toggle"
+            class:active={activeCount > 0}
+            on:click={() => (expanded = !expanded)}
+    >
+        Filter
+        {#if activeCount > 0}<span class="badge">{activeCount}</span>{/if}
+    </button>
 
-    <div>
-        {#each weekdays as wd}
-            <button
-                    class:active={selectedWeekday === wd.day}
-                    on:click={() => {
-                        if (selectedWeekday === wd.day) { selectedWeekday = null; selectedDate = null; apply(); }
-                        else selectWeekday(wd.day);
-                    }}
-            >
-                {wd.label}
-            </button>
-        {/each}
-    </div>
+    {#if expanded}
+        <button
+                class="backdrop"
+                aria-label="Filter schließen"
+                on:click={() => (expanded = false)}
+        ></button>
 
-    <div>
-        {#each timeSlots as slot}
-            <button
-                    class:active={selectedTimeSlot === slot}
-                    on:click={() => { selectedTimeSlot = selectedTimeSlot === slot ? null : slot; apply(); }}
-            >
-                {slot.label}
-            </button>
-        {/each}
-    </div>
+        <div class="popover">
+            <label class="group">
+                <span class="group-label">Kategorie</span>
+                <select bind:value={selectedCategory} on:change={apply}>
+                    <option value={null}>Alle Kategorien</option>
+                    {#each categories as cat}
+                        <option value={cat}>{cat}</option>
+                    {/each}
+                </select>
+            </label>
 
-    <button on:click={reset}>Filter zurücksetzen</button>
+            <div class="group">
+                <span class="group-label">Wochentag</span>
+                <div class="pill-row">
+                    {#each weekdays as wd}
+                        <button
+                                class:active={selectedWeekday === wd.day}
+                                on:click={() => {
+                                    if (selectedWeekday === wd.day) { selectedWeekday = null; selectedDate = null; apply(); }
+                                    else selectWeekday(wd.day);
+                                }}
+                        >
+                            {wd.label}
+                        </button>
+                    {/each}
+                </div>
+            </div>
+
+            <div class="group">
+                <span class="group-label">Uhrzeit</span>
+                <div class="pill-row">
+                    {#each timeSlots as slot}
+                        <button
+                                class:active={selectedTimeSlot === slot}
+                                on:click={() => { selectedTimeSlot = selectedTimeSlot === slot ? null : slot; apply(); }}
+                        >
+                            {slot.label}
+                        </button>
+                    {/each}
+                </div>
+            </div>
+
+            <button class="reset" on:click={reset}>Filter zurücksetzen</button>
+        </div>
+    {/if}
 </div>
 
 <style>
-    div {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+    .filter {
+        position: relative;
     }
 
-    select,
-    button {
+    .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         font-family: inherit;
         font-size: 0.85rem;
         padding: 5px 10px;
@@ -125,22 +159,115 @@
         transition: border-color 0.15s, background 0.15s;
     }
 
+    .toggle:hover {
+        border-color: var(--color-primary);
+    }
+
+    .toggle:focus,
+    .toggle:focus-visible {
+        outline: none;
+        border-color: var(--color-primary);
+    }
+
+    .toggle.active {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: var(--radius-pill);
+        background: var(--color-accent);
+        color: var(--color-accent-text);
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1500;
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: default;
+    }
+
+    .popover {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        width: min(360px, 90vw);
+        z-index: 1600;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-panel);
+        padding: 12px;
+    }
+
+    .group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .group-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-text-muted);
+    }
+
+    .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    select,
+    .pill-row button,
+    .reset {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 5px 10px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-bg);
+        color: var(--color-text);
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s;
+    }
+
     select:hover,
-    button:hover {
+    .pill-row button:hover,
+    .reset:hover {
         border-color: var(--color-primary);
     }
 
     select:focus,
-    button:focus {
+    .pill-row button:focus,
+    .reset:focus {
         outline: none;
         border-color: var(--color-primary);
     }
 
-    .active {
+    .pill-row button.active {
         font-weight: bold;
         border-color: var(--color-primary);
         background: var(--color-accent);
         color: var(--color-accent-text);
-        outline: none;
+    }
+
+    .reset {
+        align-self: flex-start;
     }
 </style>
