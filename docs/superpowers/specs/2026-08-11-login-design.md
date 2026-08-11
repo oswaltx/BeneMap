@@ -68,12 +68,20 @@ Autorisierung:
   erfordern eine bestehende Session
 
 CORS/CSRF:
-- `@CrossOrigin` wird um `allowCredentials = true` erweitert (Origin bleibt
-  auf `http://localhost:5173` beschränkt)
+- CORS-Konfiguration wandert von `@CrossOrigin` auf `MainController`
+  zentral in die Spring-Security-Konfiguration (`allowCredentials = true`,
+  Origin bleibt auf `http://localhost:5173` beschränkt)
 - Session-Cookie wird mit `SameSite=Lax` gesetzt
-- Spring Security CSRF-Schutz bleibt aktiv, über
-  `CookieCsrfTokenRepository` (nicht-httpOnly `XSRF-TOKEN`-Cookie, das
-  Frontend liest und bei state-ändernden Requests als Header mitschickt)
+- **Abweichung von der ursprünglichen Spec:** Spring Securitys separater
+  CSRF-Token-Mechanismus (`CookieCsrfTokenRepository`) wird bewusst
+  weggelassen. Ihn für eine Cross-Port-SPA (5173→8080) korrekt zum Laufen
+  zu bringen ist eine der fehleranfälligeren Ecken von Spring Security 6
+  (bekannter Stolperstein: das Token-Cookie wird nicht zuverlässig
+  gesetzt). Das `SameSite=Lax`-Cookie blockiert den klassischen
+  CSRF-Angriffsvektor bei POST-Requests bereits weitgehend — für den
+  Umfang dieses Projekts ausreichend Schutz bei deutlich geringerem
+  Risiko kaputter Requests. CSRF-Schutz wird daher in der
+  Security-Konfiguration komplett deaktiviert (`csrf { it.disable() }`).
 
 ## Frontend
 
