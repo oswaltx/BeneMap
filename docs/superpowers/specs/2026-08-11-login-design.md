@@ -94,9 +94,10 @@ CORS/CSRF:
   eingeloggte Anbieter
 - Direkter Aufruf von `/add` ohne eingeloggten Anbieter leitet zur Karte um,
   mit Hinweistext
-- Alle bestehenden `fetch`-Aufrufe (Map, AddActivity) bekommen
-  `credentials: "include"`; state-ändernde Requests lesen das
-  `XSRF-TOKEN`-Cookie und schicken es als Header mit
+- Alle bestehenden `fetch`-Aufrufe, die den Login-Status betreffen
+  (Login/Register/Logout, `/auth/me`, `/add`), bekommen
+  `credentials: "include"` — kein zusätzlicher CSRF-Header nötig (siehe
+  CORS/CSRF-Abschnitt oben)
 
 ## Fehlerbehandlung
 
@@ -105,13 +106,15 @@ CORS/CSRF:
   war (verhindert Enumeration bestehender E-Mail-Adressen)
 - Registrierung mit bereits vergebener E-Mail → 409, Formular zeigt
   entsprechenden Hinweis
-- `/add` ohne gültige Session/Rolle → 403, Frontend fängt das ab und leitet
-  um (siehe oben)
+- `/add` ganz ohne Session → 401 (Spring Securitys Standardverhalten für
+  anonyme Zugriffe auf rollengeschützte Endpunkte); `/add` mit Session aber
+  falscher Rolle → 403. Frontend zeigt in beiden Fällen denselben
+  Hinweistext statt des Formulars (siehe oben)
 
 ## Tests
 
 - Backend: Registrierung, Login (korrekt/falsch), Zugriff auf `/add` ohne
-  Login (403), mit Login als `USER` (403), mit Login als `ANBIETER` (200,
+  Login (401), mit Login als `USER` (403), mit Login als `ANBIETER` (200,
   `createdBy` korrekt gesetzt)
 - Frontend: manuelle Sichtprüfung (kein Test-Framework im Projekt, siehe
   bestehende Konvention aus dem UI-Redesign)
