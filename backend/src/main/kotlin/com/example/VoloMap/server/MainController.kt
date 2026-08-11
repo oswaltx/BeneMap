@@ -1,7 +1,7 @@
 package com.example.VoloMap.server
 
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@CrossOrigin(origins = ["http://localhost:5173"])
 @RestController
 class MainController(
     private val repository: VolunteerActivityRepository,
-    private val geocodingService: GeocodingService
+    private val geocodingService: GeocodingService,
+    private val userRepository: UserRepository
 ) {
 
     @GetMapping("/")
@@ -66,8 +66,11 @@ class MainController(
     }
     @PostMapping("/add")
     fun addActivity(
-        @RequestBody activity: VolunteerActivity
+        @RequestBody activity: VolunteerActivity,
+        authentication: Authentication
     ): ResponseEntity<VolunteerActivity> {
+        activity.createdBy = userRepository.findByEmail(authentication.name)
+
         if (activity.latitude == null && activity.longitude == null && !activity.addressText.isNullOrBlank()) {
             val coords = geocodingService.geocode(activity.addressText!!)
             if (coords != null) {

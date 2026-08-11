@@ -7,23 +7,40 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.security.core.Authentication
 
 class MainControllerAddActivityTest {
+
+    private val provider = User(
+        email = "anbieter@example.com",
+        passwordHash = "hashed",
+        name = "Anbieter Anna",
+        role = Role.ANBIETER
+    )
+
+    private fun authenticationFor(email: String): Authentication {
+        val authentication: Authentication = mock()
+        whenever(authentication.name).thenReturn(email)
+        return authentication
+    }
 
     @Test
     fun `geocodes address when coordinates are missing`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
         whenever(geocodingService.geocode("Domkloster 4, Köln")).thenReturn(Pair(50.9413, 6.9583))
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService)
+        val controller = MainController(repository, geocodingService, userRepository)
         val activity = VolunteerActivity(name = "Test", addressText = "Domkloster 4, Köln")
 
-        val result = controller.addActivity(activity)
+        val result = controller.addActivity(activity, authenticationFor(provider.email))
 
         assertEquals(50.9413, result.body?.latitude)
         assertEquals(6.9583, result.body?.longitude)
+        assertEquals(provider, result.body?.createdBy)
         verify(geocodingService).geocode("Domkloster 4, Köln")
     }
 
@@ -31,13 +48,15 @@ class MainControllerAddActivityTest {
     fun `saves activity without coordinates when geocoding finds nothing`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
         whenever(geocodingService.geocode(any<String>())).thenReturn(null)
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService)
+        val controller = MainController(repository, geocodingService, userRepository)
         val activity = VolunteerActivity(name = "Test", addressText = "Nonexistent Place XYZ")
 
-        val result = controller.addActivity(activity)
+        val result = controller.addActivity(activity, authenticationFor(provider.email))
 
         assertEquals(200, result.statusCode.value())
         assertNull(result.body?.latitude)
@@ -48,12 +67,14 @@ class MainControllerAddActivityTest {
     fun `does not call geocoding when coordinates are already set`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService)
+        val controller = MainController(repository, geocodingService, userRepository)
         val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0)
 
-        controller.addActivity(activity)
+        controller.addActivity(activity, authenticationFor(provider.email))
 
         verify(geocodingService, org.mockito.kotlin.never()).geocode(any<String>())
     }

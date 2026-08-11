@@ -55,7 +55,7 @@ class MainControllerMarkersTest {
             listOf(matching, wrongCategory, wrongTime, wrongSearch)
         )
 
-        val controller = MainController(repository, mock())
+        val controller = MainController(repository, mock(), mock())
         val result = controller.markers(
             category = "Umwelt",
             date = null,
@@ -85,7 +85,7 @@ class MainControllerMarkersTest {
         )
         whenever(repository.findAll()).thenReturn(listOf(byDescription, noMatch))
 
-        val controller = MainController(repository, mock())
+        val controller = MainController(repository, mock(), mock())
         val result = controller.markers(
             category = null, date = null, timeFrom = null, timeTo = null, search = "tierheim"
         )
