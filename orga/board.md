@@ -12,6 +12,10 @@ kanban-plugin: board
 - [ ] View for multiple volunteer activies in one place
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] Autokategorisierung von Events
+- [ ] Login für Anbieter und User
+- [ ] Bewertungssystem
+- [ ] Edits von Volunteer Aktivitäten
+- [ ] Bugfix: Race Condition bei schnellen Filter-Änderungen (fetchMarkers in Map.svelte überschreibt Ergebnisse ggf. mit veralteter Response, da keine Reihenfolge-Absicherung/Request-Abbruch)
 ## Doing
 
 
