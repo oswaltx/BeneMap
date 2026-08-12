@@ -62,8 +62,10 @@ Pins haben (vorerst) keine Detailansicht zur Folge.
 - Klick auf einen `CircleMarker` setzt `selectedMarker` auf die
   entsprechende Aktivität.
 - `VolunteerList` feuert bei Klick auf eine Karte ein neues `select`-Event
-  (Payload: die `marker`-Objekt), analog zum bestehenden `refresh`-Event
-  — `Map.svelte` reagiert mit `on:select={(e) => selectedMarker = e.detail}`.
+  (Payload: `{ id: number }`, nicht das vollständige Marker-Objekt), analog
+  zum bestehenden `refresh`-Event — `Map.svelte` reagiert mit
+  `on:select={(e) => selectedMarkerId = e.detail.id}` und leitet den
+  aktuellen Marker anhand der id aus dem eigenen `markers`-Array ab.
 - Klick auf einen anderen Pin/eine andere Liste-Karte wechselt direkt um
   (kein Zwischenschritt).
 - Ein Schließen-Button (×) im Panel-Header sowie ein Klick auf die Karte
