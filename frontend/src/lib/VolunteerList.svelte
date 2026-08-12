@@ -39,7 +39,18 @@
 
 <div class="list">
     {#each markers as marker}
-        <div class="card" on:click={() => dispatch("select", { id: marker.id })}>
+        <div
+            class="card"
+            role="button"
+            tabindex="0"
+            on:click={() => dispatch("select", { id: marker.id })}
+            on:keydown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    dispatch("select", { id: marker.id });
+                }
+            }}
+        >
             <div class="card-header">
                 <strong>{marker.name}</strong>
                 {#if marker.category}
