@@ -70,9 +70,10 @@ class SecurityConfig(
             .csrf { it.disable() }
             .securityContext { it.securityContextRepository(securityContextRepository) }
             .authorizeHttpRequests {
-                it.requestMatchers(HttpMethod.GET, "/", "/markers", "/categories").permitAll()
+                it.requestMatchers(HttpMethod.GET, "/", "/markers", "/categories", "/activities/*/ratings", "/providers/*/ratings").permitAll()
                 it.requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
                 it.requestMatchers(HttpMethod.POST, "/add").hasRole("ANBIETER")
+                it.requestMatchers(HttpMethod.POST, "/activities/*/ratings", "/providers/*/ratings").hasRole("USER")
                 it.anyRequest().authenticated()
             }
             .exceptionHandling {
