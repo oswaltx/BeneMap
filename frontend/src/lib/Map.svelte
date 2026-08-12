@@ -110,7 +110,7 @@
         </div>
         {#if sheetExpanded}
             <div class="sheet-content">
-                <VolunteerList {markers} />
+                <VolunteerList {markers} on:refresh={fetchMarkers} />
             </div>
         {/if}
     </div>
