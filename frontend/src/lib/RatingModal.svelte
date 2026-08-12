@@ -114,6 +114,7 @@
                         <strong>{r.userName}</strong>
                         <span class="stars">{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</span>
                     </div>
+                    <p class="rating-date">{new Date(r.createdAt).toLocaleDateString("de-DE")}</p>
                     {#if r.comment}<p>{r.comment}</p>{/if}
                 </div>
             {/each}

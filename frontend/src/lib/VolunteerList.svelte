@@ -14,6 +14,7 @@
         activityRating: number | null;
         activityRatingCount: number;
         providerId: number | null;
+        providerName: string | null;
         providerRating: number | null;
         providerRatingCount: number;
     }[] = [];
@@ -28,7 +29,7 @@
 
     function openProviderRating(marker: (typeof markers)[number]) {
         if (marker.providerId == null) return;
-        openRating = { target: "provider", targetId: marker.providerId, targetLabel: "Anbieter" };
+        openRating = { target: "provider", targetId: marker.providerId, targetLabel: marker.providerName ?? "Anbieter" };
     }
 
     function handleRated() {

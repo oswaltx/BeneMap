@@ -45,7 +45,10 @@
         fetchMarkers();
     });
 
+    let fetchMarkersSeq = 0;
+
     async function fetchMarkers() {
+        const seq = ++fetchMarkersSeq;
         const params = new URLSearchParams();
 
         if (query.date) params.append("date", query.date);
@@ -59,9 +62,12 @@
                 "http://localhost:8080/markers?" + params.toString()
             );
             if (!res.ok) throw new Error("Request failed");
-            markers = await res.json();
+            const data = await res.json();
+            if (seq !== fetchMarkersSeq) return;
+            markers = data;
             errorMessage = null;
         } catch (e) {
+            if (seq !== fetchMarkersSeq) return;
             errorMessage = "Aktivitäten konnten nicht geladen werden. Ist der Server erreichbar?";
         }
     }
