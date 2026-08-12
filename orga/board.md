@@ -14,8 +14,7 @@ kanban-plugin: board
 - [ ] Autokategorisierung von Events
 - [ ] Edits von Volunteer Aktivitäten
 - [ ] Bugfix: Race Condition bei schnellen Filter-Änderungen (fetchMarkers in Map.svelte überschreibt Ergebnisse ggf. mit veralteter Response, da keine Reihenfolge-Absicherung/Request-Abbruch)
-- [ ] Pin-Detailseite (Popup beim Klick auf einen Marker) optisch überarbeiten — aktuell unstyled Leaflet-Popup (nackte h3/p-Tags), passt nicht zum Rest der App. Die blauen CircleMarker selbst bleiben wie sie sind (bewusst gewählt, zeigen überlagernde Events).
-- [ ] Bewertungssystem-Politur: RatingModal zeigt bei Anbieter-Bewertungen nur den generischen Titel "Anbieter" statt des tatsächlichen Namens (Feld `providerName` existiert im Backend, wird im Frontend noch nicht durchgereicht), und das Datum einer Bewertung wird nicht angezeigt (Feld vorhanden, ungenutzt)
+- [ ] Bewertungssystem-Politur: RatingModal zeigt bei Anbieter-Bewertungen aus VolunteerList weiterhin nur den generischen Titel "Anbieter" statt des tatsächlichen Namens (in der neuen PinDetailPanel-Detailansicht ist das seit dem Pin-Detailpanel-Feature bereits gelöst, in VolunteerList.svelte noch nicht nachgezogen), und das Datum einer Bewertung wird nirgends angezeigt (Feld vorhanden, ungenutzt)
 ## Doing
 
 
@@ -24,6 +23,7 @@ kanban-plugin: board
 - [x] create datamodel
 - [x] Login für Anbieter und User
 - [x] Bewertungssystem
+- [x] Pin-Detailseite optisch überarbeitet (Google-Maps-Stil, Seitenpanel als Overlay über der Karte)
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
