@@ -40,24 +40,22 @@ verlinkt.
   seit dem Bewertungssystem-Feature, wurde aber noch nirgends
   konsumiert).
 
-## Technischer Hinweis: Karten-Resize
-
-Leaflet (über `sveaflet`) erkennt Container-Größenänderungen nicht
-automatisch — wenn das Panel öffnet/schließt und die Karte dadurch
-schmaler/breiter wird, muss `invalidateSize()` auf der zugrunde liegenden
-Leaflet-Map-Instanz explizit aufgerufen werden, sonst wirken die
-Kartenkacheln verzerrt oder abgeschnitten. Wird beim Implementierungsplan
-konkretisiert (abhängig davon, wie `sveaflet` Zugriff auf die
-Map-Instanz erlaubt).
-
 ## Architektur & Layout
 
 Neue Komponente `PinDetailPanel.svelte`. `Map.svelte` bekommt einen neuen
-State `selectedMarker: Marker | null`. Ab 1024px Fensterbreite wird
-`.map-shell` zu einer Flex-Reihe: das Panel (fest 360px, links) plus die
-Karte (`flex: 1`, Rest der Breite). Unterhalb von 1024px bleibt
-`selectedMarker` ungenutzt — kein Panel wird gerendert, Klicks auf Pins
-haben (vorerst) keine Detailansicht zur Folge.
+State `selectedMarker: Marker | null`. Ab 1024px Fensterbreite wird das
+Panel (fest 360px, links) als **Overlay** über der Karte eingeblendet
+(`position: absolute` innerhalb von `.map-area`, höherer z-index) —
+**nicht** durch eine Größenänderung der Karte, sondern analog zum
+bestehenden Bottom-Sheet-Muster (die Karte bleibt in voller Breite,
+darüber liegende Elemente wie die Suchleiste weichen zur Seite aus). Diese
+Entscheidung wurde während der Implementierung revidiert: die
+ursprüngliche Flex-Reihen-Variante (Karte schiebt sich zur Seite,
+`invalidateSize()`-Workaround nötig) wurde nach Rückmeldung verworfen, da
+sie nicht dem Google-Maps-Vorbild entspricht — dort verschiebt sich die
+Karte beim Öffnen des Seitenpanels ebenfalls nicht. Unterhalb von 1024px
+bleibt `selectedMarker` ungenutzt — kein Panel wird gerendert, Klicks auf
+Pins haben (vorerst) keine Detailansicht zur Folge.
 
 ## Auslöser & Schließen
 
