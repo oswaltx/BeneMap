@@ -10,5 +10,11 @@ data class Marker(
     val address: String,
     val category: String,
     val description: String,
-    val dateTime: LocalDateTime?
+    val dateTime: LocalDateTime?,
+    val activityRating: Double?,
+    val activityRatingCount: Int,
+    val providerId: Long?,
+    val providerName: String?,
+    val providerRating: Double?,
+    val providerRatingCount: Int,
 )

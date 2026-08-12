@@ -14,7 +14,9 @@ import java.time.LocalDateTime
 class MainController(
     private val repository: VolunteerActivityRepository,
     private val geocodingService: GeocodingService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val activityRatingRepository: ActivityRatingRepository,
+    private val providerRatingRepository: ProviderRatingRepository,
 ) {
 
     @GetMapping("/")
@@ -32,10 +34,16 @@ class MainController(
         val filterDate = date?.let { LocalDate.parse(it) }
         val searchText = search?.trim()?.lowercase()
 
+        val activityRatingsByActivityId = activityRatingRepository.findAll().groupBy { it.activity.id }
+        val providerRatingsByProviderId = providerRatingRepository.findAll().groupBy { it.provider.id }
+
         return repository.findAll()
             .filter { category == null || it.category == category }
             .filter { it.latitude != null && it.longitude != null }
             .map { activity ->
+                val activityRatings = activityRatingsByActivityId[activity.id].orEmpty()
+                val providerId = activity.createdBy?.id
+                val providerRatings = providerId?.let { providerRatingsByProviderId[it] }.orEmpty()
                 Marker(
                     id = activity.id,
                     lat = activity.latitude!!,
@@ -44,7 +52,13 @@ class MainController(
                     address = activity.addressText ?: "",
                     category = activity.category ?: "",
                     description = activity.description ?: "",
-                    dateTime = activity.dateTime
+                    dateTime = activity.dateTime,
+                    activityRating = activityRatings.map { it.stars }.average().takeIf { activityRatings.isNotEmpty() },
+                    activityRatingCount = activityRatings.size,
+                    providerId = providerId,
+                    providerName = activity.createdBy?.name,
+                    providerRating = providerRatings.map { it.stars }.average().takeIf { providerRatings.isNotEmpty() },
+                    providerRatingCount = providerRatings.size,
                 )
             }
             .filter { filterDate == null || it.dateTime?.toLocalDate() == filterDate }
