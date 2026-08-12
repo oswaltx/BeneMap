@@ -18,7 +18,7 @@
         providerRatingCount: number;
     }[] = [];
 
-    const dispatch = createEventDispatcher<{ refresh: void }>();
+    const dispatch = createEventDispatcher<{ refresh: void; select: { id: number } }>();
 
     let openRating: { target: "activity" | "provider"; targetId: number; targetLabel: string } | null = null;
 
@@ -39,7 +39,7 @@
 
 <div class="list">
     {#each markers as marker}
-        <div class="card">
+        <div class="card" on:click={() => dispatch("select", { id: marker.id })}>
             <div class="card-header">
                 <strong>{marker.name}</strong>
                 {#if marker.category}
@@ -52,11 +52,11 @@
             <p class="address">{marker.address}</p>
             <p class="date">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
             <div class="ratings">
-                <button class="rating-badge" on:click={() => openActivityRating(marker)}>
+                <button class="rating-badge" on:click|stopPropagation={() => openActivityRating(marker)}>
                     {marker.activityRating != null ? `★ ${marker.activityRating.toFixed(1)} (${marker.activityRatingCount})` : "Noch keine Bewertung"}
                 </button>
                 {#if marker.providerId != null}
-                    <button class="rating-badge" on:click={() => openProviderRating(marker)}>
+                    <button class="rating-badge" on:click|stopPropagation={() => openProviderRating(marker)}>
                         Anbieter: {marker.providerRating != null ? `★ ${marker.providerRating.toFixed(1)} (${marker.providerRatingCount})` : "Noch keine Bewertung"}
                     </button>
                 {/if}
@@ -89,6 +89,7 @@
         border: 1px solid var(--color-border);
         border-radius: var(--radius-md);
         padding: 10px 12px;
+        cursor: pointer;
     }
     .card-header {
         display: flex;
