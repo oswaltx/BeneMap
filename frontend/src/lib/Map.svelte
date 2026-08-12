@@ -112,14 +112,21 @@
         </div>
 
         <div class="map-container">
-            <Map options={{ center: [50.9375, 6.9603], zoom: 13, zoomControl: false, attributionControl: false }}>
+            <Map
+                options={{ center: [50.9375, 6.9603], zoom: 13, zoomControl: false, attributionControl: false }}
+                onclick={() => (selectedMarkerId = null)}
+            >
                 <TileLayer
                     url={'https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png'}
                     options={{ attribution }}
                 />
 
-                {#each markers as marker}
-                    <CircleMarker latLng={[marker.lat, marker.lng]} onclick={() => (selectedMarkerId = marker.id)} />
+                {#each markers as marker (marker.id)}
+                    <CircleMarker
+                        latLng={[marker.lat, marker.lng]}
+                        options={{ radius: 10, bubblingMouseEvents: false }}
+                        onclick={() => (selectedMarkerId = marker.id)}
+                    />
                 {/each}
             </Map>
         </div>
