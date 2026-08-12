@@ -1,4 +1,7 @@
 <script lang="ts">
+    import Link from "./Link.svelte";
+    import { currentUser, authChecked, fetchWithSessionCheck } from "../auth";
+
     let name = "";
     let description = "";
     let addressText = "";
@@ -20,8 +23,9 @@
         statusMessage = null;
 
         try {
-            const res = await fetch("http://localhost:8080/add", {
+            const res = await fetchWithSessionCheck("http://localhost:8080/add", {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name,
@@ -61,42 +65,54 @@
     }
 </script>
 
-<div class="page">
-    <form on:submit|preventDefault={handleSubmit}>
-        <label>
-            Name *
-            <input type="text" bind:value={name} required />
-        </label>
+{#if !$authChecked}
+    <div class="page"><p>Lädt…</p></div>
+{:else if $currentUser?.role !== "ANBIETER"}
+    <div class="page">
+        <p class="notice">
+            Nur eingeloggte Anbieter können Aktivitäten hinzufügen.
+            <Link href="/login">Jetzt einloggen</Link> oder
+            <Link href="/register">registrieren</Link>.
+        </p>
+    </div>
+{:else}
+    <div class="page">
+        <form on:submit|preventDefault={handleSubmit}>
+            <label>
+                Name *
+                <input type="text" bind:value={name} required />
+            </label>
 
-        <label>
-            Beschreibung
-            <textarea bind:value={description}></textarea>
-        </label>
+            <label>
+                Beschreibung
+                <textarea bind:value={description}></textarea>
+            </label>
 
-        <label>
-            Adresse
-            <input type="text" bind:value={addressText} placeholder="Straße, Hausnummer, Stadt" />
-        </label>
+            <label>
+                Adresse
+                <input type="text" bind:value={addressText} placeholder="Straße, Hausnummer, Stadt" />
+            </label>
 
-        <label>
-            Kategorie
-            <input type="text" bind:value={category} />
-        </label>
+            <label>
+                Kategorie
+                <input type="text" bind:value={category} />
+            </label>
 
-        <label>
-            Datum/Uhrzeit
-            <input type="datetime-local" bind:value={dateTime} />
-        </label>
+            <label>
+                Datum/Uhrzeit
+                <input type="datetime-local" bind:value={dateTime} />
+            </label>
 
-        <button type="submit" disabled={submitting}>
-            {submitting ? "Speichert…" : "Aktivität hinzufügen"}
-        </button>
+            <button type="submit" disabled={submitting}>
+                {submitting ? "Speichert…" : "Aktivität hinzufügen"}
+            </button>
 
-        {#if statusMessage}
-            <p class:warning={statusIsWarning}>{statusMessage}</p>
-        {/if}
-    </form>
-</div>
+            {#if statusMessage}
+                <p class:warning={statusIsWarning}>{statusMessage}</p>
+            {/if}
+        </form>
+    </div>
+{/if}
 
 <style>
     .page {
@@ -158,5 +174,12 @@
         color: var(--color-error);
         font-size: 0.85rem;
         margin: 0;
+    }
+
+    .notice {
+        color: var(--color-text-muted);
+        font-size: 0.9rem;
+        text-align: center;
+        max-width: 420px;
     }
 </style>

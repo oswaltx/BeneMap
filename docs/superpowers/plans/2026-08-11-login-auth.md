@@ -116,6 +116,7 @@ git commit -m "feat: add User entity, Role enum and UserRepository"
 
 **Files:**
 - Create: `backend/src/main/kotlin/com/example/VoloMap/server/SecurityConfig.kt`
+- Modify: `backend/src/main/resources/application.properties`
 - Test: `backend/src/test/kotlin/com/example/VoloMap/server/MainControllerSecurityTest.kt`
 
 **Interfaces:**
@@ -262,20 +263,30 @@ class SecurityConfig(
 }
 ```
 
-- [ ] **Step 4: Test erneut laufen lassen, Erfolg bestätigen**
+- [ ] **Step 4: `SameSite=Lax` für das Session-Cookie explizit setzen**
+
+Spring Boot 3+/4 setzt `SameSite=Lax` für Session-Cookies zwar bereits standardmäßig, aber implizit — für die im Global-Constraints-Abschnitt geforderte, überprüfbare Absicherung wird es hier explizit konfiguriert statt sich auf den Default zu verlassen. In `backend/src/main/resources/application.properties`, nach der Zeile `spring.jpa.show-sql=true`, folgende Zeile ergänzen:
+
+```properties
+
+# Session-Cookie: SameSite=Lax ist der alleinige CSRF-Schutz dieses Projekts (siehe Spec)
+server.servlet.session.cookie.same-site=Lax
+```
+
+- [ ] **Step 5: Test erneut laufen lassen, Erfolg bestätigen**
 
 Run (from `backend/`): `./gradlew.bat test --tests "com.example.VoloMap.server.MainControllerSecurityTest"`
 Expected: PASS.
 
-- [ ] **Step 5: Volle Testsuite laufen lassen**
+- [ ] **Step 6: Volle Testsuite laufen lassen**
 
 Run (from `backend/`): `./gradlew.bat test`
 Expected: `BUILD SUCCESSFUL` — die bestehenden `MainControllerAddActivityTest`- und `MainControllerMarkersTest`-Tests instanziieren `MainController` direkt ohne Spring-Kontext und sind von der Security-Konfiguration nicht betroffen; `DemoApplicationTests` (Kontext-Ladetest) muss weiterhin grün sein.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add backend/src/main/kotlin/com/example/VoloMap/server/SecurityConfig.kt backend/src/test/kotlin/com/example/VoloMap/server/MainControllerSecurityTest.kt
+git add backend/src/main/kotlin/com/example/VoloMap/server/SecurityConfig.kt backend/src/test/kotlin/com/example/VoloMap/server/MainControllerSecurityTest.kt backend/src/main/resources/application.properties
 git commit -m "feat: add Spring Security config with session auth and role-gated /add"
 ```
 

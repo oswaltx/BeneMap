@@ -1,10 +1,13 @@
 package com.example.VoloMap.server
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.time.Instant
 import java.time.LocalDateTime
@@ -44,4 +47,12 @@ class VolunteerActivity constructor(
     var createdAt: Instant = Instant.now(),
 
     var dateTime: LocalDateTime = LocalDateTime.now(),
+
+    // Anbieter, der diese Aktivität angelegt hat — null für bestehende gescrapte/geseedete Einträge.
+    // @JsonIgnore verhindert, dass das verschachtelte User-Objekt (inkl. Passwort-Hash) über die
+    // API ausgeliefert wird.
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    var createdBy: User? = null,
 )

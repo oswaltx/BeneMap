@@ -27,12 +27,15 @@
         implementation("org.jetbrains.kotlin:kotlin-reflect")
         implementation("org.springframework.boot:spring-boot-starter-web")
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+        implementation("org.springframework.boot:spring-boot-starter-security")
+        implementation("org.springframework.boot:spring-boot-starter-validation")
         implementation("org.jsoup:jsoup:1.17.2") //Scraping
         implementation("org.json:json:20240303")
         implementation("tools.jackson.module:jackson-module-kotlin:3.0.0")
         runtimeOnly("com.h2database:h2")
 
         testImplementation("org.springframework.boot:spring-boot-starter-test")
+        testImplementation("org.springframework.boot:spring-boot-webmvc-test")
         testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
         testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")

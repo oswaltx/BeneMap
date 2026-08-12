@@ -4,13 +4,17 @@ import type { Component } from "svelte";
 import Home from "./pages/Home.svelte";
 import About from "./pages/About.svelte";
 import AddActivity from "./lib/AddActivity.svelte";
+import Login from "./pages/Login.svelte";
+import Register from "./pages/Register.svelte";
 
 export const route = writable<string>(window.location.pathname);
 
 export const routes: Record<string, Component> = {
     "/": Home,
     "/about": About,
-    "/add": AddActivity
+    "/add": AddActivity,
+    "/login": Login,
+    "/register": Register,
 };
 
 export function navigate(path: string) {
