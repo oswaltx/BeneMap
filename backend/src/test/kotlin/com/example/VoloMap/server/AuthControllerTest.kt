@@ -39,6 +39,7 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.email").value("anna@example.com"))
             .andExpect(jsonPath("$.name").value("Anna"))
             .andExpect(jsonPath("$.role").value("USER"))
+            .andExpect(jsonPath("$.id").isNumber)
     }
 
     @Test
@@ -84,6 +85,7 @@ class AuthControllerTest {
         mockMvc.perform(get("/auth/me").session(session))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.name").value("Cara"))
+            .andExpect(jsonPath("$.id").isNumber)
 
         mockMvc.perform(post("/auth/logout").session(session))
             .andExpect(status().isOk)

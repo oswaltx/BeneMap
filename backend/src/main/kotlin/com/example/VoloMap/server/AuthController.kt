@@ -28,7 +28,7 @@ data class RegisterRequest(
     val role: Role
 )
 data class LoginRequest(val email: String, val password: String)
-data class UserResponse(val email: String, val name: String, val role: Role)
+data class UserResponse(val id: Long, val email: String, val name: String, val role: Role)
 data class ErrorResponse(val error: String)
 
 @RestController
@@ -60,7 +60,7 @@ class AuthController(
         )
         establishSession(email, req.password, request, response)
         val user = userRepository.findByEmail(email)!!
-        return ResponseEntity.ok(UserResponse(user.email, user.name, user.role))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role))
     }
 
     @PostMapping("/login")
@@ -76,7 +76,7 @@ class AuthController(
             return ResponseEntity.status(401).body(ErrorResponse("E-Mail oder Passwort falsch."))
         }
         val user = userRepository.findByEmail(email)!!
-        return ResponseEntity.ok(UserResponse(user.email, user.name, user.role))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role))
     }
 
     @PostMapping("/logout")
@@ -92,7 +92,7 @@ class AuthController(
     @GetMapping("/me")
     fun me(authentication: Authentication): ResponseEntity<UserResponse> {
         val user = userRepository.findByEmail(authentication.name)!!
-        return ResponseEntity.ok(UserResponse(user.email, user.name, user.role))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role))
     }
 
     private fun establishSession(
