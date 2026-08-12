@@ -1,6 +1,5 @@
 <script lang="ts">
-    import {onMount, tick} from "svelte";
-    import type {Map as LeafletMap} from "leaflet";
+    import {onMount} from "svelte";
     import {Map, TileLayer} from "sveaflet";
     import FilterBar from "./FilterBar.svelte";
     import SearchBar from "./SearchBar.svelte";
@@ -22,12 +21,6 @@
     }
 
     $: panelOpen = selectedMarker != null && isDesktop;
-
-    let leafletMapInstance: LeafletMap | undefined;
-    $: if (leafletMapInstance) {
-        panelOpen;
-        tick().then(() => leafletMapInstance?.invalidateSize());
-    }
 
     let query = {
         date: "",
@@ -103,23 +96,23 @@
 </script>
 
 <div class="map-shell">
-    {#if panelOpen && selectedMarker}
-        <PinDetailPanel
-            marker={selectedMarker}
-            on:close={() => (selectedMarkerId = null)}
-            on:refresh={fetchMarkers}
-        />
-    {/if}
-
     <div class="map-area">
-        <div class="search-panel">
+        {#if panelOpen && selectedMarker}
+            <PinDetailPanel
+                marker={selectedMarker}
+                on:close={() => (selectedMarkerId = null)}
+                on:refresh={fetchMarkers}
+            />
+        {/if}
+
+        <div class="search-panel" class:panel-open={panelOpen}>
             <SearchBar on:search={handleSearch} />
             <FilterBar {categories} on:filter={handleFilter} />
             {#if errorMessage}<p class="error">{errorMessage}</p>{/if}
         </div>
 
         <div class="map-container">
-            <Map bind:instance={leafletMapInstance} options={{ center: [50.9375, 6.9603], zoom: 13, zoomControl: false, attributionControl: false }}>
+            <Map options={{ center: [50.9375, 6.9603], zoom: 13, zoomControl: false, attributionControl: false }}>
                 <TileLayer
                     url={'https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png'}
                     options={{ attribution }}
@@ -131,7 +124,7 @@
             </Map>
         </div>
 
-        <div class="bottom-sheet" class:expanded={sheetExpanded}>
+        <div class="bottom-sheet" class:expanded={sheetExpanded} class:panel-open={panelOpen}>
             <div class="sheet-header">
                 <button class="sheet-handle" on:click={() => sheetExpanded = !sheetExpanded}>
                     {markers.length} Aktivitäten {sheetExpanded ? "▼" : "▲"}
@@ -151,14 +144,12 @@
     .map-shell {
         height: 100%;
         width: 100%;
-        display: flex;
     }
 
     .map-area {
         position: relative;
-        flex: 1;
-        min-width: 0;
         height: 100%;
+        width: 100%;
     }
 
     .map-container {
@@ -184,6 +175,11 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
+        transition: left 0.2s ease;
+    }
+
+    .search-panel.panel-open {
+        left: 372px;
     }
 
     .error {
@@ -204,6 +200,11 @@
         max-height: 60%;
         display: flex;
         flex-direction: column;
+        transition: left 0.2s ease;
+    }
+
+    .bottom-sheet.panel-open {
+        left: 360px;
     }
 
     .sheet-header {

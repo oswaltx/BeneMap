@@ -82,9 +82,12 @@
 
 <style>
     .panel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
         width: 360px;
-        flex-shrink: 0;
-        height: 100%;
+        z-index: 1002;
         overflow-y: auto;
         background: var(--color-surface);
         border-right: 1px solid var(--color-border);
