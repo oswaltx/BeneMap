@@ -73,3 +73,21 @@ export async function logout(): Promise<void> {
     });
     currentUser.set(null);
 }
+
+/**
+ * Wraps fetch for session-bearing calls that expect the user to still be
+ * logged in. If the server responds 401 (e.g. the session expired mid-use),
+ * clears the auth store so the UI falls back to the logged-out view on the
+ * next reactive update. The response is still returned to the caller so it
+ * can show its own error message.
+ */
+export async function fetchWithSessionCheck(
+    input: RequestInfo | URL,
+    init?: RequestInit
+): Promise<Response> {
+    const res = await fetch(input, init);
+    if (res.status === 401) {
+        currentUser.set(null);
+    }
+    return res;
+}

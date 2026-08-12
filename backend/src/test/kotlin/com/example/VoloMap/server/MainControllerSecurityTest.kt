@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -76,5 +77,15 @@ class MainControllerSecurityTest {
 
         val saved = activityRepository.findAll().first()
         assertEquals("anbieter@example.com", saved.createdBy?.email)
+    }
+
+    @Test
+    fun `markers is publicly readable without a session`() {
+        mockMvc.perform(get("/markers")).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `categories is publicly readable without a session`() {
+        mockMvc.perform(get("/categories")).andExpect(status().isOk)
     }
 }

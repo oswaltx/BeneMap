@@ -2,6 +2,10 @@ package com.example.VoloMap.server
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -17,7 +21,12 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-data class RegisterRequest(val email: String, val password: String, val name: String, val role: Role)
+data class RegisterRequest(
+    @field:Email val email: String,
+    @field:Size(min = 8, max = 72) val password: String,
+    @field:NotBlank val name: String,
+    val role: Role
+)
 data class LoginRequest(val email: String, val password: String)
 data class UserResponse(val email: String, val name: String, val role: Role)
 data class ErrorResponse(val error: String)
@@ -33,23 +42,24 @@ class AuthController(
 
     @PostMapping("/register")
     fun register(
-        @RequestBody req: RegisterRequest,
+        @Valid @RequestBody req: RegisterRequest,
         request: HttpServletRequest,
         response: HttpServletResponse
     ): ResponseEntity<*> {
-        if (userRepository.existsByEmail(req.email)) {
+        val email = req.email.trim().lowercase()
+        if (userRepository.existsByEmail(email)) {
             return ResponseEntity.status(409).body(ErrorResponse("E-Mail bereits registriert."))
         }
         userRepository.save(
             User(
-                email = req.email,
+                email = email,
                 passwordHash = passwordEncoder.encode(req.password)!!,
                 name = req.name,
                 role = req.role
             )
         )
-        establishSession(req.email, req.password, request, response)
-        val user = userRepository.findByEmail(req.email)!!
+        establishSession(email, req.password, request, response)
+        val user = userRepository.findByEmail(email)!!
         return ResponseEntity.ok(UserResponse(user.email, user.name, user.role))
     }
 
@@ -59,12 +69,13 @@ class AuthController(
         request: HttpServletRequest,
         response: HttpServletResponse
     ): ResponseEntity<*> {
+        val email = req.email.trim().lowercase()
         try {
-            establishSession(req.email, req.password, request, response)
+            establishSession(email, req.password, request, response)
         } catch (e: AuthenticationException) {
             return ResponseEntity.status(401).body(ErrorResponse("E-Mail oder Passwort falsch."))
         }
-        val user = userRepository.findByEmail(req.email)!!
+        val user = userRepository.findByEmail(email)!!
         return ResponseEntity.ok(UserResponse(user.email, user.name, user.role))
     }
 
@@ -95,6 +106,9 @@ class AuthController(
         val context = SecurityContextHolder.createEmptyContext()
         context.authentication = authResult
         SecurityContextHolder.setContext(context)
+        if (request.getSession(false) != null) {
+            request.changeSessionId()
+        }
         securityContextRepository.saveContext(context, request, response)
     }
 }

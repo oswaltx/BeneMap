@@ -1,6 +1,6 @@
 <script lang="ts">
     import Link from "./Link.svelte";
-    import { currentUser, authChecked } from "../auth";
+    import { currentUser, authChecked, fetchWithSessionCheck } from "../auth";
 
     let name = "";
     let description = "";
@@ -23,7 +23,7 @@
         statusMessage = null;
 
         try {
-            const res = await fetch("http://localhost:8080/add", {
+            const res = await fetchWithSessionCheck("http://localhost:8080/add", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

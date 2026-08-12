@@ -69,6 +69,7 @@ class MainController(
         @RequestBody activity: VolunteerActivity,
         authentication: Authentication
     ): ResponseEntity<VolunteerActivity> {
+        activity.id = 0
         activity.createdBy = userRepository.findByEmail(authentication.name)
 
         if (activity.latitude == null && activity.longitude == null && !activity.addressText.isNullOrBlank()) {
