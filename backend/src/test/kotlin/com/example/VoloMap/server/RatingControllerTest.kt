@@ -1,5 +1,6 @@
 package com.example.VoloMap.server
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,6 +40,12 @@ class RatingControllerTest {
         providerRatingRepository.deleteAll()
         activityRepository.deleteAll()
         userRepository.deleteAll()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        activityRatingRepository.deleteAll()
+        providerRatingRepository.deleteAll()
     }
 
     private fun registerAndSession(email: String, role: String): MockHttpSession {
