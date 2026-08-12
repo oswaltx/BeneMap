@@ -1,15 +1,33 @@
 <script lang="ts">
-    import {onMount} from "svelte";
-    import {Map, Marker, Popup, TileLayer} from "sveaflet";
+    import {onMount, tick} from "svelte";
+    import type {Map as LeafletMap} from "leaflet";
+    import {Map, TileLayer} from "sveaflet";
     import FilterBar from "./FilterBar.svelte";
     import SearchBar from "./SearchBar.svelte";
     import VolunteerList from "./VolunteerList.svelte";
+    import PinDetailPanel from "./PinDetailPanel.svelte";
     import { CircleMarker } from "sveaflet";
 
     let markers: any[] = [];
     let categories: string[] = [];
     let errorMessage: string | null = null;
     let sheetExpanded = false;
+
+    let selectedMarkerId: number | null = null;
+    $: selectedMarker = markers.find((m) => m.id === selectedMarkerId) ?? null;
+
+    let isDesktop = typeof window !== "undefined" ? window.innerWidth >= 1024 : false;
+    function handleResize() {
+        isDesktop = window.innerWidth >= 1024;
+    }
+
+    $: panelOpen = selectedMarker != null && isDesktop;
+
+    let leafletMapInstance: LeafletMap | undefined;
+    $: if (leafletMapInstance) {
+        panelOpen;
+        tick().then(() => leafletMapInstance?.invalidateSize());
+    }
 
     let query = {
         date: "",
@@ -18,6 +36,11 @@
         timeTo: "",
         search: "",
     };
+
+    onMount(() => {
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    });
 
     onMount(async () => {
         try {
@@ -71,56 +94,71 @@
         };
         fetchMarkers();
     }
+
+    function handleSelect(event: CustomEvent<{ id: number }>) {
+        selectedMarkerId = event.detail.id;
+    }
+
     const attribution = '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 </script>
 
 <div class="map-shell">
-    <div class="search-panel">
-        <SearchBar on:search={handleSearch} />
-        <FilterBar {categories} on:filter={handleFilter} />
-        {#if errorMessage}<p class="error">{errorMessage}</p>{/if}
-    </div>
+    {#if panelOpen && selectedMarker}
+        <PinDetailPanel
+            marker={selectedMarker}
+            on:close={() => (selectedMarkerId = null)}
+            on:refresh={fetchMarkers}
+        />
+    {/if}
 
-    <div class="map-container">
-        <Map options={{ center: [50.9375, 6.9603], zoom: 13, zoomControl: false, attributionControl: false }}>
-            <TileLayer
-                url={'https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png'}
-                options={{ attribution }}
-            />
-
-            {#each markers as marker}
-                <CircleMarker latLng={[marker.lat, marker.lng]}>
-                    <Popup>
-                        <h3>{marker.name}</h3>
-                        <p>{marker.address}</p>
-                        <p>{marker.category}</p>
-                        <p>{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
-                    </Popup>
-                </CircleMarker>
-            {/each}
-        </Map>
-    </div>
-
-    <div class="bottom-sheet" class:expanded={sheetExpanded}>
-        <div class="sheet-header">
-            <button class="sheet-handle" on:click={() => sheetExpanded = !sheetExpanded}>
-                {markers.length} Aktivitäten {sheetExpanded ? "▼" : "▲"}
-            </button>
-            <span class="attribution">© CARTO © OpenStreetMap</span>
+    <div class="map-area">
+        <div class="search-panel">
+            <SearchBar on:search={handleSearch} />
+            <FilterBar {categories} on:filter={handleFilter} />
+            {#if errorMessage}<p class="error">{errorMessage}</p>{/if}
         </div>
-        {#if sheetExpanded}
-            <div class="sheet-content">
-                <VolunteerList {markers} on:refresh={fetchMarkers} />
+
+        <div class="map-container">
+            <Map bind:instance={leafletMapInstance} options={{ center: [50.9375, 6.9603], zoom: 13, zoomControl: false, attributionControl: false }}>
+                <TileLayer
+                    url={'https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png'}
+                    options={{ attribution }}
+                />
+
+                {#each markers as marker}
+                    <CircleMarker latLng={[marker.lat, marker.lng]} onclick={() => (selectedMarkerId = marker.id)} />
+                {/each}
+            </Map>
+        </div>
+
+        <div class="bottom-sheet" class:expanded={sheetExpanded}>
+            <div class="sheet-header">
+                <button class="sheet-handle" on:click={() => sheetExpanded = !sheetExpanded}>
+                    {markers.length} Aktivitäten {sheetExpanded ? "▼" : "▲"}
+                </button>
+                <span class="attribution">© CARTO © OpenStreetMap</span>
             </div>
-        {/if}
+            {#if sheetExpanded}
+                <div class="sheet-content">
+                    <VolunteerList {markers} on:refresh={fetchMarkers} on:select={handleSelect} />
+                </div>
+            {/if}
+        </div>
     </div>
 </div>
 
 <style>
     .map-shell {
-        position: relative;
         height: 100%;
         width: 100%;
+        display: flex;
+    }
+
+    .map-area {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        height: 100%;
     }
 
     .map-container {
