@@ -15,6 +15,7 @@ kanban-plugin: board
 - [ ] Bewertungssystem
 - [ ] Edits von Volunteer Aktivitäten
 - [ ] Bugfix: Race Condition bei schnellen Filter-Änderungen (fetchMarkers in Map.svelte überschreibt Ergebnisse ggf. mit veralteter Response, da keine Reihenfolge-Absicherung/Request-Abbruch)
+- [ ] Pin-Detailseite (Popup beim Klick auf einen Marker) optisch überarbeiten — aktuell unstyled Leaflet-Popup (nackte h3/p-Tags), passt nicht zum Rest der App. Die blauen CircleMarker selbst bleiben wie sie sind (bewusst gewählt, zeigen überlagernde Events).
 ## Doing
 
 
