@@ -3,6 +3,7 @@ import { writable } from "svelte/store";
 export type Role = "ANBIETER" | "USER";
 
 export interface AuthUser {
+    id: number;
     email: string;
     name: string;
     role: Role;
