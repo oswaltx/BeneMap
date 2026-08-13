@@ -57,7 +57,9 @@ class MainControllerEditActivityTest {
 
         assertEquals(200, result.statusCode.value())
         verify(geocodingService, never()).geocode(any<String>())
-        assertEquals(50.9413, (result.body as VolunteerActivity).latitude)
+        val body = result.body as UpdateActivityResponse
+        assertEquals(50.9413, body.activity.latitude)
+        assertEquals(false, body.geocodingFailed)
     }
 
     @Test
@@ -79,8 +81,10 @@ class MainControllerEditActivityTest {
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
 
-        assertEquals(50.0, (result.body as VolunteerActivity).latitude)
-        assertEquals(6.0, (result.body as VolunteerActivity).longitude)
+        val body = result.body as UpdateActivityResponse
+        assertEquals(50.0, body.activity.latitude)
+        assertEquals(6.0, body.activity.longitude)
+        assertEquals(false, body.geocodingFailed)
     }
 
     @Test
@@ -102,8 +106,10 @@ class MainControllerEditActivityTest {
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
 
-        assertEquals(1.0, (result.body as VolunteerActivity).latitude)
-        assertEquals(2.0, (result.body as VolunteerActivity).longitude)
+        val body = result.body as UpdateActivityResponse
+        assertEquals(1.0, body.activity.latitude)
+        assertEquals(2.0, body.activity.longitude)
+        assertEquals(true, body.geocodingFailed)
     }
 
     @Test
@@ -155,6 +161,6 @@ class MainControllerEditActivityTest {
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
 
-        assertEquals(originalDateTime, (result.body as VolunteerActivity).dateTime)
+        assertEquals(originalDateTime, (result.body as UpdateActivityResponse).activity.dateTime)
     }
 }

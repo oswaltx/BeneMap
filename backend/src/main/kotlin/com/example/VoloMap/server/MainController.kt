@@ -120,6 +120,7 @@ class MainController(
             activity.dateTime = req.dateTime
         }
 
+        var geocodingFailed = false
         val addressChanged = req.addressText != activity.addressText
         if (addressChanged) {
             activity.addressText = req.addressText
@@ -128,6 +129,11 @@ class MainController(
                 if (coords != null) {
                     activity.latitude = coords.first
                     activity.longitude = coords.second
+                } else {
+                    // Keep the previous coordinates (no pin loss); the frontend needs an
+                    // explicit signal here since latitude/longitude alone can't distinguish
+                    // "unchanged because nothing changed" from "unchanged because geocoding failed".
+                    geocodingFailed = true
                 }
             } else {
                 activity.latitude = null
@@ -135,7 +141,8 @@ class MainController(
             }
         }
 
-        return ResponseEntity.ok(repository.save(activity))
+        val saved = repository.save(activity)
+        return ResponseEntity.ok(UpdateActivityResponse(saved, geocodingFailed))
     }
 
     @DeleteMapping("/activities/{id}")
@@ -155,6 +162,11 @@ class MainController(
     }
 
 }
+
+data class UpdateActivityResponse(
+    val activity: VolunteerActivity,
+    val geocodingFailed: Boolean,
+)
 
 data class UpdateActivityRequest(
     val name: String,
