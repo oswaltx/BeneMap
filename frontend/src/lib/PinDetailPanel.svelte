@@ -1,7 +1,10 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
     import RatingModal from "./RatingModal.svelte";
+    import EditActivityModal from "./EditActivityModal.svelte";
     import { categoryColor } from "./categoryColor";
+    import { deleteActivity } from "./activityActions";
+    import { currentUser } from "../auth";
 
     export let marker: {
         id: number;
@@ -21,6 +24,14 @@
     const dispatch = createEventDispatcher<{ close: void; refresh: void }>();
 
     let openRating: { target: "activity" | "provider"; targetId: number; targetLabel: string } | null = null;
+    $: isOwner = $currentUser?.id === marker.providerId;
+    let editing = false;
+
+    async function handleDelete() {
+        if (await deleteActivity(marker.id)) {
+            dispatch("refresh");
+        }
+    }
 
     function openActivityRating() {
         openRating = { target: "activity", targetId: marker.id, targetLabel: marker.name };
@@ -44,6 +55,10 @@
                 class="tag"
                 style="background:{categoryColor(marker.category).bg}; color:{categoryColor(marker.category).text};"
             >{marker.category}</span>
+        {/if}
+        {#if isOwner}
+            <button class="edit-link" on:click={() => (editing = true)}>Bearbeiten</button>
+            <button class="edit-link" on:click={handleDelete}>Löschen</button>
         {/if}
         <button class="close" on:click={() => dispatch("close")} aria-label="Schließen">×</button>
     </div>
@@ -80,6 +95,14 @@
     />
 {/if}
 
+{#if editing}
+    <EditActivityModal
+        marker={{ id: marker.id, name: marker.name, description: marker.description, address: marker.address, category: marker.category, dateTime: marker.dateTime }}
+        on:close={() => (editing = false)}
+        on:saved={() => { editing = false; dispatch("refresh"); }}
+    />
+{/if}
+
 <style>
     .panel {
         position: absolute;
@@ -112,6 +135,20 @@
         cursor: pointer;
         color: var(--color-text-muted);
         padding: 0;
+    }
+
+    .edit-link {
+        background: none;
+        border: none;
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        padding: 2px 6px;
+        text-decoration: underline;
+    }
+
+    .edit-link:hover {
+        color: var(--color-primary);
     }
 
     .tag {
