@@ -1,13 +1,17 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
     import RatingModal from "./RatingModal.svelte";
+    import EditActivityModal from "./EditActivityModal.svelte";
     import { categoryColor } from "./categoryColor";
+    import { deleteActivity } from "./activityActions";
+    import { currentUser } from "../auth";
 
     export let markers: {
         id: number;
         name: string;
         address: string;
         category: string;
+        description: string;
         dateTime: string;
         lat: number;
         lng: number;
@@ -35,6 +39,14 @@
     function handleRated() {
         openRating = null;
         dispatch("refresh");
+    }
+
+    let editingMarker: (typeof markers)[number] | null = null;
+
+    async function handleDelete(marker: (typeof markers)[number]) {
+        if (await deleteActivity(marker.id)) {
+            dispatch("refresh");
+        }
     }
 </script>
 
@@ -72,6 +84,10 @@
                         Anbieter: {marker.providerRating != null ? `★ ${marker.providerRating.toFixed(1)} (${marker.providerRatingCount})` : "Noch keine Bewertung"}
                     </button>
                 {/if}
+                {#if $currentUser?.id === marker.providerId}
+                    <button class="edit-link" on:click|stopPropagation={() => (editingMarker = marker)}>Bearbeiten</button>
+                    <button class="edit-link" on:click|stopPropagation={() => handleDelete(marker)}>Löschen</button>
+                {/if}
             </div>
         </div>
     {/each}
@@ -87,6 +103,14 @@
         targetLabel={openRating.targetLabel}
         on:close={() => (openRating = null)}
         on:rated={handleRated}
+    />
+{/if}
+
+{#if editingMarker}
+    <EditActivityModal
+        marker={{ id: editingMarker.id, name: editingMarker.name, description: editingMarker.description, address: editingMarker.address, category: editingMarker.category, dateTime: editingMarker.dateTime }}
+        on:close={() => (editingMarker = null)}
+        on:saved={() => { editingMarker = null; dispatch("refresh"); }}
     />
 {/if}
 
@@ -138,6 +162,19 @@
     }
     .rating-badge:hover {
         border-color: var(--color-primary);
+    }
+    .edit-link {
+        font-size: 0.75rem;
+        padding: 3px 6px;
+        border: none;
+        background: none;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .edit-link:hover {
+        color: var(--color-primary);
     }
     .empty {
         color: var(--color-text-muted);
