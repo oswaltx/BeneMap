@@ -8,6 +8,8 @@
 
 **Tech Stack:** Kotlin/Spring Boot 4.0.3 Backend (JUnit 5, Mockito-Kotlin für Unit-Tests, `@SpringBootTest`+`MockMvc` für Integrationstests — siehe `MainControllerAddActivityTest.kt`/`MainControllerSecurityTest.kt` als Vorbild). Svelte 5 Legacy-Stil Frontend (`<script lang="ts">`, `createEventDispatcher`, plain `let`/`$:`).
 
+> **Nachträgliche Korrektur (nach Task 6 / finaler Review):** Dieser Plan war in sich widersprüchlich — Task 3/4/5s Code (Zeilen 648, 987, 1091) lässt `on:saved` das Modal sofort schließen, während Task 6s Verifikations-Checkliste ein manuelles Schließen voraussetzt ("nach Schließen zeigt Karte/Panel den neuen Namen"). Commit `ab7f2ff` hat das zugunsten des manuellen Schließens aufgelöst (das Modal bleibt offen, bis der Nutzer selbst auf × klickt) — sonst wäre die Erfolgs-/Warnmeldung nie sichtbar. Siehe Ledger für Details.
+
 ## Global Constraints
 
 - Ownership-Erkennung: `activity.createdBy?.id == aktueller User.id` — serverseitig im Controller geprüft (Spring Security prüft nur die Rolle `ANBIETER`, nicht den Objektbesitz), sonst `403 Forbidden`.
