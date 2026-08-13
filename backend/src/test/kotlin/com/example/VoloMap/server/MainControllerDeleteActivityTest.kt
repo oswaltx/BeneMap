@@ -71,4 +71,20 @@ class MainControllerDeleteActivityTest {
 
         assertEquals(404, result.statusCode.value())
     }
+
+    @Test
+    fun `rejects delete of an activity with no owner (scraped data) with 403`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        val existing = VolunteerActivity(id = 5, name = "Gescrapt", createdBy = null)
+        whenever(repository.findById(5)).thenReturn(Optional.of(existing))
+        whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val result = controller.deleteActivity(5, authenticationFor(owner.email))
+
+        assertEquals(403, result.statusCode.value())
+        verify(repository, never()).delete(any<VolunteerActivity>())
+    }
 }

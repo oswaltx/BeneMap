@@ -1,7 +1,6 @@
 package com.example.VoloMap.server
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -162,5 +161,23 @@ class MainControllerEditActivityTest {
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
 
         assertEquals(originalDateTime, (result.body as UpdateActivityResponse).activity.dateTime)
+    }
+
+    @Test
+    fun `rejects update of an activity with no owner (scraped data) with 403`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        val existing = VolunteerActivity(id = 5, name = "Gescrapt", createdBy = null)
+        whenever(repository.findById(5)).thenReturn(Optional.of(existing))
+        whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val req = UpdateActivityRequest(name = "Übernommen")
+
+        val result = controller.updateActivity(5, req, authenticationFor(owner.email))
+
+        assertEquals(403, result.statusCode.value())
+        verify(repository, never()).save(any<VolunteerActivity>())
     }
 }

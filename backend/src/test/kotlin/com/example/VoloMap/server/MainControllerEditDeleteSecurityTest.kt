@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest
@@ -105,7 +106,10 @@ class MainControllerEditDeleteSecurityTest {
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"name":"Neuer Name"}""")
-        ).andExpect(status().isOk)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.geocodingFailed").value(false))
+            .andExpect(jsonPath("$.activity.name").value("Neuer Name"))
 
         assertEquals("Neuer Name", activityRepository.findById(id).get().name)
     }
