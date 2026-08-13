@@ -110,7 +110,7 @@
     <EditActivityModal
         marker={{ id: editingMarker.id, name: editingMarker.name, description: editingMarker.description, address: editingMarker.address, category: editingMarker.category, dateTime: editingMarker.dateTime }}
         on:close={() => (editingMarker = null)}
-        on:saved={() => { editingMarker = null; dispatch("refresh"); }}
+        on:saved={() => dispatch("refresh")}
     />
 {/if}
 

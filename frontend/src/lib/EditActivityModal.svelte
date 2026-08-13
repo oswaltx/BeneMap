@@ -54,7 +54,7 @@
             }
 
             const saved = await res.json();
-            if (addressText && (saved.latitude == null || saved.longitude == null)) {
+            if (saved.geocodingFailed) {
                 statusMessage = "Gespeichert — die Adresse konnte aber nicht gefunden werden, die Position auf der Karte wurde nicht aktualisiert.";
                 statusIsWarning = true;
             } else {
