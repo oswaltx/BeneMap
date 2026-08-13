@@ -50,12 +50,15 @@
             if (!res.ok) {
                 statusMessage = "Fehler beim Speichern. Bitte versuche es erneut.";
                 statusIsWarning = true;
+                if (res.status === 404) {
+                    dispatch("saved");
+                }
                 return;
             }
 
             const saved = await res.json();
-            if (saved.geocodingFailed) {
-                statusMessage = "Gespeichert — die Adresse konnte aber nicht gefunden werden, die Position auf der Karte wurde nicht aktualisiert.";
+            if (saved.geocodingFailed || saved.activity.latitude == null || saved.activity.longitude == null) {
+                statusMessage = "Gespeichert — aber ohne gültige Adresse erscheint die Aktivität nicht auf der Karte.";
                 statusIsWarning = true;
             } else {
                 statusMessage = "Aktivität wurde aktualisiert.";
