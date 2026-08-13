@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -145,6 +146,7 @@ class MainController(
         return ResponseEntity.ok(UpdateActivityResponse(saved, geocodingFailed))
     }
 
+    @Transactional
     @DeleteMapping("/activities/{id}")
     fun deleteActivity(
         @PathVariable id: Long,
@@ -168,6 +170,13 @@ data class UpdateActivityResponse(
     val geocodingFailed: Boolean,
 )
 
+/**
+ * PUT /activities/{id} request body. `description`/`addressText`/`category` use
+ * full-replace semantics (omitted means "clear this field"); `dateTime` uses merge
+ * semantics (omitted means "leave the existing value unchanged"). The frontend
+ * always sends every field, so this asymmetry has no live effect today — but a
+ * future API consumer sending a partial body needs to know about it.
+ */
 data class UpdateActivityRequest(
     val name: String,
     val description: String? = null,
