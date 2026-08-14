@@ -12,6 +12,7 @@
         address: string;
         category: string;
         description: string;
+        photoUrls: string[];
         dateTime: string;
         activityRating: number | null;
         activityRatingCount: number;
@@ -97,7 +98,7 @@
 
 {#if editing}
     <EditActivityModal
-        marker={{ id: marker.id, name: marker.name, description: marker.description, address: marker.address, category: marker.category, dateTime: marker.dateTime }}
+        marker={{ id: marker.id, name: marker.name, description: marker.description, address: marker.address, category: marker.category, dateTime: marker.dateTime, photoUrls: marker.photoUrls }}
         on:close={() => (editing = false)}
         on:saved={() => dispatch("refresh")}
     />

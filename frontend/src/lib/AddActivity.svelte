@@ -7,6 +7,7 @@
     let addressText = "";
     let category = "";
     let dateTime = "";
+    let photoUrlsText = "";
 
     let submitting = false;
     let statusMessage: string | null = null;
@@ -33,6 +34,7 @@
                     addressText: addressText || null,
                     category: category || null,
                     dateTime: dateTime ? dateTime + ":00" : undefined,
+                    photoUrls: photoUrlsText.trim() || undefined,
                 }),
             });
 
@@ -56,6 +58,7 @@
             addressText = "";
             category = "";
             dateTime = "";
+            photoUrlsText = "";
         } catch (e) {
             statusMessage = "Server nicht erreichbar. Bitte versuche es später erneut.";
             statusIsWarning = true;
@@ -101,6 +104,11 @@
             <label>
                 Datum/Uhrzeit
                 <input type="datetime-local" bind:value={dateTime} />
+            </label>
+
+            <label>
+                Foto-URLs (eine pro Zeile)
+                <textarea bind:value={photoUrlsText} rows="3" placeholder={"https://...\nhttps://..."}></textarea>
             </label>
 
             <button type="submit" disabled={submitting}>

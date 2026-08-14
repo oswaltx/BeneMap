@@ -9,6 +9,7 @@
         address: string;
         category: string;
         dateTime: string;
+        photoUrls: string[];
     };
 
     const dispatch = createEventDispatcher<{ close: void; saved: void }>();
@@ -18,6 +19,7 @@
     let addressText = marker.address;
     let category = marker.category;
     let dateTime = marker.dateTime ? marker.dateTime.slice(0, 16) : "";
+    let photoUrlsText = marker.photoUrls.join("\n");
 
     let submitting = false;
     let statusMessage: string | null = null;
@@ -44,6 +46,7 @@
                     addressText: addressText || null,
                     category: category || null,
                     dateTime: dateTime ? dateTime + ":00" : undefined,
+                    photoUrls: photoUrlsText.trim() || undefined,
                 }),
             });
 
@@ -105,6 +108,11 @@
         <label>
             Datum/Uhrzeit
             <input type="datetime-local" bind:value={dateTime} />
+        </label>
+
+        <label>
+            Foto-URLs (eine pro Zeile)
+            <textarea bind:value={photoUrlsText} rows="3" placeholder={"https://...\nhttps://..."}></textarea>
         </label>
 
         <button type="submit" disabled={submitting}>

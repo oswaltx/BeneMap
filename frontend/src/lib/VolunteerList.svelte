@@ -12,6 +12,7 @@
         address: string;
         category: string;
         description: string;
+        photoUrls: string[];
         dateTime: string;
         lat: number;
         lng: number;
@@ -108,7 +109,7 @@
 
 {#if editingMarker}
     <EditActivityModal
-        marker={{ id: editingMarker.id, name: editingMarker.name, description: editingMarker.description, address: editingMarker.address, category: editingMarker.category, dateTime: editingMarker.dateTime }}
+        marker={{ id: editingMarker.id, name: editingMarker.name, description: editingMarker.description, address: editingMarker.address, category: editingMarker.category, dateTime: editingMarker.dateTime, photoUrls: editingMarker.photoUrls }}
         on:close={() => (editingMarker = null)}
         on:saved={() => dispatch("refresh")}
     />
