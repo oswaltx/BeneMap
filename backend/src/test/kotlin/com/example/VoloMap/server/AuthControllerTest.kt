@@ -130,4 +130,45 @@ class AuthControllerTest {
                 .content("""{"photoUrl":"https://example.com/x.jpg"}""")
         ).andExpect(status().isUnauthorized)
     }
+
+    @Test
+    fun `website URL without a scheme gets https prepended`() {
+        val register = mockMvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"eve@example.com","password":"geheim123","name":"Eve","role":"ANBIETER"}""")
+        ).andReturn()
+        val session = register.request.session as MockHttpSession
+
+        mockMvc.perform(
+            put("/auth/me")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"websiteUrl":"www.eve-verein.de"}""")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.websiteUrl").value("https://www.eve-verein.de"))
+    }
+
+    @Test
+    fun `updating profile cannot smuggle in role, email, or name changes`() {
+        val register = mockMvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"frank@example.com","password":"geheim123","name":"Frank","role":"ANBIETER"}""")
+        ).andReturn()
+        val session = register.request.session as MockHttpSession
+
+        mockMvc.perform(
+            put("/auth/me")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"photoUrl":"https://example.com/frank.jpg","role":"USER","email":"attacker@evil.de","name":"Attacker"}""")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.role").value("ANBIETER"))
+            .andExpect(jsonPath("$.email").value("frank@example.com"))
+            .andExpect(jsonPath("$.name").value("Frank"))
+            .andExpect(jsonPath("$.photoUrl").value("https://example.com/frank.jpg"))
+    }
 }

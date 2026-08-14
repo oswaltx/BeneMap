@@ -176,7 +176,7 @@ data class UpdateActivityResponse(
 )
 
 /**
- * PUT /activities/{id} request body. `description`/`addressText`/`category` use
+ * PUT /activities/{id} request body. `description`/`addressText`/`category`/`photoUrls` use
  * full-replace semantics (omitted means "clear this field"); `dateTime` uses merge
  * semantics (omitted means "leave the existing value unchanged"). The frontend
  * always sends every field, so this asymmetry has no live effect today — but a

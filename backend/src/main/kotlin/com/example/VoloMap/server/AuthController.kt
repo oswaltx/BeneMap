@@ -104,6 +104,11 @@ class AuthController(
         return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
     }
 
+    /**
+     * PUT /auth/me request body uses full-replace semantics for both fields: sending
+     * only `photoUrl` will silently clear an existing `websiteUrl` (and vice versa),
+     * since both fields are always overwritten, never merged.
+     */
     @PutMapping("/me")
     fun updateProfile(
         @RequestBody req: UpdateProfileRequest,
@@ -112,6 +117,7 @@ class AuthController(
         val user = userRepository.findByEmail(authentication.name)!!
         user.photoUrl = req.photoUrl?.trim()?.ifBlank { null }
         user.websiteUrl = req.websiteUrl?.trim()?.ifBlank { null }
+            ?.let { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
         userRepository.save(user)
         return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
     }
