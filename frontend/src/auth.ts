@@ -7,6 +7,8 @@ export interface AuthUser {
     email: string;
     name: string;
     role: Role;
+    photoUrl: string | null;
+    websiteUrl: string | null;
 }
 
 export const currentUser = writable<AuthUser | null>(null);
