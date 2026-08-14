@@ -10,6 +10,7 @@ data class Marker(
     val address: String,
     val category: String,
     val description: String,
+    val photoUrls: List<String>,
     val dateTime: LocalDateTime?,
     val activityRating: Double?,
     val activityRatingCount: Int,

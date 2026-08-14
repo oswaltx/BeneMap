@@ -56,6 +56,7 @@ class MainController(
                     address = activity.addressText ?: "",
                     category = activity.category ?: "",
                     description = activity.description ?: "",
+                    photoUrls = parsePhotoUrls(activity.photoUrls),
                     dateTime = activity.dateTime,
                     activityRating = activityRatings.map { it.stars }.average().takeIf { activityRatings.isNotEmpty() },
                     activityRatingCount = activityRatings.size,
@@ -89,6 +90,7 @@ class MainController(
     ): ResponseEntity<VolunteerActivity> {
         activity.id = 0
         activity.createdBy = userRepository.findByEmail(authentication.name)
+        activity.photoUrls = normalizePhotoUrls(activity.photoUrls)
 
         if (activity.latitude == null && activity.longitude == null && !activity.addressText.isNullOrBlank()) {
             val coords = geocodingService.geocode(activity.addressText!!)
@@ -117,6 +119,7 @@ class MainController(
         activity.name = req.name
         activity.description = req.description
         activity.category = req.category
+        activity.photoUrls = normalizePhotoUrls(req.photoUrls)
         if (req.dateTime != null) {
             activity.dateTime = req.dateTime
         }
@@ -183,4 +186,17 @@ data class UpdateActivityRequest(
     val addressText: String? = null,
     val category: String? = null,
     val dateTime: LocalDateTime? = null,
+    val photoUrls: String? = null,
 )
+
+private const val MAX_PHOTO_URLS = 10
+
+private fun parsePhotoUrls(raw: String?): List<String> {
+    if (raw.isNullOrBlank()) return emptyList()
+    return raw.lines().map { it.trim() }.filter { it.isNotEmpty() }.take(MAX_PHOTO_URLS)
+}
+
+private fun normalizePhotoUrls(raw: String?): String? {
+    val parsed = parsePhotoUrls(raw)
+    return if (parsed.isEmpty()) null else parsed.joinToString("\n")
+}

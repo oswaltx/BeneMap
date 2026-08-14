@@ -154,4 +154,38 @@ class MainControllerMarkersTest {
         assertNull(result[0].providerRating)
         assertEquals(0, result[0].providerRatingCount)
     }
+
+    @Test
+    fun `parses stored photo URLs into a list, trimming and dropping blank lines`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val withPhotos = activity(
+            name = "Mit Fotos",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        ).also { it.photoUrls = "https://example.com/a.jpg\n  \nhttps://example.com/b.jpg  \n" }
+        whenever(repository.findAll()).thenReturn(listOf(withPhotos))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertEquals(listOf("https://example.com/a.jpg", "https://example.com/b.jpg"), result[0].photoUrls)
+    }
+
+    @Test
+    fun `photo URLs list is empty when the activity has none`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val noPhotos = activity(
+            name = "Ohne Fotos",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        )
+        whenever(repository.findAll()).thenReturn(listOf(noPhotos))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertEquals(emptyList<String>(), result[0].photoUrls)
+    }
 }

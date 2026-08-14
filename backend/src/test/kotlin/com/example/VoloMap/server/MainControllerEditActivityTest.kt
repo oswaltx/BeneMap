@@ -1,6 +1,7 @@
 package com.example.VoloMap.server
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -179,5 +180,46 @@ class MainControllerEditActivityTest {
 
         assertEquals(403, result.statusCode.value())
         verify(repository, never()).save(any<VolunteerActivity>())
+    }
+
+    @Test
+    fun `updates and caps photo URLs on edit`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        val existing = VolunteerActivity(id = 5, name = "Alt", createdBy = owner)
+        whenever(repository.findById(5)).thenReturn(Optional.of(existing))
+        whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val rawUrls = (1..12).joinToString("\n") { "https://example.com/photo$it.jpg" }
+        val req = UpdateActivityRequest(name = "Alt", photoUrls = rawUrls)
+
+        val result = controller.updateActivity(5, req, authenticationFor(owner.email))
+
+        val storedLines = (result.body as UpdateActivityResponse).activity.photoUrls?.lines() ?: emptyList()
+        assertEquals(10, storedLines.size)
+    }
+
+    @Test
+    fun `omitting photo URLs on edit clears them (full-replace semantics)`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        val existing = VolunteerActivity(
+            id = 5, name = "Alt", createdBy = owner,
+            photoUrls = "https://example.com/old.jpg"
+        )
+        whenever(repository.findById(5)).thenReturn(Optional.of(existing))
+        whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val req = UpdateActivityRequest(name = "Alt")
+
+        val result = controller.updateActivity(5, req, authenticationFor(owner.email))
+
+        assertNull((result.body as UpdateActivityResponse).activity.photoUrls)
     }
 }

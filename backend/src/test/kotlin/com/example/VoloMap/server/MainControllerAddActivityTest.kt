@@ -78,4 +78,39 @@ class MainControllerAddActivityTest {
 
         verify(geocodingService, org.mockito.kotlin.never()).geocode(any<String>())
     }
+
+    @Test
+    fun `normalizes and caps photo URLs when adding an activity`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val rawUrls = (1..12).joinToString("\n") { "https://example.com/photo$it.jpg" }
+        val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0, photoUrls = rawUrls)
+
+        val result = controller.addActivity(activity, authenticationFor(provider.email))
+
+        val storedLines = result.body?.photoUrls?.lines() ?: emptyList()
+        assertEquals(10, storedLines.size)
+        assertEquals("https://example.com/photo1.jpg", storedLines.first())
+    }
+
+    @Test
+    fun `blank photo URLs field is stored as null`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0, photoUrls = "   \n  \n")
+
+        val result = controller.addActivity(activity, authenticationFor(provider.email))
+
+        assertNull(result.body?.photoUrls)
+    }
 }
