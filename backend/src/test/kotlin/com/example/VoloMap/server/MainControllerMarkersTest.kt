@@ -188,4 +188,52 @@ class MainControllerMarkersTest {
 
         assertEquals(emptyList<String>(), result[0].photoUrls)
     }
+
+    @Test
+    fun `includes provider photo and website when set`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val activityRatingRepository = mock<ActivityRatingRepository>()
+        val providerRatingRepository = mock<ProviderRatingRepository>()
+        val provider = User(
+            id = 7, email = "anbieter@example.com", passwordHash = "x", name = "Anbieter Anna",
+            role = Role.ANBIETER, photoUrl = "https://example.com/anna.jpg", websiteUrl = "https://anna-verein.de"
+        )
+        val rated = activity(
+            name = "Bewertete Aktion",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        ).also { it.createdBy = provider }
+        whenever(repository.findAll()).thenReturn(listOf(rated))
+        whenever(activityRatingRepository.findAll()).thenReturn(emptyList())
+        whenever(providerRatingRepository.findAll()).thenReturn(emptyList())
+
+        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository)
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertEquals("https://example.com/anna.jpg", result[0].providerPhotoUrl)
+        assertEquals("https://anna-verein.de", result[0].providerWebsiteUrl)
+    }
+
+    @Test
+    fun `provider photo and website are null without an owner`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val activityRatingRepository = mock<ActivityRatingRepository>()
+        val providerRatingRepository = mock<ProviderRatingRepository>()
+        val unrated = activity(
+            name = "Unbewertete Aktion",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        )
+        whenever(repository.findAll()).thenReturn(listOf(unrated))
+        whenever(activityRatingRepository.findAll()).thenReturn(emptyList())
+        whenever(providerRatingRepository.findAll()).thenReturn(emptyList())
+
+        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository)
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertNull(result[0].providerPhotoUrl)
+        assertNull(result[0].providerWebsiteUrl)
+    }
 }

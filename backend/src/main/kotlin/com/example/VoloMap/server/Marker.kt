@@ -16,6 +16,8 @@ data class Marker(
     val activityRatingCount: Int,
     val providerId: Long?,
     val providerName: String?,
+    val providerPhotoUrl: String?,
+    val providerWebsiteUrl: String?,
     val providerRating: Double?,
     val providerRatingCount: Int,
 )

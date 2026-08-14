@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -28,7 +29,15 @@ data class RegisterRequest(
     val role: Role
 )
 data class LoginRequest(val email: String, val password: String)
-data class UserResponse(val id: Long, val email: String, val name: String, val role: Role)
+data class UserResponse(
+    val id: Long,
+    val email: String,
+    val name: String,
+    val role: Role,
+    val photoUrl: String? = null,
+    val websiteUrl: String? = null,
+)
+data class UpdateProfileRequest(val photoUrl: String? = null, val websiteUrl: String? = null)
 data class ErrorResponse(val error: String)
 
 @RestController
@@ -60,7 +69,7 @@ class AuthController(
         )
         establishSession(email, req.password, request, response)
         val user = userRepository.findByEmail(email)!!
-        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
     }
 
     @PostMapping("/login")
@@ -76,7 +85,7 @@ class AuthController(
             return ResponseEntity.status(401).body(ErrorResponse("E-Mail oder Passwort falsch."))
         }
         val user = userRepository.findByEmail(email)!!
-        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
     }
 
     @PostMapping("/logout")
@@ -92,7 +101,19 @@ class AuthController(
     @GetMapping("/me")
     fun me(authentication: Authentication): ResponseEntity<UserResponse> {
         val user = userRepository.findByEmail(authentication.name)!!
-        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
+    }
+
+    @PutMapping("/me")
+    fun updateProfile(
+        @RequestBody req: UpdateProfileRequest,
+        authentication: Authentication
+    ): ResponseEntity<UserResponse> {
+        val user = userRepository.findByEmail(authentication.name)!!
+        user.photoUrl = req.photoUrl?.trim()?.ifBlank { null }
+        user.websiteUrl = req.websiteUrl?.trim()?.ifBlank { null }
+        userRepository.save(user)
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
     }
 
     private fun establishSession(

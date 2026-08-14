@@ -10,6 +10,7 @@ import org.springframework.mock.web.MockHttpSession
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -97,5 +98,36 @@ class AuthControllerTest {
     @Test
     fun `me without a session is unauthorized`() {
         mockMvc.perform(get("/auth/me")).andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun `owner can update their own profile photo and website`() {
+        val register = mockMvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"dana@example.com","password":"geheim123","name":"Dana","role":"ANBIETER"}""")
+        ).andReturn()
+        val session = register.request.session as MockHttpSession
+
+        mockMvc.perform(
+            put("/auth/me")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"photoUrl":"https://example.com/dana.jpg","websiteUrl":"https://dana-vereint.de"}""")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.photoUrl").value("https://example.com/dana.jpg"))
+            .andExpect(jsonPath("$.websiteUrl").value("https://dana-vereint.de"))
+            .andExpect(jsonPath("$.email").value("dana@example.com"))
+            .andExpect(jsonPath("$.role").value("ANBIETER"))
+    }
+
+    @Test
+    fun `updating profile without a session is unauthorized`() {
+        mockMvc.perform(
+            put("/auth/me")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"photoUrl":"https://example.com/x.jpg"}""")
+        ).andExpect(status().isUnauthorized)
     }
 }

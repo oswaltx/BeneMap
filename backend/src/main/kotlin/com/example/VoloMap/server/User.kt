@@ -29,5 +29,8 @@ class User(
     @Enumerated(EnumType.STRING)
     var role: Role,
 
+    var photoUrl: String? = null,
+    var websiteUrl: String? = null,
+
     var createdAt: Instant = Instant.now(),
 )

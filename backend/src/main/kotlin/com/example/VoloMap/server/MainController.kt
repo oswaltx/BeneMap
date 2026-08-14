@@ -62,6 +62,8 @@ class MainController(
                     activityRatingCount = activityRatings.size,
                     providerId = providerId,
                     providerName = activity.createdBy?.name,
+                    providerPhotoUrl = activity.createdBy?.photoUrl,
+                    providerWebsiteUrl = activity.createdBy?.websiteUrl,
                     providerRating = providerRatings.map { it.stars }.average().takeIf { providerRatings.isNotEmpty() },
                     providerRatingCount = providerRatings.size,
                 )
