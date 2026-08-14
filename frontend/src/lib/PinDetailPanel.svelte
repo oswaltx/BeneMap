@@ -18,6 +18,8 @@
         activityRatingCount: number;
         providerId: number | null;
         providerName: string | null;
+        providerPhotoUrl: string | null;
+        providerWebsiteUrl: string | null;
         providerRating: number | null;
         providerRatingCount: number;
     };
@@ -27,6 +29,11 @@
     let openRating: { target: "activity" | "provider"; targetId: number; targetLabel: string } | null = null;
     $: isOwner = $currentUser?.id === marker.providerId;
     let editing = false;
+    let selectedPhotoIndex = 0;
+    $: {
+        marker.id;
+        selectedPhotoIndex = 0;
+    }
 
     async function handleDelete() {
         if (await deleteActivity(marker.id)) {
@@ -64,6 +71,26 @@
         <button class="close" on:click={() => dispatch("close")} aria-label="Schließen">×</button>
     </div>
 
+    {#if marker.photoUrls.length > 0}
+        <div class="gallery">
+            <img class="hero-photo" src={marker.photoUrls[selectedPhotoIndex]} alt={marker.name} />
+            {#if marker.photoUrls.length > 1}
+                <div class="photo-strip">
+                    {#each marker.photoUrls as url, i}
+                        <button
+                            class="thumb"
+                            class:selected={i === selectedPhotoIndex}
+                            on:click={() => (selectedPhotoIndex = i)}
+                            aria-label={`Foto ${i + 1} anzeigen`}
+                        >
+                            <img src={url} alt="" />
+                        </button>
+                    {/each}
+                </div>
+            {/if}
+        </div>
+    {/if}
+
     <h3>{marker.name}</h3>
     <p class="meta">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
     <p class="meta">{marker.address}</p>
@@ -78,7 +105,15 @@
 
     {#if marker.providerId != null}
         <div class="provider">
-            <span class="provider-name">{marker.providerName}</span>
+            <div class="provider-header">
+                {#if marker.providerPhotoUrl}
+                    <img class="provider-avatar" src={marker.providerPhotoUrl} alt={marker.providerName ?? "Anbieter"} />
+                {/if}
+                <span class="provider-name">{marker.providerName}</span>
+            </div>
+            {#if marker.providerWebsiteUrl}
+                <a class="provider-website" href={marker.providerWebsiteUrl} target="_blank" rel="noopener noreferrer">Website besuchen</a>
+            {/if}
             <button class="rating-badge" on:click={openProviderRating}>
                 {marker.providerRating != null ? `★ ${marker.providerRating.toFixed(1)} (${marker.providerRatingCount})` : "Noch keine Bewertung"}
             </button>
@@ -176,6 +211,47 @@
         line-height: 1.5;
     }
 
+    .gallery {
+        margin: 4px 0;
+    }
+
+    .hero-photo {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        background: var(--color-bg);
+    }
+
+    .photo-strip {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+        overflow-x: auto;
+    }
+
+    .thumb {
+        flex: 0 0 48px;
+        height: 48px;
+        padding: 0;
+        border: 2px solid transparent;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        cursor: pointer;
+        background: none;
+    }
+
+    .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .thumb.selected {
+        border-color: var(--color-primary);
+    }
+
     .rating-badge {
         align-self: flex-start;
         font-size: 0.8rem;
@@ -204,5 +280,24 @@
         font-size: 0.85rem;
         font-weight: 600;
         color: var(--color-text);
+    }
+
+    .provider-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .provider-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .provider-website {
+        font-size: 0.8rem;
+        color: var(--color-primary);
+        align-self: flex-start;
     }
 </style>
