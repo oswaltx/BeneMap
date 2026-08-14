@@ -30,10 +30,7 @@
     $: isOwner = $currentUser?.id === marker.providerId;
     let editing = false;
     let selectedPhotoIndex = 0;
-    $: {
-        marker.id;
-        selectedPhotoIndex = 0;
-    }
+    $: safePhotoIndex = selectedPhotoIndex < marker.photoUrls.length ? selectedPhotoIndex : 0;
 
     async function handleDelete() {
         if (await deleteActivity(marker.id)) {
@@ -73,13 +70,13 @@
 
     {#if marker.photoUrls.length > 0}
         <div class="gallery">
-            <img class="hero-photo" src={marker.photoUrls[selectedPhotoIndex]} alt={marker.name} />
+            <img class="hero-photo" src={marker.photoUrls[safePhotoIndex]} alt="" />
             {#if marker.photoUrls.length > 1}
                 <div class="photo-strip">
                     {#each marker.photoUrls as url, i}
                         <button
                             class="thumb"
-                            class:selected={i === selectedPhotoIndex}
+                            class:selected={i === safePhotoIndex}
                             on:click={() => (selectedPhotoIndex = i)}
                             aria-label={`Foto ${i + 1} anzeigen`}
                         >
