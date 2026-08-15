@@ -10,7 +10,7 @@
     {
       "name": "backend",
       "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "cd backend && gradlew.bat bootRun"],
+      "runtimeArgs": ["/c", "cd backend && .\\gradlew.bat bootRun"],
       "port": 8080
     }
   ]
