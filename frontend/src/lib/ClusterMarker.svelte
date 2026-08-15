@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onDestroy } from "svelte";
     import { Marker, DivIcon, Popup } from "sveaflet";
     import { categoryColor } from "./categoryColor";
 
@@ -50,6 +50,10 @@
         popupOpen = false;
         dispatch("select", { id });
     }
+
+    onDestroy(() => {
+        if (closeTimer) clearTimeout(closeTimer);
+    });
 </script>
 
 <Marker
@@ -66,7 +70,15 @@
 {#if popupOpen}
     <Popup
         latLng={[lat, lng]}
-        options={{ closeButton: false, autoClose: false, closeOnClick: false, offset: [0, -16] }}
+        options={{
+            closeButton: false,
+            autoClose: false,
+            closeOnClick: false,
+            offset: [0, -16],
+            maxHeight: 240,
+            autoPan: false,
+            closeOnEscapeKey: false,
+        }}
     >
         <div class="cluster-popup" on:mouseenter={openNow} on:mouseleave={scheduleClose}>
             <p class="cluster-popup-title">{members.length} Aktivitäten hier</p>
