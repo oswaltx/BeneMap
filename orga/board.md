@@ -25,6 +25,7 @@ kanban-plugin: board
 - [x] Bewertungssystem-Politur: Anbieter-Name im RatingModal-Titel + Bewertungsdatum werden jetzt angezeigt
 - [x] Edits von Volunteer Aktivitäten (inkl. Löschen) — Anbieter können eigene Aktivitäten bearbeiten/löschen, in Kartenpanel und Liste
 - [x] Fotos für Aktivitäten (Galerie) + Anbieter-Profilbild/Website — nur URL-Eingabe, kein Datei-Upload; neue "Mein Profil"-Seite
+- [x] Hover-Übersicht auf der Karte — Tooltip mit Name, Kategorie, Datum, Bewertung beim Überfahren eines Punkts
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
