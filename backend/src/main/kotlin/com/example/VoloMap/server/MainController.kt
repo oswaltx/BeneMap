@@ -105,6 +105,53 @@ class MainController(
         return ResponseEntity.ok(savedActivity)
     }
 
+    @PostMapping("/add-recurring")
+    fun addRecurringActivity(
+        @RequestBody req: AddRecurringActivityRequest,
+        authentication: Authentication
+    ): ResponseEntity<*> {
+        if (req.recurrenceIntervalDays < 1) {
+            return ResponseEntity.badRequest().body(ErrorResponse("recurrenceIntervalDays muss mindestens 1 sein."))
+        }
+
+        val provider = userRepository.findByEmail(authentication.name)
+        val normalizedPhotoUrls = normalizePhotoUrls(req.photoUrls)
+
+        var latitude: Double? = null
+        var longitude: Double? = null
+        if (!req.addressText.isNullOrBlank()) {
+            val coords = geocodingService.geocode(req.addressText)
+            if (coords != null) {
+                latitude = coords.first
+                longitude = coords.second
+            }
+        }
+
+        val horizonEnd = req.dateTime.plusMonths(RECURRENCE_HORIZON_MONTHS)
+        val occurrenceDates = generateSequence(req.dateTime) { it.plusDays(req.recurrenceIntervalDays.toLong()) }
+            .takeWhile { it.isBefore(horizonEnd) }
+            .take(MAX_RECURRING_OCCURRENCES)
+            .toList()
+
+        val createdActivities = occurrenceDates.map { occurrenceDateTime ->
+            repository.save(
+                VolunteerActivity(
+                    name = req.name,
+                    description = req.description,
+                    addressText = req.addressText,
+                    category = req.category,
+                    photoUrls = normalizedPhotoUrls,
+                    latitude = latitude,
+                    longitude = longitude,
+                    dateTime = occurrenceDateTime,
+                    createdBy = provider,
+                )
+            )
+        }
+
+        return ResponseEntity.ok(createdActivities)
+    }
+
     @PutMapping("/activities/{id}")
     fun updateActivity(
         @PathVariable id: Long,
@@ -192,6 +239,18 @@ data class UpdateActivityRequest(
 )
 
 private const val MAX_PHOTO_URLS = 10
+private const val MAX_RECURRING_OCCURRENCES = 60
+private const val RECURRENCE_HORIZON_MONTHS = 3L
+
+data class AddRecurringActivityRequest(
+    val name: String,
+    val description: String? = null,
+    val addressText: String? = null,
+    val category: String? = null,
+    val dateTime: LocalDateTime,
+    val photoUrls: String? = null,
+    val recurrenceIntervalDays: Int,
+)
 
 private fun parsePhotoUrls(raw: String?): List<String> {
     if (raw.isNullOrBlank()) return emptyList()
