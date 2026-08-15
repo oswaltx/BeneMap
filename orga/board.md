@@ -9,7 +9,6 @@ kanban-plugin: board
 
 - [ ] Research: Existing volunteer map solutions
 - [ ] Research: Calendar sync implementation (iCal/Google API)
-- [ ] View for multiple volunteer activies in one place
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] Autokategorisierung von Events
 ## Doing
@@ -26,6 +25,7 @@ kanban-plugin: board
 - [x] Edits von Volunteer Aktivitäten (inkl. Löschen) — Anbieter können eigene Aktivitäten bearbeiten/löschen, in Kartenpanel und Liste
 - [x] Fotos für Aktivitäten (Galerie) + Anbieter-Profilbild/Website — nur URL-Eingabe, kein Datei-Upload; neue "Mein Profil"-Seite
 - [x] Hover-Übersicht auf der Karte — Tooltip mit Name, Kategorie, Datum, Bewertung beim Überfahren eines Punkts
+- [x] Mehrere Aktivitäten an einem Ort — Cluster-Pin mit Anzahl statt sich überlappender Einzel-Pins; Hover/Klick zeigt Liste, Klick auf Zeile öffnet Detailansicht
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
