@@ -23,6 +23,12 @@
             return;
         }
 
+        if (isRecurring && (!recurrenceCount || recurrenceCount < 1)) {
+            statusMessage = "Bitte eine Zahl ab 1 für die Wiederholung angeben.";
+            statusIsWarning = true;
+            return;
+        }
+
         submitting = true;
         statusMessage = null;
 
