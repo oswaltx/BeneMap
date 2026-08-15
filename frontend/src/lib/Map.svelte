@@ -158,7 +158,12 @@
                             </Tooltip>
                         </CircleMarker>
                     {:else}
-                        <ClusterMarker lat={group.lat} lng={group.lng} members={group.members} />
+                        <ClusterMarker
+                            lat={group.lat}
+                            lng={group.lng}
+                            members={group.members}
+                            on:select={handleSelect}
+                        />
                     {/if}
                 {/each}
             </Map>
