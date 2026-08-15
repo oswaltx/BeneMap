@@ -8,6 +8,9 @@
     let category = "";
     let dateTime = "";
     let photoUrlsText = "";
+    let isRecurring = false;
+    let recurrenceCount = 1;
+    let recurrenceUnit: "days" | "weeks" = "weeks";
 
     let submitting = false;
     let statusMessage: string | null = null;
@@ -23,19 +26,31 @@
         submitting = true;
         statusMessage = null;
 
+        const baseBody = {
+            name,
+            description: description || null,
+            addressText: addressText || null,
+            category: category || null,
+            dateTime: dateTime ? dateTime + ":00" : undefined,
+            photoUrls: photoUrlsText.trim() || undefined,
+        };
+
+        const endpoint = isRecurring
+            ? "http://localhost:8080/add-recurring"
+            : "http://localhost:8080/add";
+        const body = isRecurring
+            ? {
+                  ...baseBody,
+                  recurrenceIntervalDays: recurrenceUnit === "weeks" ? recurrenceCount * 7 : recurrenceCount,
+              }
+            : baseBody;
+
         try {
-            const res = await fetchWithSessionCheck("http://localhost:8080/add", {
+            const res = await fetchWithSessionCheck(endpoint, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name,
-                    description: description || null,
-                    addressText: addressText || null,
-                    category: category || null,
-                    dateTime: dateTime ? dateTime + ":00" : undefined,
-                    photoUrls: photoUrlsText.trim() || undefined,
-                }),
+                body: JSON.stringify(body),
             });
 
             if (!res.ok) {
@@ -45,7 +60,18 @@
             }
 
             const saved = await res.json();
-            if (saved.latitude == null || saved.longitude == null) {
+
+            if (isRecurring) {
+                const activities: { latitude: number | null; longitude: number | null }[] = saved;
+                const missingCoords = activities.some((a) => a.latitude == null || a.longitude == null);
+                if (missingCoords) {
+                    statusMessage = `${activities.length} Termine wurden gespeichert — die Adresse konnte aber nicht gefunden werden, sie erscheinen noch nicht auf der Karte.`;
+                    statusIsWarning = true;
+                } else {
+                    statusMessage = `${activities.length} Termine wurden angelegt.`;
+                    statusIsWarning = false;
+                }
+            } else if (saved.latitude == null || saved.longitude == null) {
                 statusMessage = "Gespeichert — die Adresse konnte aber nicht gefunden werden, der Eintrag erscheint noch nicht auf der Karte.";
                 statusIsWarning = true;
             } else {
@@ -59,6 +85,9 @@
             category = "";
             dateTime = "";
             photoUrlsText = "";
+            isRecurring = false;
+            recurrenceCount = 1;
+            recurrenceUnit = "weeks";
         } catch (e) {
             statusMessage = "Server nicht erreichbar. Bitte versuche es später erneut.";
             statusIsWarning = true;
@@ -111,6 +140,27 @@
                 <textarea bind:value={photoUrlsText} rows="3" placeholder={"https://...\nhttps://..."}></textarea>
             </label>
 
+            <label class="checkbox-label">
+                <input type="checkbox" bind:checked={isRecurring} />
+                Wiederholt sich
+            </label>
+
+            {#if isRecurring}
+                <div class="recurrence-fields">
+                    <label>
+                        Alle
+                        <input type="number" min="1" bind:value={recurrenceCount} />
+                    </label>
+                    <label>
+                        Einheit
+                        <select bind:value={recurrenceUnit}>
+                            <option value="days">Tage</option>
+                            <option value="weeks">Wochen</option>
+                        </select>
+                    </label>
+                </div>
+            {/if}
+
             <button type="submit" disabled={submitting}>
                 {submitting ? "Speichert…" : "Aktivität hinzufügen"}
             </button>
@@ -150,6 +200,21 @@
         gap: 4px;
         font-size: 0.9rem;
         color: var(--color-text);
+    }
+
+    .checkbox-label {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .recurrence-fields {
+        display: flex;
+        gap: 12px;
+    }
+
+    .recurrence-fields label {
+        flex: 1;
     }
 
     input,
