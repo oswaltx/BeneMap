@@ -29,6 +29,12 @@
             return;
         }
 
+        if (isRecurring && !dateTime) {
+            statusMessage = "Für eine Wiederholung wird ein Startdatum benötigt.";
+            statusIsWarning = true;
+            return;
+        }
+
         submitting = true;
         statusMessage = null;
 
@@ -41,6 +47,7 @@
             photoUrls: photoUrlsText.trim() || undefined,
         };
 
+        const wasRecurring = isRecurring;
         const endpoint = isRecurring
             ? "http://localhost:8080/add-recurring"
             : "http://localhost:8080/add";
@@ -67,7 +74,7 @@
 
             const saved = await res.json();
 
-            if (isRecurring) {
+            if (wasRecurring) {
                 const activities: { latitude: number | null; longitude: number | null }[] = saved;
                 const missingCoords = activities.some((a) => a.latitude == null || a.longitude == null);
                 if (missingCoords) {
