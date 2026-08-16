@@ -52,7 +52,11 @@ class VolunteerActivity constructor(
     // Timestamp of when this record was inserted into our database
     var createdAt: Instant = Instant.now(),
 
-    var dateTime: LocalDateTime = LocalDateTime.now(),
+    // Nullable, da nicht jede Quelle einen Termin liefert (z. B. gescrapte
+    // Städtische Angebote der Kölner Engagementdatenbank, die keine
+    // Termine führt). Der Default bleibt "jetzt" für alle bestehenden
+    // Aufrufer, die dateTime nicht explizit setzen.
+    var dateTime: LocalDateTime? = LocalDateTime.now(),
 
     // Anbieter, der diese Aktivität angelegt hat — null für bestehende gescrapte/geseedete Einträge.
     // @JsonIgnore verhindert, dass das verschachtelte User-Objekt (inkl. Passwort-Hash) über die

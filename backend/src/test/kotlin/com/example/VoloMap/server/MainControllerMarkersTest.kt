@@ -236,4 +236,57 @@ class MainControllerMarkersTest {
         assertNull(result[0].providerPhotoUrl)
         assertNull(result[0].providerWebsiteUrl)
     }
+
+    @Test
+    fun `includes sourceUrl when the activity was scraped`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val scraped = activity(
+            name = "Gescraptes Angebot",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        ).also { it.sourceUrl = "https://engagementdatenbank.stadt-koeln.de/testprojekt" }
+        whenever(repository.findAll()).thenReturn(listOf(scraped))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertEquals("https://engagementdatenbank.stadt-koeln.de/testprojekt", result[0].sourceUrl)
+    }
+
+    @Test
+    fun `sourceUrl is null for an activity added through the normal form`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val ownActivity = activity(
+            name = "Eigene Aktivität",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        )
+        whenever(repository.findAll()).thenReturn(listOf(ownActivity))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertNull(result[0].sourceUrl)
+    }
+
+    @Test
+    fun `dateTime is null when an activity has no scheduled appointment`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val undated = VolunteerActivity(
+            name = "Ohne Termin",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            latitude = 50.0,
+            longitude = 6.0,
+            dateTime = null
+        )
+        whenever(repository.findAll()).thenReturn(listOf(undated))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertNull(result[0].dateTime)
+    }
 }

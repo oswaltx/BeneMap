@@ -74,6 +74,13 @@ class Scraper(
         }
 
         val document = getDocument(url)
+        val activity = buildActivityFromDocument(document, url)
+
+        repository.save(activity)
+        println("Saved: ${activity.name} (lat=${activity.latitude}, lng=${activity.longitude})")
+    }
+
+    fun buildActivityFromDocument(document: Document, url: String): VolunteerActivity {
         val fields = document.select("div.field")
         val data = mutableMapOf<String, String>()
 
@@ -99,8 +106,9 @@ class Scraper(
         }
         println("Gefundene Felder: ${data.keys}")
 
-
-        val activity = VolunteerActivity(
+        // dateTime bleibt null: die Kölner Engagementdatenbank führt für
+        // diese Angebote keine Termine, ein "jetzt"-Zeitstempel wäre irreführend.
+        return VolunteerActivity(
             name = data["Projektname"] ?: "Unbekannt",
             description = data["Beschreibung"],
             addressText = data["Adresse der Vermittlungsstelle"],
@@ -108,11 +116,8 @@ class Scraper(
             category = data["Tätigkeitsbereich"] ?: listOf("Unbekannt", "Umwelthilfe", "Ehre")[ Random.nextInt(0, 2)],
             latitude = coords?.first,
             longitude = coords?.second,
-            dateTime = LocalDateTime.now()
+            dateTime = null
         )
-
-        repository.save(activity)
-        println("Saved: ${activity.name} (lat=${coords?.first}, lng=${coords?.second})")
     }
     fun fakeScraper(limit: Int) {
             val names = listOf(
