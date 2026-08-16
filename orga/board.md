@@ -26,6 +26,7 @@ kanban-plugin: board
 - [x] Fotos für Aktivitäten (Galerie) + Anbieter-Profilbild/Website — nur URL-Eingabe, kein Datei-Upload; neue "Mein Profil"-Seite
 - [x] Hover-Übersicht auf der Karte — Tooltip mit Name, Kategorie, Datum, Bewertung beim Überfahren eines Punkts
 - [x] Mehrere Aktivitäten an einem Ort — Cluster-Pin mit Anzahl statt sich überlappender Einzel-Pins; Hover/Klick zeigt Liste, Klick auf Zeile öffnet Detailansicht
+- [x] Wiederkehrende Events — Checkbox "Wiederholt sich" beim Anlegen (alle N Tage/Wochen), erzeugt automatisch unabhängige Termine bis zu 3 Monate im Voraus (max. 60)
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
