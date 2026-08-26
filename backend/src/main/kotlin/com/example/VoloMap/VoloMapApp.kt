@@ -16,9 +16,9 @@ fun main(args: Array<String>) {
         val scraper = context.getBean(Scraper::class.java)
         scraper.fakeScraper(30)
     }
-    /*
-    scraper.scrapeWebsite(
-        "https://engagementdatenbank.stadt-koeln.de/ergebnisse?fulltext=&id=&area_of_activity=All&target_group=All&postal_code=&page=1",
-        "page", 20
-    )*/
+
+    if (args.contains("--scrape")) {
+        val scraper = context.getBean(Scraper::class.java)
+        scraper.scrapeAllCategories(20)
+    }
 }
