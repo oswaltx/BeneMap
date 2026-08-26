@@ -13,7 +13,7 @@
         category: string;
         description: string;
         photoUrls: string[];
-        dateTime: string;
+        dateTime: string | null;
         lat: number;
         lng: number;
         activityRating: number | null;
@@ -75,7 +75,9 @@
                 {/if}
             </div>
             <p class="address">{marker.address}</p>
-            <p class="date">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
+            {#if marker.dateTime}
+                <p class="date">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
+            {/if}
             <div class="ratings">
                 <button class="rating-badge" on:click|stopPropagation={() => openActivityRating(marker)}>
                     {marker.activityRating != null ? `★ ${marker.activityRating.toFixed(1)} (${marker.activityRatingCount})` : "Noch keine Bewertung"}

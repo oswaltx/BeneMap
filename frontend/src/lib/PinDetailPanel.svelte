@@ -13,7 +13,8 @@
         category: string;
         description: string;
         photoUrls: string[];
-        dateTime: string;
+        dateTime: string | null;
+        sourceUrl: string | null;
         activityRating: number | null;
         activityRatingCount: number;
         providerId: number | null;
@@ -89,11 +90,19 @@
     {/if}
 
     <h3>{marker.name}</h3>
-    <p class="meta">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
+    {#if marker.dateTime}
+        <p class="meta">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
+    {/if}
     <p class="meta">{marker.address}</p>
 
     {#if marker.description}
         <p class="description">{marker.description}</p>
+    {/if}
+
+    {#if marker.sourceUrl}
+        <a class="source-link" href={marker.sourceUrl} target="_blank" rel="noopener noreferrer">
+            Mehr Infos auf der Webseite der Stadt Köln
+        </a>
     {/if}
 
     <button class="rating-badge" on:click={openActivityRating}>
@@ -206,6 +215,12 @@
         font-size: 0.9rem;
         color: var(--color-text);
         line-height: 1.5;
+    }
+
+    .source-link {
+        font-size: 0.85rem;
+        color: var(--color-primary);
+        align-self: flex-start;
     }
 
     .gallery {

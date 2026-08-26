@@ -8,7 +8,7 @@
         description: string;
         address: string;
         category: string;
-        dateTime: string;
+        dateTime: string | null;
         photoUrls: string[];
     };
 
