@@ -138,7 +138,13 @@ class Scraper(
 
         // Einsatzort (tatsächlicher Ort der Tätigkeit) ist genauer als die
         // Adresse der Vermittlungsstelle (Vereinsbüro) und wird bevorzugt.
-        val address = data["Einsatzort"] ?: data["Adresse der Vermittlungsstelle"]
+        //
+        // Einsatzort nur bevorzugen, wenn es wie eine echte Adresse aussieht (enthält eine
+        // Ziffer, z. B. Postleitzahl oder Hausnummer) — sonst steht dort teils nur "Deutschland"
+        // (ganz ohne Ort), was schlechter geokodiert als die Vermittlungsstelle-Adresse.
+        val einsatzort = data["Einsatzort"]
+        val vermittlungsstelleAdresse = data["Adresse der Vermittlungsstelle"]
+        val address = if (einsatzort != null && einsatzort.any { it.isDigit() }) einsatzort else vermittlungsstelleAdresse
         val coords = address?.let { geocodingService.geocode(it) }
         println("Gefundene Felder: ${data.keys}")
 

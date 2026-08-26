@@ -79,6 +79,37 @@ class ScraperTest {
     }
 
     @Test
+    fun `falls back to Adresse der Vermittlungsstelle when Einsatzort is just the bare country name`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        whenever(geocodingService.geocode("Clemensstraße 7, 50676 Köln")).thenReturn(Pair(50.9, 6.95))
+
+        val html = """
+            <html><body>
+                <div class="field">
+                    <div class="field__label">Adresse der Vermittlungsstelle</div>
+                    <div class="field__item">Clemensstraße 7, 50676 Köln</div>
+                </div>
+                <div class="field">
+                    <div class="field__label">Einsatzort</div>
+                    <div class="field__item">Deutschland</div>
+                </div>
+            </body></html>
+        """.trimIndent()
+        val document = Jsoup.parse(html)
+
+        val scraper = Scraper(repository, geocodingService)
+        val activity = scraper.buildActivityFromDocument(
+            document, "https://engagementdatenbank.stadt-koeln.de/testprojekt", "Testprojekt", "Bildung"
+        )
+
+        assertEquals("Clemensstraße 7, 50676 Köln", activity.addressText)
+        assertEquals(50.9, activity.latitude)
+        assertEquals(6.95, activity.longitude)
+        verify(geocodingService, never()).geocode("Deutschland")
+    }
+
+    @Test
     fun `falls back to Adresse der Vermittlungsstelle when Einsatzort is missing`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()
