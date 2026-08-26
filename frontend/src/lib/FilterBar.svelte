@@ -10,12 +10,14 @@
             timeFrom: number | null;
             timeTo: number | null;
         };
+        toggleCityOffers: boolean;
     }>();
 
     let selectedCategory: string | null = null;
     let selectedDate: string | null = null;
     let selectedWeekday: number | null = null;
     let selectedTimeSlot: { label: string; from: number; to: number } | null = null;
+    let showCityOffers = false;
 
     const weekdays = [
         { label: "Mo", day: 1 },
@@ -65,12 +67,14 @@
         selectedDate = null;
         selectedWeekday = null;
         selectedTimeSlot = null;
+        showCityOffers = false;
+        dispatch("toggleCityOffers", false);
         apply();
     }
 
     let expanded = false;
 
-    $: activeCount = [selectedCategory, selectedWeekday, selectedTimeSlot].filter(
+    $: activeCount = [selectedCategory, selectedWeekday, selectedTimeSlot, showCityOffers ? true : null].filter(
         (v) => v !== null
     ).length;
 </script>
@@ -132,6 +136,17 @@
                         </button>
                     {/each}
                 </div>
+            </div>
+
+            <div class="group">
+                <label class="checkbox-row">
+                    <input
+                        type="checkbox"
+                        bind:checked={showCityOffers}
+                        on:change={() => dispatch("toggleCityOffers", showCityOffers)}
+                    />
+                    Städtische Angebote (Köln) anzeigen
+                </label>
             </div>
 
             <button class="reset" on:click={reset}>Filter zurücksetzen</button>
@@ -225,6 +240,15 @@
         font-size: 0.75rem;
         font-weight: 600;
         color: var(--color-text-muted);
+    }
+
+    .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: var(--color-text);
+        cursor: pointer;
     }
 
     .pill-row {

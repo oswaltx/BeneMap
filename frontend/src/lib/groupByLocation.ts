@@ -5,7 +5,7 @@ export interface LocationGroup<T> {
     members: T[];
 }
 
-export function groupByLocation<T extends { lat: number; lng: number; dateTime: string }>(
+export function groupByLocation<T extends { lat: number; lng: number; dateTime: string | null }>(
     markers: T[]
 ): LocationGroup<T>[] {
     const groups = new Map<string, LocationGroup<T>>();
@@ -21,7 +21,11 @@ export function groupByLocation<T extends { lat: number; lng: number; dateTime: 
     }
 
     for (const group of groups.values()) {
-        group.members.sort((a, b) => a.dateTime.localeCompare(b.dateTime));
+        group.members.sort((a, b) => {
+            if (!a.dateTime) return 1;
+            if (!b.dateTime) return -1;
+            return a.dateTime.localeCompare(b.dateTime);
+        });
     }
 
     return [...groups.values()];

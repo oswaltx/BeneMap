@@ -11,7 +11,9 @@
     import ClusterMarker from "./ClusterMarker.svelte";
 
     let markers: any[] = [];
-    $: markerGroups = groupByLocation(markers);
+    let showCityOffers = false;
+    $: visibleMarkers = markers.filter((m) => showCityOffers || !m.sourceUrl);
+    $: markerGroups = groupByLocation(visibleMarkers);
     let categories: string[] = [];
     let errorMessage: string | null = null;
     let sheetExpanded = false;
@@ -102,6 +104,10 @@
         selectedMarkerId = event.detail.id;
     }
 
+    function handleToggleCityOffers(event: CustomEvent<boolean>) {
+        showCityOffers = event.detail;
+    }
+
     const attribution = '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 </script>
 
@@ -117,7 +123,7 @@
 
         <div class="search-panel" class:panel-open={panelOpen}>
             <SearchBar on:search={handleSearch} />
-            <FilterBar {categories} on:filter={handleFilter} />
+            <FilterBar {categories} on:filter={handleFilter} on:toggleCityOffers={handleToggleCityOffers} />
             {#if errorMessage}<p class="error">{errorMessage}</p>{/if}
         </div>
 
@@ -136,7 +142,9 @@
                         {@const marker = group.members[0]}
                         <CircleMarker
                             latLng={[marker.lat, marker.lng]}
-                            options={{ radius: 10, bubblingMouseEvents: false }}
+                            options={marker.sourceUrl
+                                ? { radius: 10, bubblingMouseEvents: false, color: "#F4C542", dashArray: "4, 4" }
+                                : { radius: 10, bubblingMouseEvents: false }}
                             onclick={() => (selectedMarkerId = marker.id)}
                         >
                             <Tooltip options={{ direction: "top", offset: [0, -10] }}>
@@ -150,7 +158,9 @@
                                             >{marker.category}</span>
                                         {/if}
                                     </div>
-                                    <p class="tooltip-date">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
+                                    {#if marker.dateTime}
+                                        <p class="tooltip-date">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
+                                    {/if}
                                     <p class="tooltip-rating">
                                         {marker.activityRating != null ? `★ ${marker.activityRating.toFixed(1)} (${marker.activityRatingCount})` : "Noch keine Bewertung"}
                                     </p>
@@ -172,13 +182,13 @@
         <div class="bottom-sheet" class:expanded={sheetExpanded} class:panel-open={panelOpen}>
             <div class="sheet-header">
                 <button class="sheet-handle" on:click={() => sheetExpanded = !sheetExpanded}>
-                    {markers.length} Aktivitäten {sheetExpanded ? "▼" : "▲"}
+                    {visibleMarkers.length} Aktivitäten {sheetExpanded ? "▼" : "▲"}
                 </button>
                 <span class="attribution">© CARTO © OpenStreetMap</span>
             </div>
             {#if sheetExpanded}
                 <div class="sheet-content">
-                    <VolunteerList {markers} on:refresh={fetchMarkers} on:select={handleSelect} />
+                    <VolunteerList markers={visibleMarkers} on:refresh={fetchMarkers} on:select={handleSelect} />
                 </div>
             {/if}
         </div>

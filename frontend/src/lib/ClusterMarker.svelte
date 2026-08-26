@@ -10,7 +10,7 @@
         name: string;
         category: string;
         address: string;
-        dateTime: string;
+        dateTime: string | null;
     }[] = [];
 
     const dispatch = createEventDispatcher<{ select: { id: number } }>();
@@ -87,7 +87,9 @@
                 <button type="button" class="cluster-row" on:click={() => selectMember(member.id)}>
                     <span class="cluster-row-text">
                         <span class="cluster-row-name">{member.name}</span>
-                        <span class="cluster-row-date">{new Date(member.dateTime).toLocaleString("de-DE")}</span>
+                        {#if member.dateTime}
+                            <span class="cluster-row-date">{new Date(member.dateTime).toLocaleString("de-DE")}</span>
+                        {/if}
                     </span>
                     {#if member.category}
                         <span
