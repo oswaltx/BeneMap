@@ -25,6 +25,12 @@ private val ENGAGEMENT_CATEGORIES = mapOf(
     382 to "Verkauf",
 )
 
+// Harte Obergrenze als Absicherung gegen Endlos-Pagination (z.B. falls die
+// "keine Ergebnisse mehr"-Erkennung in einem Randfall versagt). 50 Seiten x
+// ~20 Treffer/Seite = 1000 mögliche Ergebnisse pro Kategorie, weit mehr als
+// jedes realistische limitPerCategory je bräuchte.
+private const val MAX_PAGES_PER_CATEGORY = 50
+
 @Component
 class Scraper(
     private val repository: VolunteerActivityRepository,
@@ -43,10 +49,11 @@ class Scraper(
     fun scrapeWebsite(url: String, pageString: String?, category: String, limit: Int = Int.MAX_VALUE) {
         var count = 0
 
-        fun scrapeWithLimit(document: Document) {
+        fun scrapeWithLimit(document: Document): Int {
             val titleLinks = document.select("div.views-field-title a")
+            var foundOnPage = 0
             for (link in titleLinks) {
-                if (count >= limit) return
+                if (count >= limit) return foundOnPage
                 val name = link.text()
                 val href = link.attr("href").removePrefix("/index.php")
                 val fullUrl = "https://engagementdatenbank.stadt-koeln.de$href"
@@ -54,19 +61,25 @@ class Scraper(
                 println("Scraping: $fullUrl")
                 scrapeEhrenamtDetails(name, fullUrl, category)
                 count++
+                foundOnPage++
             }
+            return foundOnPage
         }
 
         scrapeWithLimit(getDocument(url))
 
         if (pageString == null || count >= limit) return
 
-        var page = 2
-        while (count < limit) {
-            val newUrl = url.replace("page=1", "page=$page")
+        var page = 1
+        while (count < limit && page <= MAX_PAGES_PER_CATEGORY) {
+            val newUrl = url.replace("page=0", "page=$page")
             try {
                 println("Scraping page $page")
-                scrapeWithLimit(getDocument(newUrl))
+                val found = scrapeWithLimit(getDocument(newUrl))
+                if (found == 0) {
+                    println("No more results (empty page)")
+                    break
+                }
                 page++
             } catch (e: Exception) {
                 println("No more pages")
@@ -77,7 +90,7 @@ class Scraper(
 
     fun scrapeAllCategories(limitPerCategory: Int) {
         for ((id, category) in ENGAGEMENT_CATEGORIES) {
-            val url = "https://engagementdatenbank.stadt-koeln.de/ergebnisse?fulltext=&id=&area_of_activity=$id&target_group=All&postal_code=&page=1"
+            val url = "https://engagementdatenbank.stadt-koeln.de/ergebnisse?fulltext=&id=&area_of_activity=$id&target_group=All&postal_code=&page=0"
             println("Scraping category: $category ($id)")
             try {
                 scrapeWebsite(url, "page", category, limitPerCategory)

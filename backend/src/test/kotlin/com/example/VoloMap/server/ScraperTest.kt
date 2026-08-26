@@ -1,5 +1,7 @@
 package com.example.VoloMap.server
 
+import com.sun.net.httpserver.HttpExchange
+import com.sun.net.httpserver.HttpServer
 import org.jsoup.Jsoup
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -9,6 +11,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import java.net.InetSocketAddress
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 class ScraperTest {
 
@@ -96,5 +101,76 @@ class ScraperTest {
 
         assertEquals("Domkloster 4, Köln", activity.addressText)
         assertEquals(50.9413, activity.latitude)
+    }
+
+    @Test
+    fun `pagination stops once a page returns zero results instead of running away`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        // Detail pages are never actually fetched here: pretend every listing we
+        // encounter is already known, so scrapeEhrenamtDetails short-circuits before
+        // it would try a real network request against the (hardcoded) live domain.
+        whenever(repository.existsBySourceUrl(any())).thenReturn(true)
+
+        val twoEntriesHtml = """
+            <html><body>
+                <div class="views-row">
+                    <div class="views-field-title"><a href="/index.php/angebot-a">Angebot A</a></div>
+                </div>
+                <div class="views-row">
+                    <div class="views-field-title"><a href="/index.php/angebot-b">Angebot B</a></div>
+                </div>
+            </body></html>
+        """.trimIndent()
+
+        val noResultsHtml = """
+            <html><body>
+                <div class="messages">Es wurden keine Ehrenamtsangebote gefunden.</div>
+            </body></html>
+        """.trimIndent()
+
+        // Records how many times each "page=N" value was requested, so we can prove
+        // the pagination loop stopped right after the first empty page instead of
+        // continuing to fetch page=2, page=3, ... forever (the real-world bug fetched
+        // ~18,700 pages against the live Köln site before this fix).
+        val requestsByPage = ConcurrentHashMap<String, AtomicInteger>()
+
+        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+        server.createContext("/ergebnisse") { exchange: HttpExchange ->
+            try {
+                val query = exchange.requestURI.query ?: ""
+                val page = query.substringAfter("page=", "0").substringBefore("&")
+                requestsByPage.computeIfAbsent(page) { AtomicInteger(0) }.incrementAndGet()
+
+                val body = if (page == "1") noResultsHtml else twoEntriesHtml
+                val bytes = body.toByteArray(Charsets.UTF_8)
+                exchange.responseHeaders.add("Content-Type", "text/html; charset=utf-8")
+                exchange.sendResponseHeaders(200, bytes.size.toLong())
+                exchange.responseBody.write(bytes)
+            } finally {
+                exchange.close()
+            }
+        }
+        server.start()
+
+        try {
+            val port = server.address.port
+            // page=0 is the true first page on the real site; the fixed pagination
+            // loop replaces this "page=0" marker with page=1, page=2, ... in turn.
+            val startUrl = "http://127.0.0.1:$port/ergebnisse?fulltext=&page=0"
+
+            val scraper = Scraper(repository, geocodingService)
+            scraper.scrapeWebsite(startUrl, "page", "TestCategory", limit = 100)
+
+            assertEquals(1, requestsByPage["0"]?.get(), "first page should be fetched exactly once")
+            assertEquals(
+                1, requestsByPage["1"]?.get(),
+                "the empty page should be fetched exactly once, to discover there are no more results"
+            )
+            assertNull(requestsByPage["2"], "pagination must stop after the empty page, not continue to page=2")
+            assertNull(requestsByPage["3"], "pagination must not run away past the empty page")
+        } finally {
+            server.stop(0)
+        }
     }
 }
