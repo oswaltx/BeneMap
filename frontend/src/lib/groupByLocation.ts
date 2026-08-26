@@ -22,7 +22,7 @@ export function groupByLocation<T extends { lat: number; lng: number; dateTime: 
 
     for (const group of groups.values()) {
         group.members.sort((a, b) => {
-            if (!a.dateTime) return 1;
+            if (!a.dateTime) return b.dateTime ? 1 : 0;
             if (!b.dateTime) return -1;
             return a.dateTime.localeCompare(b.dateTime);
         });

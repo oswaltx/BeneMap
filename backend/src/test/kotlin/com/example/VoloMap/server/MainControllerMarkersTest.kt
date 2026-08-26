@@ -289,4 +289,46 @@ class MainControllerMarkersTest {
 
         assertNull(result[0].dateTime)
     }
+
+    @Test
+    fun `undated activity is excluded when a specific date filter is set`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val undated = VolunteerActivity(
+            name = "Ohne Termin",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            latitude = 50.0,
+            longitude = 6.0,
+            dateTime = null
+        )
+        whenever(repository.findAll()).thenReturn(listOf(undated))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(
+            category = null, date = "2026-08-10", timeFrom = null, timeTo = null, search = null
+        )
+
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun `undated activity is excluded when a time range filter is set`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val undated = VolunteerActivity(
+            name = "Ohne Termin",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            latitude = 50.0,
+            longitude = 6.0,
+            dateTime = null
+        )
+        whenever(repository.findAll()).thenReturn(listOf(undated))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(
+            category = null, date = null, timeFrom = 8, timeTo = 12, search = null
+        )
+
+        assertEquals(0, result.size)
+    }
 }

@@ -113,4 +113,25 @@ class MainControllerAddActivityTest {
 
         assertNull(result.body?.photoUrls)
     }
+
+    @Test
+    fun `clears a client-supplied sourceUrl`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val activity = VolunteerActivity(
+            name = "Test",
+            latitude = 1.0,
+            longitude = 2.0,
+            sourceUrl = "javascript:alert(1)"
+        )
+
+        val result = controller.addActivity(activity, authenticationFor(provider.email))
+
+        assertNull(result.body?.sourceUrl)
+    }
 }

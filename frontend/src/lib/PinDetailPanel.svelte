@@ -99,7 +99,7 @@
         <p class="description">{marker.description}</p>
     {/if}
 
-    {#if marker.sourceUrl}
+    {#if marker.sourceUrl && (marker.sourceUrl.startsWith("http://") || marker.sourceUrl.startsWith("https://"))}
         <a class="source-link" href={marker.sourceUrl} target="_blank" rel="noopener noreferrer">
             Mehr Infos auf der Webseite der Stadt Köln
         </a>

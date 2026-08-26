@@ -92,6 +92,7 @@ class MainController(
         authentication: Authentication
     ): ResponseEntity<VolunteerActivity> {
         activity.id = 0
+        activity.sourceUrl = null
         activity.createdBy = userRepository.findByEmail(authentication.name)
         activity.photoUrls = normalizePhotoUrls(activity.photoUrls)
 

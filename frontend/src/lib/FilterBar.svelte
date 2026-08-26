@@ -74,9 +74,7 @@
 
     let expanded = false;
 
-    $: activeCount = [selectedCategory, selectedWeekday, selectedTimeSlot, showCityOffers ? true : null].filter(
-        (v) => v !== null
-    ).length;
+    $: activeCount = [selectedCategory, selectedWeekday, selectedTimeSlot].filter((v) => v !== null).length + (showCityOffers ? 1 : 0);
 </script>
 
 <div class="filter">
@@ -148,6 +146,11 @@
                     Städtische Angebote (Köln) anzeigen
                 </label>
             </div>
+            {#if showCityOffers && (selectedDate || selectedTimeSlot)}
+                <p class="hint">
+                    Städtische Angebote haben keinen Termin und werden bei aktivem Datums-/Zeitfilter nicht angezeigt.
+                </p>
+            {/if}
 
             <button class="reset" on:click={reset}>Filter zurücksetzen</button>
         </div>
@@ -249,6 +252,12 @@
         font-size: 0.85rem;
         color: var(--color-text);
         cursor: pointer;
+    }
+
+    .hint {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+        margin: 0;
     }
 
     .pill-row {

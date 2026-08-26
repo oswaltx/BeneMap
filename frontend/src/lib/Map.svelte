@@ -19,7 +19,7 @@
     let sheetExpanded = false;
 
     let selectedMarkerId: number | null = null;
-    $: selectedMarker = markers.find((m) => m.id === selectedMarkerId) ?? null;
+    $: selectedMarker = visibleMarkers.find((m) => m.id === selectedMarkerId) ?? null;
 
     let isDesktop = typeof window !== "undefined" ? window.innerWidth >= 1024 : false;
     function handleResize() {

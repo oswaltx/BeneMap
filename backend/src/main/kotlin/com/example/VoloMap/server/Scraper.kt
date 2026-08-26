@@ -158,7 +158,6 @@ class Scraper(
                     name = names.random(),
                     description = descriptions.random(),
                     addressText = addresses.random(),
-                    sourceUrl = "https://wawagogo.com/${Random.nextInt(100000, 999999)}",
                     category = categories.random(),
                     latitude = cologneCenterLat + Random.nextDouble(-maxOffset, maxOffset),
                     longitude = cologneCenterLng + Random.nextDouble(-maxOffset, maxOffset),
