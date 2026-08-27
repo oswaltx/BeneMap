@@ -177,7 +177,11 @@ class Scraper(
             category = category,
             latitude = coords?.first,
             longitude = coords?.second,
-            dateTime = null
+            dateTime = null,
+            sourceContactName = data["Name der Vermittlungsstelle"],
+            sourceContactWebsite = data["Homepage der Vermittlungsstelle"],
+            sourceContactEmail = data["E-Mail der Vermittlungsstelle"],
+            sourceContactPhone = data["Telefonnummer der Vermittlungsstelle"],
         )
     }
 

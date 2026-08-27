@@ -164,6 +164,80 @@ class ScraperTest {
     }
 
     @Test
+    fun `extracts Vermittlungsstelle contact fields from the detail page`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        whenever(geocodingService.geocode(any())).thenReturn(Pair(50.9, 6.95))
+
+        val html = """
+            <html><body>
+                <div class="field">
+                    <div class="field__label">Adresse der Vermittlungsstelle</div>
+                    <div class="field__item">Domkloster 4, Köln</div>
+                </div>
+                <div class="field">
+                    <div class="field__label">Name der Vermittlungsstelle</div>
+                    <div class="field__item">Ceno &amp; Die Paten e.V.</div>
+                </div>
+                <div class="field">
+                    <div class="field__label">Homepage der Vermittlungsstelle</div>
+                    <div class="field__item"><a href="https://www.ceno-koeln.de/">https://www.ceno-koeln.de/</a></div>
+                </div>
+                <div class="field">
+                    <div class="field__label">E-Mail der Vermittlungsstelle</div>
+                    <div class="field__item"><a href="mailto:est@ceno-koeln.de">est@ceno-koeln.de</a></div>
+                </div>
+                <div class="field">
+                    <div class="field__label">Telefonnummer der Vermittlungsstelle</div>
+                    <div class="field__item">0221 1234567</div>
+                </div>
+            </body></html>
+        """.trimIndent()
+        val document = Jsoup.parse(html)
+
+        val scraper = Scraper(repository, geocodingService)
+        val activity = scraper.buildActivityFromDocument(
+            document, "https://engagementdatenbank.stadt-koeln.de/testprojekt", "Testprojekt", "Bildung"
+        )
+
+        assertEquals("Ceno & Die Paten e.V.", activity.sourceContactName)
+        assertEquals("https://www.ceno-koeln.de/", activity.sourceContactWebsite)
+        assertEquals("est@ceno-koeln.de", activity.sourceContactEmail)
+        assertEquals("0221 1234567", activity.sourceContactPhone)
+    }
+
+    @Test
+    fun `contact fields are individually null when the detail page omits them`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        whenever(geocodingService.geocode(any())).thenReturn(Pair(50.9, 6.95))
+
+        val html = """
+            <html><body>
+                <div class="field">
+                    <div class="field__label">Adresse der Vermittlungsstelle</div>
+                    <div class="field__item">Domkloster 4, Köln</div>
+                </div>
+                <div class="field">
+                    <div class="field__label">Name der Vermittlungsstelle</div>
+                    <div class="field__item">Ceno &amp; Die Paten e.V.</div>
+                </div>
+            </body></html>
+        """.trimIndent()
+        val document = Jsoup.parse(html)
+
+        val scraper = Scraper(repository, geocodingService)
+        val activity = scraper.buildActivityFromDocument(
+            document, "https://engagementdatenbank.stadt-koeln.de/testprojekt", "Testprojekt", "Bildung"
+        )
+
+        assertEquals("Ceno & Die Paten e.V.", activity.sourceContactName)
+        assertNull(activity.sourceContactWebsite)
+        assertNull(activity.sourceContactEmail)
+        assertNull(activity.sourceContactPhone)
+    }
+
+    @Test
     fun `pagination stops once a page returns zero results instead of running away`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()
