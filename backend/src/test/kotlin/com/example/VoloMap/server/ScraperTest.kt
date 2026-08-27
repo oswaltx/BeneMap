@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.net.InetSocketAddress
@@ -186,11 +187,16 @@ class ScraperTest {
 
         try {
             val port = server.address.port
+            val serverBaseUrl = "http://127.0.0.1:$port"
             // page=0 is the true first page on the real site; the fixed pagination
             // loop replaces this "page=0" marker with page=1, page=2, ... in turn.
-            val startUrl = "http://127.0.0.1:$port/ergebnisse?fulltext=&page=0"
+            val startUrl = "$serverBaseUrl/ergebnisse?fulltext=&page=0"
 
-            val scraper = Scraper(repository, geocodingService)
+            // baseUrl is pointed at this same local server (not the real, hardcoded
+            // engagementdatenbank.stadt-koeln.de) so this test's isolation from the
+            // live site is structural, rather than depending solely on the
+            // existsBySourceUrl mock above never being accidentally removed.
+            val scraper = Scraper(repository, geocodingService, baseUrl = serverBaseUrl)
             scraper.scrapeWebsite(startUrl, "page", "TestCategory", limit = 100)
 
             assertEquals(1, requestsByPage["0"]?.get(), "first page should be fetched exactly once")
@@ -200,6 +206,66 @@ class ScraperTest {
             )
             assertNull(requestsByPage["2"], "pagination must stop after the empty page, not continue to page=2")
             assertNull(requestsByPage["3"], "pagination must not run away past the empty page")
+        } finally {
+            server.stop(0)
+        }
+    }
+
+    @Test
+    fun `a failing detail page does not prevent other listings on the same page from being saved`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        // No listing is already known, so every one of them reaches a real (local) fetch.
+        whenever(repository.existsBySourceUrl(any())).thenReturn(false)
+
+        val listPageHtml = """
+            <html><body>
+                <div class="views-row">
+                    <div class="views-field-title"><a href="/index.php/angebot-a">Angebot A</a></div>
+                </div>
+                <div class="views-row">
+                    <div class="views-field-title"><a href="/index.php/angebot-fail">Angebot Fail</a></div>
+                </div>
+                <div class="views-row">
+                    <div class="views-field-title"><a href="/index.php/angebot-b">Angebot B</a></div>
+                </div>
+            </body></html>
+        """.trimIndent()
+
+        val detailPageHtml = "<html><body></body></html>"
+
+        fun HttpExchange.respondOk(body: String) {
+            val bytes = body.toByteArray(Charsets.UTF_8)
+            responseHeaders.add("Content-Type", "text/html; charset=utf-8")
+            sendResponseHeaders(200, bytes.size.toLong())
+            responseBody.write(bytes)
+            close()
+        }
+
+        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+        server.createContext("/ergebnisse") { exchange: HttpExchange -> exchange.respondOk(listPageHtml) }
+        server.createContext("/angebot-a") { exchange: HttpExchange -> exchange.respondOk(detailPageHtml) }
+        server.createContext("/angebot-b") { exchange: HttpExchange -> exchange.respondOk(detailPageHtml) }
+        server.createContext("/angebot-fail") { exchange: HttpExchange ->
+            // No response body for a 500: simulates a genuinely broken detail page.
+            exchange.sendResponseHeaders(500, -1)
+            exchange.close()
+        }
+        server.start()
+
+        try {
+            val port = server.address.port
+            val serverBaseUrl = "http://127.0.0.1:$port"
+            val startUrl = "$serverBaseUrl/ergebnisse?fulltext=&page=0"
+
+            val scraper = Scraper(repository, geocodingService, baseUrl = serverBaseUrl)
+            // pageString = null: this test targets the per-listing isolation on a single
+            // page (Finding 1), not the multi-page pagination loop covered separately above.
+            scraper.scrapeWebsite(startUrl, pageString = null, category = "TestCategory", limit = 100)
+
+            // Angebot A and Angebot B must both be saved even though Angebot Fail's
+            // detail-page fetch failed (500) in between them.
+            verify(repository, times(2)).save(any())
         } finally {
             server.stop(0)
         }
