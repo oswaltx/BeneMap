@@ -265,7 +265,7 @@ class ScraperTest {
 
             // Angebot A and Angebot B must both be saved even though Angebot Fail's
             // detail-page fetch failed (500) in between them.
-            verify(repository, times(2)).save(any())
+            verify(repository, times(2)).save(any<VolunteerActivity>())
         } finally {
             server.stop(0)
         }
