@@ -30,6 +30,7 @@ kanban-plugin: board
 - [x] Städtische Angebote (Köln) Toggle — blendet gescrapte, undatierte Angebote der Kölner Engagementdatenbank auf Karte/Liste ein/aus, gestrichelter Pin-Rand, Link zur Quelle statt Datum
 - [x] Scraper-Überarbeitung — echte Namen/Kategorien/Einsatzort statt "Unbekannt"/Zufall/Vermittlungsstelle-Adresse, wiederholbar per `--scrape`-Flag
 - [x] Vermittlungsstelle-Kontaktdaten — Name, Homepage, E-Mail, Telefonnummer der vermittelnden Organisation werden mitgescrapt und im Detail-Panel als eigener Block angezeigt
+- [x] Hover-Popup vereinheitlicht — Einzel-Pins nutzen jetzt dasselbe sticky Hover-Popup wie Cluster-Pins statt eines Tooltips, der sofort verschwand
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
