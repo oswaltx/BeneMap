@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
     val context = runApplication<VoloMapApp>(*args)
 
     val repository = context.getBean(VolunteerActivityRepository::class.java)
-    if (repository.count() == 0L) {
+    if (repository.count() == 0L && !args.contains("--scrape")) {
         val scraper = context.getBean(Scraper::class.java)
         scraper.fakeScraper(30)
     }

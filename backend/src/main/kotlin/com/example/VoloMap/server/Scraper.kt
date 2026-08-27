@@ -34,7 +34,8 @@ private const val MAX_PAGES_PER_CATEGORY = 50
 @Component
 class Scraper(
     private val repository: VolunteerActivityRepository,
-    private val geocodingService: GeocodingService
+    private val geocodingService: GeocodingService,
+    private val baseUrl: String = "https://engagementdatenbank.stadt-koeln.de"
 ) {
     fun getDocument(url: String): Document {
         return Jsoup.connect(url)
@@ -55,11 +56,18 @@ class Scraper(
             for (link in titleLinks) {
                 if (count >= limit) return foundOnPage
                 val name = link.text()
-                val href = link.attr("href").removePrefix("/index.php")
-                val fullUrl = "https://engagementdatenbank.stadt-koeln.de$href"
-                if (href.isEmpty()) continue
+                val rawHref = link.attr("href")
+                if (rawHref.isEmpty()) continue
+                if (!rawHref.startsWith("/")) continue
+                if (name.isBlank()) continue
+                val href = rawHref.removePrefix("/index.php")
+                val fullUrl = "$baseUrl$href"
                 println("Scraping: $fullUrl")
-                scrapeEhrenamtDetails(name, fullUrl, category)
+                try {
+                    scrapeEhrenamtDetails(name, fullUrl, category)
+                } catch (e: Exception) {
+                    println("Failed to scrape listing $fullUrl: ${e.message}")
+                }
                 count++
                 foundOnPage++
             }
@@ -75,6 +83,7 @@ class Scraper(
             val newUrl = url.replace("page=0", "page=$page")
             try {
                 println("Scraping page $page")
+                Thread.sleep(500) // Höflichkeitspause gegenüber der Stadt-Webseite
                 val found = scrapeWithLimit(getDocument(newUrl))
                 if (found == 0) {
                     println("No more results (empty page)")
@@ -82,15 +91,19 @@ class Scraper(
                 }
                 page++
             } catch (e: Exception) {
-                println("No more pages")
+                println("Failed to fetch page $page: ${e.message}")
                 break
             }
         }
     }
 
     fun scrapeAllCategories(limitPerCategory: Int) {
+        // Ein Angebot, das real unter mehreren Kategorien gelistet ist, behält die
+        // Kategorie, die zuerst erreicht wird (Map-Iterationsreihenfolge): existsBySourceUrl
+        // sorgt dafür, dass es bei jeder späteren Kategorie übersprungen wird. Akzeptierter
+        // Kompromiss, siehe Design-Dokument.
         for ((id, category) in ENGAGEMENT_CATEGORIES) {
-            val url = "https://engagementdatenbank.stadt-koeln.de/ergebnisse?fulltext=&id=&area_of_activity=$id&target_group=All&postal_code=&page=0"
+            val url = "$baseUrl/ergebnisse?fulltext=&id=&area_of_activity=$id&target_group=All&postal_code=&page=0"
             println("Scraping category: $category ($id)")
             try {
                 scrapeWebsite(url, "page", category, limitPerCategory)
