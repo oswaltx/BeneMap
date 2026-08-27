@@ -5,10 +5,9 @@
     import SearchBar from "./SearchBar.svelte";
     import VolunteerList from "./VolunteerList.svelte";
     import PinDetailPanel from "./PinDetailPanel.svelte";
-    import { CircleMarker, Tooltip } from "sveaflet";
-    import { categoryColor } from "./categoryColor";
     import { groupByLocation } from "./groupByLocation";
     import ClusterMarker from "./ClusterMarker.svelte";
+    import SingleMarkerPin from "./SingleMarkerPin.svelte";
 
     let markers: any[] = [];
     let showCityOffers = false;
@@ -139,34 +138,7 @@
 
                 {#each markerGroups as group (group.key)}
                     {#if group.members.length === 1}
-                        {@const marker = group.members[0]}
-                        <CircleMarker
-                            latLng={[marker.lat, marker.lng]}
-                            options={marker.sourceUrl
-                                ? { radius: 10, bubblingMouseEvents: false, color: "#F4C542", dashArray: "4, 4" }
-                                : { radius: 10, bubblingMouseEvents: false }}
-                            onclick={() => (selectedMarkerId = marker.id)}
-                        >
-                            <Tooltip options={{ direction: "top", offset: [0, -10] }}>
-                                <div class="marker-tooltip">
-                                    <div class="tooltip-header">
-                                        <strong>{marker.name}</strong>
-                                        {#if marker.category}
-                                            <span
-                                                class="tooltip-tag"
-                                                style="background:{categoryColor(marker.category).bg}; color:{categoryColor(marker.category).text};"
-                                            >{marker.category}</span>
-                                        {/if}
-                                    </div>
-                                    {#if marker.dateTime}
-                                        <p class="tooltip-date">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
-                                    {/if}
-                                    <p class="tooltip-rating">
-                                        {marker.activityRating != null ? `★ ${marker.activityRating.toFixed(1)} (${marker.activityRatingCount})` : "Noch keine Bewertung"}
-                                    </p>
-                                </div>
-                            </Tooltip>
-                        </CircleMarker>
+                        <SingleMarkerPin marker={group.members[0]} on:select={handleSelect} />
                     {:else}
                         <ClusterMarker
                             lat={group.lat}
@@ -291,35 +263,5 @@
     .sheet-content {
         overflow-y: auto;
         padding: 0 12px 12px;
-    }
-
-    .marker-tooltip {
-        min-width: 160px;
-    }
-
-    .tooltip-header {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-
-    .tooltip-header strong {
-        color: var(--color-text);
-        font-size: 0.85rem;
-    }
-
-    .tooltip-tag {
-        font-size: 0.65rem;
-        padding: 1px 6px;
-        border-radius: var(--radius-pill);
-        white-space: nowrap;
-    }
-
-    .tooltip-date,
-    .tooltip-rating {
-        margin: 3px 0 0;
-        font-size: 0.75rem;
-        color: var(--color-text-muted);
     }
 </style>
