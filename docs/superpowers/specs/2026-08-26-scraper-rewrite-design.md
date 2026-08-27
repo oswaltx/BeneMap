@@ -24,7 +24,7 @@ korrekt ausliest und sich gefahrlos wiederholt anstoßen lässt.
   Detail-URLs zu kommen.
 - **Kategorie:** Kein Kategorie-Feld auf der Detailseite oder im
   Ergebnislisten-Eintrag. Die Seite hat aber ein echtes, stabiles
-  Kategorie-Vokabular über den Such-Filter `area_of_activity` (17 Werte,
+  Kategorie-Vokabular über den Such-Filter `area_of_activity` (16 Werte,
   z. B. `476` = "Bildung", `475` = "Umwelt, Natur und Tierschutz", `464`
   = "Soziales" — vollständige Liste unten). Scrapt man pro Kategorie
   einzeln (statt `area_of_activity=All`), ist die Kategorie jedes
@@ -87,7 +87,7 @@ unverändert — nur der Auswahl-Selektor und die pro Treffer
 mitgelieferten Daten ändern sich.
 
 **`Scraper.kt` — Kategorie-Iteration:**
-Ein neues, festes `Map<Int, String>` mit allen 17 Kategorie-IDs → echten
+Ein neues, festes `Map<Int, String>` mit allen 16 Kategorie-IDs → echten
 Kategorienamen (aus der Analyse):
 
 ```
