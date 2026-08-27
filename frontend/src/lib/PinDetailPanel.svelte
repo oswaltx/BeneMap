@@ -15,6 +15,10 @@
         photoUrls: string[];
         dateTime: string | null;
         sourceUrl: string | null;
+        sourceContactName: string | null;
+        sourceContactWebsite: string | null;
+        sourceContactEmail: string | null;
+        sourceContactPhone: string | null;
         activityRating: number | null;
         activityRatingCount: number;
         providerId: number | null;
@@ -103,6 +107,21 @@
         <a class="source-link" href={marker.sourceUrl} target="_blank" rel="noopener noreferrer">
             Mehr Infos auf der Webseite der Stadt Köln
         </a>
+    {/if}
+
+    {#if marker.sourceContactName}
+        <div class="source-contact">
+            <span class="source-contact-name">{marker.sourceContactName}</span>
+            {#if marker.sourceContactWebsite}
+                <a class="source-contact-link" href={marker.sourceContactWebsite} target="_blank" rel="noopener noreferrer">Website besuchen</a>
+            {/if}
+            {#if marker.sourceContactEmail}
+                <a class="source-contact-link" href={`mailto:${marker.sourceContactEmail}`}>{marker.sourceContactEmail}</a>
+            {/if}
+            {#if marker.sourceContactPhone}
+                <span class="source-contact-phone">{marker.sourceContactPhone}</span>
+            {/if}
+        </div>
     {/if}
 
     <button class="rating-badge" on:click={openActivityRating}>
@@ -311,5 +330,31 @@
         font-size: 0.8rem;
         color: var(--color-primary);
         align-self: flex-start;
+    }
+
+    .source-contact {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 4px;
+        padding-top: 10px;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .source-contact-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--color-text);
+    }
+
+    .source-contact-link {
+        font-size: 0.8rem;
+        color: var(--color-primary);
+        align-self: flex-start;
+    }
+
+    .source-contact-phone {
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
     }
 </style>
