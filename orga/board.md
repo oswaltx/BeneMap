@@ -28,6 +28,7 @@ kanban-plugin: board
 - [x] Mehrere Aktivitäten an einem Ort — Cluster-Pin mit Anzahl statt sich überlappender Einzel-Pins; Hover/Klick zeigt Liste, Klick auf Zeile öffnet Detailansicht
 - [x] Wiederkehrende Events — Checkbox "Wiederholt sich" beim Anlegen (alle N Tage/Wochen), erzeugt automatisch unabhängige Termine bis zu 3 Monate im Voraus (max. 60)
 - [x] Städtische Angebote (Köln) Toggle — blendet gescrapte, undatierte Angebote der Kölner Engagementdatenbank auf Karte/Liste ein/aus, gestrichelter Pin-Rand, Link zur Quelle statt Datum
+- [x] Scraper-Überarbeitung — echte Namen/Kategorien/Einsatzort statt "Unbekannt"/Zufall/Vermittlungsstelle-Adresse, wiederholbar per `--scrape`-Flag
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
