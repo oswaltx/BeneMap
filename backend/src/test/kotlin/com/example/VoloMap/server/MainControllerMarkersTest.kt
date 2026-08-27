@@ -272,6 +272,51 @@ class MainControllerMarkersTest {
     }
 
     @Test
+    fun `includes Vermittlungsstelle contact fields when the activity was scraped`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val scraped = activity(
+            name = "Gescraptes Angebot",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        ).also {
+            it.sourceContactName = "Ceno & Die Paten e.V."
+            it.sourceContactWebsite = "https://www.ceno-koeln.de/"
+            it.sourceContactEmail = "est@ceno-koeln.de"
+            it.sourceContactPhone = "0221 1234567"
+        }
+        whenever(repository.findAll()).thenReturn(listOf(scraped))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertEquals("Ceno & Die Paten e.V.", result[0].sourceContactName)
+        assertEquals("https://www.ceno-koeln.de/", result[0].sourceContactWebsite)
+        assertEquals("est@ceno-koeln.de", result[0].sourceContactEmail)
+        assertEquals("0221 1234567", result[0].sourceContactPhone)
+    }
+
+    @Test
+    fun `Vermittlungsstelle contact fields are null for an activity added through the normal form`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val ownActivity = activity(
+            name = "Eigene Aktivität",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        )
+        whenever(repository.findAll()).thenReturn(listOf(ownActivity))
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertNull(result[0].sourceContactName)
+        assertNull(result[0].sourceContactWebsite)
+        assertNull(result[0].sourceContactEmail)
+        assertNull(result[0].sourceContactPhone)
+    }
+
+    @Test
     fun `dateTime is null when an activity has no scheduled appointment`() {
         val repository = mock<VolunteerActivityRepository>()
         val undated = VolunteerActivity(

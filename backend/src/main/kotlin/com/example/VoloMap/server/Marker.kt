@@ -21,4 +21,8 @@ data class Marker(
     val providerRating: Double?,
     val providerRatingCount: Int,
     val sourceUrl: String?,
+    val sourceContactName: String?,
+    val sourceContactWebsite: String?,
+    val sourceContactEmail: String?,
+    val sourceContactPhone: String?,
 )

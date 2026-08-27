@@ -67,6 +67,10 @@ class MainController(
                     providerRating = providerRatings.map { it.stars }.average().takeIf { providerRatings.isNotEmpty() },
                     providerRatingCount = providerRatings.size,
                     sourceUrl = activity.sourceUrl,
+                    sourceContactName = activity.sourceContactName,
+                    sourceContactWebsite = activity.sourceContactWebsite,
+                    sourceContactEmail = activity.sourceContactEmail,
+                    sourceContactPhone = activity.sourceContactPhone,
                 )
             }
             .filter { filterDate == null || it.dateTime?.toLocalDate() == filterDate }
