@@ -112,7 +112,7 @@
     {#if marker.sourceContactName}
         <div class="source-contact">
             <span class="source-contact-name">{marker.sourceContactName}</span>
-            {#if marker.sourceContactWebsite}
+            {#if marker.sourceContactWebsite && (marker.sourceContactWebsite.startsWith("http://") || marker.sourceContactWebsite.startsWith("https://"))}
                 <a class="source-contact-link" href={marker.sourceContactWebsite} target="_blank" rel="noopener noreferrer">Website besuchen</a>
             {/if}
             {#if marker.sourceContactEmail}
