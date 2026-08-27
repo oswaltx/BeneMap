@@ -136,6 +136,34 @@ class ScraperTest {
     }
 
     @Test
+    fun `collapses a duplicated postal code in the address text`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        whenever(geocodingService.geocode(any())).thenReturn(Pair(50.93, 6.98))
+
+        // Reproduces the real Köln site's own markup glitch: the postal-code span and
+        // the locality span both contain "50679", so a plain text() concatenation
+        // yields "50679 50679 Köln" verbatim.
+        val html = """
+            <html><body>
+                <div class="field">
+                    <div class="field__label">Adresse der Vermittlungsstelle</div>
+                    <div class="field__item">Gebrüder-Coblenz-Str. 10 50679 50679 Köln Deutschland</div>
+                </div>
+            </body></html>
+        """.trimIndent()
+        val document = Jsoup.parse(html)
+
+        val scraper = Scraper(repository, geocodingService)
+        val activity = scraper.buildActivityFromDocument(
+            document, "https://engagementdatenbank.stadt-koeln.de/testprojekt", "Testprojekt", "Bildung"
+        )
+
+        assertEquals("Gebrüder-Coblenz-Str. 10 50679 Köln Deutschland", activity.addressText)
+        verify(geocodingService).geocode("Gebrüder-Coblenz-Str. 10 50679 Köln Deutschland")
+    }
+
+    @Test
     fun `pagination stops once a page returns zero results instead of running away`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()

@@ -157,7 +157,13 @@ class Scraper(
         // (ganz ohne Ort), was schlechter geokodiert als die Vermittlungsstelle-Adresse.
         val einsatzort = data["Einsatzort"]
         val vermittlungsstelleAdresse = data["Adresse der Vermittlungsstelle"]
-        val address = if (einsatzort != null && einsatzort.any { it.isDigit() }) einsatzort else vermittlungsstelleAdresse
+        val rawAddress = if (einsatzort != null && einsatzort.any { it.isDigit() }) einsatzort else vermittlungsstelleAdresse
+
+        // Die Stadt-Köln-Seite liefert bei manchen Adressen die Postleitzahl doppelt
+        // (z. B. "50679 50679 Köln" — die Postleitzahl steckt sowohl im eigenen
+        // "postal-code"-Span als auch nochmal im "locality"-Span). Direkt aufeinander
+        // folgende identische Wörter werden deshalb zusammengefasst.
+        val address = rawAddress?.let { collapseDuplicateAdjacentWords(it) }
         val coords = address?.let { geocodingService.geocode(it) }
         println("Gefundene Felder: ${data.keys}")
 
@@ -174,6 +180,9 @@ class Scraper(
             dateTime = null
         )
     }
+
+    private fun collapseDuplicateAdjacentWords(text: String): String =
+        text.replace(Regex("(\\S+)(\\s+\\1)+")) { it.groupValues[1] }
 
     fun fakeScraper(limit: Int) {
         val names = listOf(
