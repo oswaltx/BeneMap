@@ -97,6 +97,10 @@ class MainController(
     ): ResponseEntity<VolunteerActivity> {
         activity.id = 0
         activity.sourceUrl = null
+        activity.sourceContactName = null
+        activity.sourceContactWebsite = null
+        activity.sourceContactEmail = null
+        activity.sourceContactPhone = null
         activity.createdBy = userRepository.findByEmail(authentication.name)
         activity.photoUrls = normalizePhotoUrls(activity.photoUrls)
 

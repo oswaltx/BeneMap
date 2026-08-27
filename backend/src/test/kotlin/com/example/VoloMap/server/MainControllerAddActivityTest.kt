@@ -134,4 +134,31 @@ class MainControllerAddActivityTest {
 
         assertNull(result.body?.sourceUrl)
     }
+
+    @Test
+    fun `clears client-supplied Vermittlungsstelle contact fields`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val activity = VolunteerActivity(
+            name = "Test",
+            latitude = 1.0,
+            longitude = 2.0,
+            sourceContactName = "Fake Stadt Köln",
+            sourceContactWebsite = "https://evil.example",
+            sourceContactEmail = "fake@evil.example",
+            sourceContactPhone = "000"
+        )
+
+        val result = controller.addActivity(activity, authenticationFor(provider.email))
+
+        assertNull(result.body?.sourceContactName)
+        assertNull(result.body?.sourceContactWebsite)
+        assertNull(result.body?.sourceContactEmail)
+        assertNull(result.body?.sourceContactPhone)
+    }
 }

@@ -111,6 +111,7 @@
 
     {#if marker.sourceContactName}
         <div class="source-contact">
+            <span class="source-contact-label">Vermittlungsstelle</span>
             <span class="source-contact-name">{marker.sourceContactName}</span>
             {#if marker.sourceContactWebsite && (marker.sourceContactWebsite.startsWith("http://") || marker.sourceContactWebsite.startsWith("https://"))}
                 <a class="source-contact-link" href={marker.sourceContactWebsite} target="_blank" rel="noopener noreferrer">Website besuchen</a>
@@ -339,6 +340,13 @@
         margin-top: 4px;
         padding-top: 10px;
         border-top: 1px solid var(--color-border);
+    }
+
+    .source-contact-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--color-text-muted);
     }
 
     .source-contact-name {
