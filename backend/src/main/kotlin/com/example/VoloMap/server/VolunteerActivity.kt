@@ -37,9 +37,13 @@ class VolunteerActivity constructor(
     // Kontaktdaten der Vermittlungsstelle (vermittelnde Organisation), nur für
     // gescrapte Städtische Angebote befüllt — bewusst nicht providerName/
     // providerWebsiteUrl genannt, da diese an ein App-User-Konto gebunden sind.
+    @Column(columnDefinition = "TEXT")
     var sourceContactName: String? = null,
+    @Column(columnDefinition = "TEXT")
     var sourceContactWebsite: String? = null,
+    @Column(columnDefinition = "TEXT")
     var sourceContactEmail: String? = null,
+    @Column(columnDefinition = "TEXT")
     var sourceContactPhone: String? = null,
 
     // Zeilenweise getrennte Liste von Bild-URLs — kein Datei-Upload, Anbieter fügt
