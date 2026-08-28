@@ -77,4 +77,7 @@ class VolunteerActivity constructor(
     @ManyToOne
     @JoinColumn(name = "created_by")
     var createdBy: User? = null,
+
+    // Optionale Teilnehmer-Obergrenze für die Anmeldefunktion. null = unbegrenzt.
+    var maxParticipants: Int? = null,
 )
