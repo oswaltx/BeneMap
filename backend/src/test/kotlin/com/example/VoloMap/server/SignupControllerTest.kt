@@ -1,6 +1,7 @@
 package com.example.VoloMap.server
 
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -124,6 +125,35 @@ class SignupControllerTest {
 
         mockMvc.perform(get("/activities/$activityId/signups"))
             .andExpect(jsonPath("$.count").value(1))
+    }
+
+    @Test
+    fun `concurrent signups do not overbook a capacity-limited activity`() {
+        val activityId = createActivity(maxParticipants = 1)
+        val sessionA = registerAndSession("a@example.com", "USER")
+        val sessionB = registerAndSession("b@example.com", "USER")
+
+        val ready = java.util.concurrent.CountDownLatch(2)
+        val go = java.util.concurrent.CountDownLatch(1)
+        val results = java.util.concurrent.ConcurrentLinkedQueue<Int>()
+
+        val threads = listOf(sessionA, sessionB).map { session ->
+            Thread {
+                ready.countDown()
+                go.await()
+                val status = mockMvc.perform(post("/activities/$activityId/signup").session(session))
+                    .andReturn().response.status
+                results.add(status)
+            }
+        }
+        threads.forEach { it.start() }
+        ready.await()
+        go.countDown()
+        threads.forEach { it.join() }
+
+        mockMvc.perform(get("/activities/$activityId/signups"))
+            .andExpect(jsonPath("$.count").value(1))
+        assertTrue(results.none { it == 500 })
     }
 
     @Test

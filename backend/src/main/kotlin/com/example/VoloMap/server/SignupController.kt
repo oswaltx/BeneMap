@@ -2,6 +2,7 @@ package com.example.VoloMap.server
 
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -24,12 +25,13 @@ class SignupController(
     private val activitySignupRepository: ActivitySignupRepository,
 ) {
 
+    @Transactional
     @PostMapping("/activities/{id}/signup")
     fun signUp(
         @PathVariable id: Long,
         authentication: Authentication
     ): ResponseEntity<*> {
-        val activity = activityRepository.findById(id).orElse(null)
+        val activity = activityRepository.findByIdForUpdate(id)
             ?: return ResponseEntity.notFound().build<Any>()
         val user = userRepository.findByEmail(authentication.name)!!
 
