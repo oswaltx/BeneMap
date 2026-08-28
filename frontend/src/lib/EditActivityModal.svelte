@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
     import { fetchWithSessionCheck } from "../auth";
+    import { ACTIVITY_CATEGORIES } from "./categories";
 
     export let marker: {
         id: number;
@@ -105,7 +106,12 @@
 
         <label>
             Kategorie
-            <input type="text" bind:value={category} />
+            <select bind:value={category}>
+                <option value="">– bitte wählen –</option>
+                {#each ACTIVITY_CATEGORIES as cat}
+                    <option value={cat}>{cat}</option>
+                {/each}
+            </select>
         </label>
 
         <label>

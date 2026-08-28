@@ -1,6 +1,7 @@
 <script lang="ts">
     import Link from "./Link.svelte";
     import { currentUser, authChecked, fetchWithSessionCheck } from "../auth";
+    import { ACTIVITY_CATEGORIES } from "./categories";
 
     let name = "";
     let description = "";
@@ -143,7 +144,12 @@
 
             <label>
                 Kategorie
-                <input type="text" bind:value={category} />
+                <select bind:value={category}>
+                    <option value="">– bitte wählen –</option>
+                    {#each ACTIVITY_CATEGORIES as cat}
+                        <option value={cat}>{cat}</option>
+                    {/each}
+                </select>
             </label>
 
             <label>
