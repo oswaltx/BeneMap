@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import kotlin.random.Random
 
-private val ENGAGEMENT_CATEGORIES = mapOf(
+val ENGAGEMENT_CATEGORIES = mapOf(
     476 to "Bildung",
     517 to "Familie & Nachbarschaft",
     302 to "Flüchtlingshilfe",
