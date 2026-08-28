@@ -2,6 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import RatingModal from "./RatingModal.svelte";
     import EditActivityModal from "./EditActivityModal.svelte";
+    import SignupModal from "./SignupModal.svelte";
     import { categoryColor } from "./categoryColor";
     import { deleteActivity } from "./activityActions";
     import { currentUser } from "../auth";
@@ -19,6 +20,8 @@
         sourceContactWebsite: string | null;
         sourceContactEmail: string | null;
         sourceContactPhone: string | null;
+        signupCount: number;
+        maxParticipants: number | null;
         activityRating: number | null;
         activityRatingCount: number;
         providerId: number | null;
@@ -32,6 +35,7 @@
     const dispatch = createEventDispatcher<{ close: void; refresh: void }>();
 
     let openRating: { target: "activity" | "provider"; targetId: number; targetLabel: string } | null = null;
+    let showSignup = false;
     $: isOwner = $currentUser?.id === marker.providerId;
     let editing = false;
     let selectedPhotoIndex = 0;
@@ -130,6 +134,14 @@
     </button>
 
     {#if marker.providerId != null}
+        <button class="rating-badge" on:click={() => (showSignup = true)}>
+            {marker.maxParticipants != null
+                ? `👥 ${marker.signupCount}/${marker.maxParticipants} Teilnehmende`
+                : `👥 ${marker.signupCount} Teilnehmende`}
+        </button>
+    {/if}
+
+    {#if marker.providerId != null}
         <div class="provider">
             <div class="provider-header">
                 {#if marker.providerPhotoUrl}
@@ -157,9 +169,18 @@
     />
 {/if}
 
+{#if showSignup}
+    <SignupModal
+        activityId={marker.id}
+        isOwner={isOwner}
+        on:close={() => (showSignup = false)}
+        on:changed={() => dispatch("refresh")}
+    />
+{/if}
+
 {#if editing}
     <EditActivityModal
-        marker={{ id: marker.id, name: marker.name, description: marker.description, address: marker.address, category: marker.category, dateTime: marker.dateTime, photoUrls: marker.photoUrls }}
+        marker={{ id: marker.id, name: marker.name, description: marker.description, address: marker.address, category: marker.category, dateTime: marker.dateTime, photoUrls: marker.photoUrls, maxParticipants: marker.maxParticipants }}
         on:close={() => (editing = false)}
         on:saved={() => dispatch("refresh")}
     />

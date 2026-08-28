@@ -22,6 +22,8 @@
         providerName: string | null;
         providerRating: number | null;
         providerRatingCount: number;
+        signupCount: number;
+        maxParticipants: number | null;
     }[] = [];
 
     const dispatch = createEventDispatcher<{ refresh: void; select: { id: number } }>();
@@ -111,7 +113,7 @@
 
 {#if editingMarker}
     <EditActivityModal
-        marker={{ id: editingMarker.id, name: editingMarker.name, description: editingMarker.description, address: editingMarker.address, category: editingMarker.category, dateTime: editingMarker.dateTime, photoUrls: editingMarker.photoUrls }}
+        marker={{ id: editingMarker.id, name: editingMarker.name, description: editingMarker.description, address: editingMarker.address, category: editingMarker.category, dateTime: editingMarker.dateTime, photoUrls: editingMarker.photoUrls, maxParticipants: editingMarker.maxParticipants }}
         on:close={() => (editingMarker = null)}
         on:saved={() => dispatch("refresh")}
     />

@@ -10,6 +10,7 @@
         category: string;
         dateTime: string | null;
         photoUrls: string[];
+        maxParticipants: number | null;
     };
 
     const dispatch = createEventDispatcher<{ close: void; saved: void }>();
@@ -20,6 +21,7 @@
     let category = marker.category;
     let dateTime = marker.dateTime ? marker.dateTime.slice(0, 16) : "";
     let photoUrlsText = marker.photoUrls.join("\n");
+    let maxParticipants = marker.maxParticipants != null ? String(marker.maxParticipants) : "";
 
     let submitting = false;
     let statusMessage: string | null = null;
@@ -47,6 +49,7 @@
                     category: category || null,
                     dateTime: dateTime ? dateTime + ":00" : undefined,
                     photoUrls: photoUrlsText.trim() || undefined,
+                    maxParticipants: maxParticipants ? Number(maxParticipants) : null,
                 }),
             });
 
@@ -113,6 +116,11 @@
         <label>
             Foto-URLs (eine pro Zeile)
             <textarea bind:value={photoUrlsText} rows="3" placeholder={"https://...\nhttps://..."}></textarea>
+        </label>
+
+        <label>
+            Maximale Teilnehmerzahl (optional)
+            <input type="number" min="1" bind:value={maxParticipants} placeholder="unbegrenzt" />
         </label>
 
         <button type="submit" disabled={submitting}>

@@ -8,6 +8,7 @@
     let category = "";
     let dateTime = "";
     let photoUrlsText = "";
+    let maxParticipants = "";
     let isRecurring = false;
     let recurrenceCount = 1;
     let recurrenceUnit: "days" | "weeks" = "weeks";
@@ -45,6 +46,7 @@
             category: category || null,
             dateTime: dateTime ? dateTime + ":00" : undefined,
             photoUrls: photoUrlsText.trim() || undefined,
+            maxParticipants: maxParticipants ? Number(maxParticipants) : null,
         };
 
         const wasRecurring = isRecurring;
@@ -98,6 +100,7 @@
             category = "";
             dateTime = "";
             photoUrlsText = "";
+            maxParticipants = "";
             isRecurring = false;
             recurrenceCount = 1;
             recurrenceUnit = "weeks";
@@ -151,6 +154,11 @@
             <label>
                 Foto-URLs (eine pro Zeile)
                 <textarea bind:value={photoUrlsText} rows="3" placeholder={"https://...\nhttps://..."}></textarea>
+            </label>
+
+            <label>
+                Maximale Teilnehmerzahl (optional)
+                <input type="number" min="1" bind:value={maxParticipants} placeholder="unbegrenzt" />
             </label>
 
             <label class="checkbox-label">
