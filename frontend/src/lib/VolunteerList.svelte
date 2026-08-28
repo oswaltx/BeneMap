@@ -2,6 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import RatingModal from "./RatingModal.svelte";
     import EditActivityModal from "./EditActivityModal.svelte";
+    import SignupModal from "./SignupModal.svelte";
     import { categoryColor } from "./categoryColor";
     import { deleteActivity } from "./activityActions";
     import { currentUser } from "../auth";
@@ -45,6 +46,7 @@
     }
 
     let editingMarker: (typeof markers)[number] | null = null;
+    let signupMarker: (typeof markers)[number] | null = null;
 
     async function handleDelete(marker: (typeof markers)[number]) {
         if (await deleteActivity(marker.id)) {
@@ -88,6 +90,11 @@
                     <button class="rating-badge" on:click|stopPropagation={() => openProviderRating(marker)}>
                         Anbieter: {marker.providerRating != null ? `★ ${marker.providerRating.toFixed(1)} (${marker.providerRatingCount})` : "Noch keine Bewertung"}
                     </button>
+                    <button class="rating-badge" on:click|stopPropagation={() => (signupMarker = marker)}>
+                        {marker.maxParticipants != null
+                            ? `👥 ${marker.signupCount}/${marker.maxParticipants} Teilnehmende`
+                            : `👥 ${marker.signupCount} Teilnehmende`}
+                    </button>
                 {/if}
                 {#if $currentUser?.id === marker.providerId}
                     <button class="edit-link" on:click|stopPropagation={() => (editingMarker = marker)}>Bearbeiten</button>
@@ -116,6 +123,15 @@
         marker={{ id: editingMarker.id, name: editingMarker.name, description: editingMarker.description, address: editingMarker.address, category: editingMarker.category, dateTime: editingMarker.dateTime, photoUrls: editingMarker.photoUrls, maxParticipants: editingMarker.maxParticipants }}
         on:close={() => (editingMarker = null)}
         on:saved={() => dispatch("refresh")}
+    />
+{/if}
+
+{#if signupMarker}
+    <SignupModal
+        activityId={signupMarker.id}
+        isOwner={$currentUser?.id === signupMarker.providerId}
+        on:close={() => (signupMarker = null)}
+        on:changed={() => dispatch("refresh")}
     />
 {/if}
 

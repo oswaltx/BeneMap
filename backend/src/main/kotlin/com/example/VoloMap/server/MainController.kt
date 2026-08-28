@@ -108,6 +108,7 @@ class MainController(
         activity.sourceContactPhone = null
         activity.createdBy = userRepository.findByEmail(authentication.name)
         activity.photoUrls = normalizePhotoUrls(activity.photoUrls)
+        activity.maxParticipants = normalizeMaxParticipants(activity.maxParticipants)
 
         if (activity.latitude == null && activity.longitude == null && !activity.addressText.isNullOrBlank()) {
             val coords = geocodingService.geocode(activity.addressText!!)
@@ -160,7 +161,7 @@ class MainController(
                     longitude = longitude,
                     dateTime = occurrenceDateTime,
                     createdBy = provider,
-                    maxParticipants = req.maxParticipants,
+                    maxParticipants = normalizeMaxParticipants(req.maxParticipants),
                 )
             )
         }
@@ -185,7 +186,7 @@ class MainController(
         activity.description = req.description
         activity.category = req.category
         activity.photoUrls = normalizePhotoUrls(req.photoUrls)
-        activity.maxParticipants = req.maxParticipants
+        activity.maxParticipants = normalizeMaxParticipants(req.maxParticipants)
         if (req.dateTime != null) {
             activity.dateTime = req.dateTime
         }
@@ -271,6 +272,8 @@ data class AddRecurringActivityRequest(
     val recurrenceIntervalDays: Int,
     val maxParticipants: Int? = null,
 )
+
+private fun normalizeMaxParticipants(value: Int?): Int? = value?.takeIf { it >= 1 }
 
 private fun parsePhotoUrls(raw: String?): List<String> {
     if (raw.isNullOrBlank()) return emptyList()

@@ -82,6 +82,25 @@ class MainControllerEditActivityTest {
     }
 
     @Test
+    fun `normalizes a negative maxParticipants to null when updating`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        val existing = VolunteerActivity(id = 5, name = "Alt", createdBy = owner)
+        whenever(repository.findById(5)).thenReturn(Optional.of(existing))
+        whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val req = UpdateActivityRequest(name = "Neu", maxParticipants = -3)
+
+        val result = controller.updateActivity(5, req, authenticationFor(owner.email))
+
+        val body = result.body as UpdateActivityResponse
+        assertNull(body.activity.maxParticipants)
+    }
+
+    @Test
     fun `re-geocodes when address changes`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()
