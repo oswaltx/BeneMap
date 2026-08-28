@@ -35,7 +35,7 @@ class MainControllerAddRecurringActivityTest {
         val userRepository: UserRepository = mock()
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val req = AddRecurringActivityRequest(
             name = "Sprachcafé",
             dateTime = LocalDateTime.parse("2026-08-15T10:00:00"),
@@ -56,7 +56,7 @@ class MainControllerAddRecurringActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val req = AddRecurringActivityRequest(
             name = "Sprachcafé",
             dateTime = LocalDateTime.parse("2026-08-15T10:00:00"),
@@ -73,6 +73,29 @@ class MainControllerAddRecurringActivityTest {
     }
 
     @Test
+    fun `passes maxParticipants through to every created occurrence`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val req = AddRecurringActivityRequest(
+            name = "Sprachcafé",
+            dateTime = LocalDateTime.parse("2026-08-15T10:00:00"),
+            recurrenceIntervalDays = 7,
+            maxParticipants = 3
+        )
+
+        @Suppress("UNCHECKED_CAST")
+        val result = controller.addRecurringActivity(req, authenticationFor(provider.email))
+        val activities = result.body as List<VolunteerActivity>
+
+        assertTrue(activities.all { it.maxParticipants == 3 })
+    }
+
+    @Test
     fun `daily interval over 3 months is capped at 60 occurrences`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()
@@ -80,7 +103,7 @@ class MainControllerAddRecurringActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val req = AddRecurringActivityRequest(
             name = "Tägliche Aktion",
             dateTime = LocalDateTime.parse("2026-08-15T10:00:00"),
@@ -103,7 +126,7 @@ class MainControllerAddRecurringActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val req = AddRecurringActivityRequest(
             name = "Sprachcafé",
             addressText = "Domkloster 4, Köln",
@@ -127,7 +150,7 @@ class MainControllerAddRecurringActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val req = AddRecurringActivityRequest(
             name = "Sprachcafé",
             dateTime = LocalDateTime.parse("2026-08-15T10:00:00"),
@@ -150,7 +173,7 @@ class MainControllerAddRecurringActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val req = AddRecurringActivityRequest(
             name = "Sprachcafé",
             addressText = "Nonexistent Place XYZ",
@@ -174,7 +197,7 @@ class MainControllerAddRecurringActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val req = AddRecurringActivityRequest(
             name = "Sprachcafé",
             dateTime = LocalDateTime.parse("2026-08-15T10:00:00"),

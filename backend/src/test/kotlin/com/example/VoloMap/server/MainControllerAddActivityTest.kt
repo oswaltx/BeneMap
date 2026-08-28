@@ -33,7 +33,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val activity = VolunteerActivity(name = "Test", addressText = "Domkloster 4, Köln")
 
         val result = controller.addActivity(activity, authenticationFor(provider.email))
@@ -53,7 +53,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val activity = VolunteerActivity(name = "Test", addressText = "Nonexistent Place XYZ")
 
         val result = controller.addActivity(activity, authenticationFor(provider.email))
@@ -71,7 +71,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0)
 
         controller.addActivity(activity, authenticationFor(provider.email))
@@ -87,7 +87,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val rawUrls = (1..12).joinToString("\n") { "https://example.com/photo$it.jpg" }
         val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0, photoUrls = rawUrls)
 
@@ -106,7 +106,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0, photoUrls = "   \n  \n")
 
         val result = controller.addActivity(activity, authenticationFor(provider.email))
@@ -122,7 +122,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val activity = VolunteerActivity(
             name = "Test",
             latitude = 1.0,
@@ -143,7 +143,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val activity = VolunteerActivity(
             name = "Test",
             latitude = 1.0,

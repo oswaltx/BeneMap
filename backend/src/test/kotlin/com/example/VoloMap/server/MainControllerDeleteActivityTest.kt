@@ -35,11 +35,33 @@ class MainControllerDeleteActivityTest {
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
         whenever(activityRatingRepository.findByActivity(existing)).thenReturn(ratings)
 
-        val controller = MainController(repository, geocodingService, userRepository, activityRatingRepository, mock())
+        val controller = MainController(repository, geocodingService, userRepository, activityRatingRepository, mock(), mock())
         val result = controller.deleteActivity(5, authenticationFor(owner.email))
 
         assertEquals(204, result.statusCode.value())
         verify(activityRatingRepository).deleteAll(ratings)
+        verify(repository).delete(existing)
+    }
+
+    @Test
+    fun `owner can delete their activity, signups are removed first`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        val activitySignupRepository: ActivitySignupRepository = mock()
+        val existing = VolunteerActivity(id = 5, name = "Alt", createdBy = owner)
+        val signups = listOf(
+            ActivitySignup(id = 10, user = owner, activity = existing)
+        )
+        whenever(repository.findById(5)).thenReturn(Optional.of(existing))
+        whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
+        whenever(activitySignupRepository.findByActivity(existing)).thenReturn(signups)
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), activitySignupRepository)
+        val result = controller.deleteActivity(5, authenticationFor(owner.email))
+
+        assertEquals(204, result.statusCode.value())
+        verify(activitySignupRepository).deleteAll(signups)
         verify(repository).delete(existing)
     }
 
@@ -52,7 +74,7 @@ class MainControllerDeleteActivityTest {
         whenever(repository.findById(5)).thenReturn(Optional.of(existing))
         whenever(userRepository.findByEmail(otherAnbieter.email)).thenReturn(otherAnbieter)
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val result = controller.deleteActivity(5, authenticationFor(otherAnbieter.email))
 
         assertEquals(403, result.statusCode.value())
@@ -66,7 +88,7 @@ class MainControllerDeleteActivityTest {
         val userRepository: UserRepository = mock()
         whenever(repository.findById(999)).thenReturn(Optional.empty())
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val result = controller.deleteActivity(999, authenticationFor(owner.email))
 
         assertEquals(404, result.statusCode.value())
@@ -81,7 +103,7 @@ class MainControllerDeleteActivityTest {
         whenever(repository.findById(5)).thenReturn(Optional.of(existing))
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
         val result = controller.deleteActivity(5, authenticationFor(owner.email))
 
         assertEquals(403, result.statusCode.value())

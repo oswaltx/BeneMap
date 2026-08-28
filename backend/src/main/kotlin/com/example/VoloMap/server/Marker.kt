@@ -25,4 +25,6 @@ data class Marker(
     val sourceContactWebsite: String?,
     val sourceContactEmail: String?,
     val sourceContactPhone: String?,
+    val signupCount: Int,
+    val maxParticipants: Int?,
 )

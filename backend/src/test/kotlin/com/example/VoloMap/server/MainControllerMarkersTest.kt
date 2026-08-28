@@ -56,7 +56,7 @@ class MainControllerMarkersTest {
             listOf(matching, wrongCategory, wrongTime, wrongSearch)
         )
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(
             category = "Umwelt",
             date = null,
@@ -86,7 +86,7 @@ class MainControllerMarkersTest {
         )
         whenever(repository.findAll()).thenReturn(listOf(byDescription, noMatch))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(
             category = null, date = null, timeFrom = null, timeTo = null, search = "tierheim"
         )
@@ -118,7 +118,7 @@ class MainControllerMarkersTest {
             listOf(ProviderRating(user = mock(), provider = provider, stars = 5))
         )
 
-        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository)
+        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository, mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertEquals(3.0, result[0].activityRating)
@@ -144,7 +144,7 @@ class MainControllerMarkersTest {
         whenever(activityRatingRepository.findAll()).thenReturn(emptyList())
         whenever(providerRatingRepository.findAll()).thenReturn(emptyList())
 
-        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository)
+        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository, mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertNull(result[0].activityRating)
@@ -166,7 +166,7 @@ class MainControllerMarkersTest {
         ).also { it.photoUrls = "https://example.com/a.jpg\n  \nhttps://example.com/b.jpg  \n" }
         whenever(repository.findAll()).thenReturn(listOf(withPhotos))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertEquals(listOf("https://example.com/a.jpg", "https://example.com/b.jpg"), result[0].photoUrls)
@@ -183,7 +183,7 @@ class MainControllerMarkersTest {
         )
         whenever(repository.findAll()).thenReturn(listOf(noPhotos))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertEquals(emptyList<String>(), result[0].photoUrls)
@@ -208,7 +208,7 @@ class MainControllerMarkersTest {
         whenever(activityRatingRepository.findAll()).thenReturn(emptyList())
         whenever(providerRatingRepository.findAll()).thenReturn(emptyList())
 
-        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository)
+        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository, mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertEquals("https://example.com/anna.jpg", result[0].providerPhotoUrl)
@@ -230,11 +230,57 @@ class MainControllerMarkersTest {
         whenever(activityRatingRepository.findAll()).thenReturn(emptyList())
         whenever(providerRatingRepository.findAll()).thenReturn(emptyList())
 
-        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository)
+        val controller = MainController(repository, mock(), mock(), activityRatingRepository, providerRatingRepository, mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertNull(result[0].providerPhotoUrl)
         assertNull(result[0].providerWebsiteUrl)
+    }
+
+    @Test
+    fun `includes signupCount and maxParticipants for an activity`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val activitySignupRepository = mock<ActivitySignupRepository>()
+        val provider = User(id = 7, email = "anbieter@example.com", passwordHash = "x", name = "Anbieter Anna", role = Role.ANBIETER)
+        val withLimit = activity(
+            name = "Begrenzte Aktion",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        ).also { it.createdBy = provider; it.maxParticipants = 5 }
+        whenever(repository.findAll()).thenReturn(listOf(withLimit))
+        whenever(activitySignupRepository.findAll()).thenReturn(
+            listOf(
+                ActivitySignup(user = mock(), activity = withLimit),
+                ActivitySignup(user = mock(), activity = withLimit),
+            )
+        )
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), activitySignupRepository)
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertEquals(2, result[0].signupCount)
+        assertEquals(5, result[0].maxParticipants)
+    }
+
+    @Test
+    fun `signupCount is zero and maxParticipants is null without any signups or limit`() {
+        val repository = mock<VolunteerActivityRepository>()
+        val activitySignupRepository = mock<ActivitySignupRepository>()
+        val unlimited = activity(
+            name = "Offene Aktion",
+            category = "Umwelt",
+            addressText = "Kölner Innenstadt",
+            dateTime = LocalDateTime.of(2026, 8, 10, 9, 0)
+        )
+        whenever(repository.findAll()).thenReturn(listOf(unlimited))
+        whenever(activitySignupRepository.findAll()).thenReturn(emptyList())
+
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), activitySignupRepository)
+        val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
+
+        assertEquals(0, result[0].signupCount)
+        assertNull(result[0].maxParticipants)
     }
 
     @Test
@@ -248,7 +294,7 @@ class MainControllerMarkersTest {
         ).also { it.sourceUrl = "https://engagementdatenbank.stadt-koeln.de/testprojekt" }
         whenever(repository.findAll()).thenReturn(listOf(scraped))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertEquals("https://engagementdatenbank.stadt-koeln.de/testprojekt", result[0].sourceUrl)
@@ -265,7 +311,7 @@ class MainControllerMarkersTest {
         )
         whenever(repository.findAll()).thenReturn(listOf(ownActivity))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertNull(result[0].sourceUrl)
@@ -287,7 +333,7 @@ class MainControllerMarkersTest {
         }
         whenever(repository.findAll()).thenReturn(listOf(scraped))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertEquals("Ceno & Die Paten e.V.", result[0].sourceContactName)
@@ -307,7 +353,7 @@ class MainControllerMarkersTest {
         )
         whenever(repository.findAll()).thenReturn(listOf(ownActivity))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertNull(result[0].sourceContactName)
@@ -329,7 +375,7 @@ class MainControllerMarkersTest {
         )
         whenever(repository.findAll()).thenReturn(listOf(undated))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(category = null, date = null, timeFrom = null, timeTo = null, search = null)
 
         assertNull(result[0].dateTime)
@@ -348,7 +394,7 @@ class MainControllerMarkersTest {
         )
         whenever(repository.findAll()).thenReturn(listOf(undated))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(
             category = null, date = "2026-08-10", timeFrom = null, timeTo = null, search = null
         )
@@ -369,7 +415,7 @@ class MainControllerMarkersTest {
         )
         whenever(repository.findAll()).thenReturn(listOf(undated))
 
-        val controller = MainController(repository, mock(), mock(), mock(), mock())
+        val controller = MainController(repository, mock(), mock(), mock(), mock(), mock())
         val result = controller.markers(
             category = null, date = null, timeFrom = 8, timeTo = 12, search = null
         )

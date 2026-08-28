@@ -21,6 +21,7 @@ class MainController(
     private val userRepository: UserRepository,
     private val activityRatingRepository: ActivityRatingRepository,
     private val providerRatingRepository: ProviderRatingRepository,
+    private val activitySignupRepository: ActivitySignupRepository,
 ) {
 
     @GetMapping("/")
@@ -40,12 +41,14 @@ class MainController(
 
         val activityRatingsByActivityId = activityRatingRepository.findAll().groupBy { it.activity.id }
         val providerRatingsByProviderId = providerRatingRepository.findAll().groupBy { it.provider.id }
+        val signupsByActivityId = activitySignupRepository.findAll().groupBy { it.activity.id }
 
         return repository.findAll()
             .filter { category == null || it.category == category }
             .filter { it.latitude != null && it.longitude != null }
             .map { activity ->
                 val activityRatings = activityRatingsByActivityId[activity.id].orEmpty()
+                val signups = signupsByActivityId[activity.id].orEmpty()
                 val providerId = activity.createdBy?.id
                 val providerRatings = providerId?.let { providerRatingsByProviderId[it] }.orEmpty()
                 Marker(
@@ -71,6 +74,8 @@ class MainController(
                     sourceContactWebsite = activity.sourceContactWebsite,
                     sourceContactEmail = activity.sourceContactEmail,
                     sourceContactPhone = activity.sourceContactPhone,
+                    signupCount = signups.size,
+                    maxParticipants = activity.maxParticipants,
                 )
             }
             .filter { filterDate == null || it.dateTime?.toLocalDate() == filterDate }
@@ -155,6 +160,7 @@ class MainController(
                     longitude = longitude,
                     dateTime = occurrenceDateTime,
                     createdBy = provider,
+                    maxParticipants = req.maxParticipants,
                 )
             )
         }
@@ -179,6 +185,7 @@ class MainController(
         activity.description = req.description
         activity.category = req.category
         activity.photoUrls = normalizePhotoUrls(req.photoUrls)
+        activity.maxParticipants = req.maxParticipants
         if (req.dateTime != null) {
             activity.dateTime = req.dateTime
         }
@@ -221,6 +228,7 @@ class MainController(
             return ResponseEntity.status(403).build()
         }
         activityRatingRepository.deleteAll(activityRatingRepository.findByActivity(activity))
+        activitySignupRepository.deleteAll(activitySignupRepository.findByActivity(activity))
         repository.delete(activity)
         return ResponseEntity.noContent().build()
     }
@@ -246,6 +254,7 @@ data class UpdateActivityRequest(
     val category: String? = null,
     val dateTime: LocalDateTime? = null,
     val photoUrls: String? = null,
+    val maxParticipants: Int? = null,
 )
 
 private const val MAX_PHOTO_URLS = 10
@@ -260,6 +269,7 @@ data class AddRecurringActivityRequest(
     val dateTime: LocalDateTime,
     val photoUrls: String? = null,
     val recurrenceIntervalDays: Int,
+    val maxParticipants: Int? = null,
 )
 
 private fun parsePhotoUrls(raw: String?): List<String> {
