@@ -1,7 +1,6 @@
 package com.example.VoloMap.server
 
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -85,7 +84,7 @@ class AccountDeletionTest {
 
     @Test
     fun `deleting a USER account removes their own ratings and signups`() {
-        val providerSession = registerAndSession("provider1@example.com", "ANBIETER")
+        registerAndSession("provider1@example.com", "ANBIETER")
         val provider = userRepository.findByEmail("provider1@example.com")!!
         val activityId = activityRepository.save(
             VolunteerActivity(name = "Testaktion", createdBy = provider)
@@ -179,6 +178,28 @@ class AccountDeletionTest {
         ).andExpect(status().isNoContent)
 
         mockMvc.perform(get("/auth/me").session(session))
+            .andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun `a second still-open session for the same account is rejected after deletion`() {
+        val firstSession = registerAndSession("twosessions@example.com", "USER")
+
+        val secondLoginResult = mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"twosessions@example.com","password":"geheim123"}""")
+        ).andReturn()
+        val secondSession = secondLoginResult.request.session as MockHttpSession
+
+        mockMvc.perform(
+            delete("/auth/me")
+                .session(firstSession)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"password":"geheim123"}""")
+        ).andExpect(status().isNoContent)
+
+        mockMvc.perform(get("/auth/me").session(secondSession))
             .andExpect(status().isUnauthorized)
     }
 
