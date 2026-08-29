@@ -77,6 +77,28 @@ export async function logout(): Promise<void> {
     currentUser.set(null);
 }
 
+export async function getDeletionImpact(): Promise<{ activityCount: number }> {
+    const res = await fetch(`${API_BASE}/auth/me/deletion-impact`, { credentials: "include" });
+    if (!res.ok) {
+        return { activityCount: 0 };
+    }
+    return res.json();
+}
+
+export async function deleteAccount(password: string): Promise<string | null> {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+    });
+    if (!res.ok) {
+        return extractError(res, "Löschen fehlgeschlagen.");
+    }
+    currentUser.set(null);
+    return null;
+}
+
 /**
  * Wraps fetch for session-bearing calls that expect the user to still be
  * logged in. If the server responds 401 (e.g. the session expired mid-use),

@@ -15,6 +15,8 @@
         <Link href="/" activeClass="active">Home</Link>
         {#if $currentUser?.role === "ANBIETER"}
             <Link href="/add" activeClass="active">Aktivität hinzufügen</Link>
+        {/if}
+        {#if $currentUser}
             <Link href="/profile" activeClass="active">Mein Profil</Link>
         {/if}
         <Link href="/about" activeClass="active">About</Link>
