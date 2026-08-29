@@ -10,7 +10,6 @@ kanban-plugin: board
 - [ ] Research: Existing volunteer map solutions
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Zeitaufwand und Verbindlichkeit
-- [ ] Autokategorisierung von Events
 ## Doing
 
 
@@ -32,6 +31,7 @@ kanban-plugin: board
 - [x] Vermittlungsstelle-Kontaktdaten — Name, Homepage, E-Mail, Telefonnummer der vermittelnden Organisation werden mitgescrapt und im Detail-Panel als eigener Block angezeigt
 - [x] Hover-Popup vereinheitlicht — Einzel-Pins nutzen jetzt dasselbe sticky Hover-Popup wie Cluster-Pins statt eines Tooltips, der sofort verschwand
 - [x] Anmeldefunktion — Ehrenamtler (Rolle USER) können sich direkt in der App für eine Aktivität anmelden ("Ich mache mit"), Anbieter sieht Name + E-Mail der Angemeldeten, optionale Teilnehmer-Obergrenze; gilt nur für app-native Aktivitäten, nicht für Städtische Angebote
+- [x] Kategorie-Dropdown — Anbieter wählen die Kategorie beim Anlegen/Bearbeiten aus einer festen Liste (dieselben Kategorien wie bei Städtischen Angeboten, plus "Sonstiges") statt sie frei einzutippen
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
