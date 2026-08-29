@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository
 interface ProviderRatingRepository : JpaRepository<ProviderRating, Long> {
     fun findByUserAndProvider(user: User, provider: User): ProviderRating?
     fun findByProvider(provider: User): List<ProviderRating>
+    fun findByUser(user: User): List<ProviderRating>
 }

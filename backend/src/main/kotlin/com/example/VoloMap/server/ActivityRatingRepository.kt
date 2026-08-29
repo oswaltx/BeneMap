@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository
 interface ActivityRatingRepository : JpaRepository<ActivityRating, Long> {
     fun findByUserAndActivity(user: User, activity: VolunteerActivity): ActivityRating?
     fun findByActivity(activity: VolunteerActivity): List<ActivityRating>
+    fun findByUser(user: User): List<ActivityRating>
 }

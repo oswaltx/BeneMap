@@ -8,4 +8,5 @@ interface ActivitySignupRepository : JpaRepository<ActivitySignup, Long> {
     fun findByUserAndActivity(user: User, activity: VolunteerActivity): ActivitySignup?
     fun findByActivity(activity: VolunteerActivity): List<ActivitySignup>
     fun countByActivity(activity: VolunteerActivity): Long
+    fun findByUser(user: User): List<ActivitySignup>
 }

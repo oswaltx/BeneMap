@@ -11,6 +11,8 @@ interface VolunteerActivityRepository : JpaRepository<VolunteerActivity, Long> {
     // Spring generates the SQL automatically from the method name -> no SQL cod required
     fun existsBySourceUrl(sourceUrl: String): Boolean
 
+    fun findByCreatedBy(user: User): List<VolunteerActivity>
+
     // Pessimistic write lock so concurrent sign-up requests for the same activity are
     // serialized — prevents overbooking a maxParticipants-limited activity and prevents
     // a duplicate-signup race from hitting the DB unique constraint as an uncaught 500.

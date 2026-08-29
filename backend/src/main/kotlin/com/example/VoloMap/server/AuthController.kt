@@ -15,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -39,6 +41,8 @@ data class UserResponse(
 )
 data class UpdateProfileRequest(val photoUrl: String? = null, val websiteUrl: String? = null)
 data class ErrorResponse(val error: String)
+data class DeletionImpactResponse(val activityCount: Int)
+data class DeleteAccountRequest(val password: String)
 
 @RestController
 @RequestMapping("/auth")
@@ -46,7 +50,11 @@ class AuthController(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val authenticationManager: AuthenticationManager,
-    private val securityContextRepository: SecurityContextRepository
+    private val securityContextRepository: SecurityContextRepository,
+    private val volunteerActivityRepository: VolunteerActivityRepository,
+    private val activityRatingRepository: ActivityRatingRepository,
+    private val providerRatingRepository: ProviderRatingRepository,
+    private val activitySignupRepository: ActivitySignupRepository,
 ) {
 
     @PostMapping("/register")
@@ -120,6 +128,48 @@ class AuthController(
             ?.let { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
         userRepository.save(user)
         return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
+    }
+
+    @GetMapping("/me/deletion-impact")
+    fun deletionImpact(authentication: Authentication): ResponseEntity<DeletionImpactResponse> {
+        val user = userRepository.findByEmail(authentication.name)!!
+        val count = volunteerActivityRepository.findByCreatedBy(user).size
+        return ResponseEntity.ok(DeletionImpactResponse(count))
+    }
+
+    @Transactional
+    @DeleteMapping("/me")
+    fun deleteAccount(
+        @RequestBody req: DeleteAccountRequest,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        authentication: Authentication
+    ): ResponseEntity<*> {
+        val user = userRepository.findByEmail(authentication.name)!!
+        if (!passwordEncoder.matches(req.password, user.passwordHash)) {
+            return ResponseEntity.status(401).body(ErrorResponse("Passwort ist falsch."))
+        }
+
+        for (activity in volunteerActivityRepository.findByCreatedBy(user)) {
+            val activityRatings: List<ActivityRating> = activityRatingRepository.findByActivity(activity)
+            activityRatingRepository.deleteAll(activityRatings)
+            val activitySignups: List<ActivitySignup> = activitySignupRepository.findByActivity(activity)
+            activitySignupRepository.deleteAll(activitySignups)
+            volunteerActivityRepository.delete(activity)
+        }
+        val providerRatings: List<ProviderRating> = providerRatingRepository.findByProvider(user)
+        providerRatingRepository.deleteAll(providerRatings)
+        val userActivityRatings: List<ActivityRating> = activityRatingRepository.findByUser(user)
+        activityRatingRepository.deleteAll(userActivityRatings)
+        val userProviderRatings: List<ProviderRating> = providerRatingRepository.findByUser(user)
+        providerRatingRepository.deleteAll(userProviderRatings)
+        val userActivitySignups: List<ActivitySignup> = activitySignupRepository.findByUser(user)
+        activitySignupRepository.deleteAll(userActivitySignups)
+
+        userRepository.delete(user)
+
+        SecurityContextLogoutHandler().logout(request, response, authentication)
+        return ResponseEntity.noContent().build<Unit>()
     }
 
     private fun establishSession(
