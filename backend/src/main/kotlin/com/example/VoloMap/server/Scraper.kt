@@ -215,7 +215,7 @@ class Scraper(
             "Köln Mülheim"
         )
 
-        val categories = listOf("Unbekannt", "Umwelthilfe", "Ehre", "Soziales", "Bildung", "Nachbarschaft")
+        val categories = ENGAGEMENT_CATEGORIES.values.toList()
 
         // Grob im Umfeld von Köln
         val cologneCenterLat = 50.9375

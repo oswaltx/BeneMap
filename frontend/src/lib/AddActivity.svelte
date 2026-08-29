@@ -245,6 +245,7 @@
     }
 
     input,
+    select,
     textarea {
         font-family: inherit;
         font-size: 0.9rem;
@@ -256,6 +257,7 @@
     }
 
     input:focus,
+    select:focus,
     textarea:focus {
         outline: none;
         border-color: var(--color-primary);

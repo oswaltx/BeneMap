@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 class ActivityCategoriesTest {
 
     @Test
-    fun `activity categories match the fifteen scraper categories plus Sonstiges in order`() {
+    fun `activity categories match the sixteen scraper categories plus Sonstiges in order`() {
         val expected = listOf(
             "Bildung",
             "Familie & Nachbarschaft",
