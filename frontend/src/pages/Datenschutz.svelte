@@ -14,7 +14,9 @@
     <p>
         <strong>Konto:</strong> E-Mail-Adresse, Name, Passwort (als Hash gespeichert,
         niemals im Klartext), Rolle (Ehrenamtler oder Anbieter), optional eine
-        Profilbild-URL.
+        Profilbild-URL und eine Website-Adresse. Bei Anbietern werden Name,
+        Profilbild und Website-Adresse öffentlich bei ihren Aktivitäten
+        angezeigt.
     </p>
     <p>
         <strong>Aktivitäten:</strong> Name, Beschreibung, Adresse bzw. Standort
@@ -22,8 +24,11 @@
         Foto-URLs, Kategorie, optionale Teilnehmer-Obergrenze.
     </p>
     <p>
-        <strong>Bewertungen:</strong> von Nutzern abgegebene Bewertungen zu
-        Aktivitäten und Anbietern.
+        <strong>Bewertungen:</strong> Sternebewertung und optionaler
+        Freitext-Kommentar zu Aktivitäten und Anbietern. Ihre Bewertung wird
+        zusammen mit Ihrem Namen öffentlich bei der jeweiligen Aktivität bzw.
+        beim jeweiligen Anbieter angezeigt — auch für nicht angemeldete
+        Besucher.
     </p>
     <p>
         <strong>Anmeldungen:</strong> Wenn Sie sich für eine Aktivität anmelden,
@@ -75,9 +80,9 @@
     <h2>7. Ihre Rechte</h2>
     <p>
         Sie haben das Recht auf Auskunft, Berichtigung, Löschung und
-        Einschränkung der Verarbeitung Ihrer Daten sowie ein Widerspruchsrecht.
-        Wenden Sie sich dazu an die oben genannte E-Mail-Adresse. Außerdem
-        haben Sie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu
-        beschweren.
+        Einschränkung der Verarbeitung Ihrer Daten sowie ein Recht auf
+        Datenübertragbarkeit und ein Widerspruchsrecht. Wenden Sie sich dazu
+        an die oben genannte E-Mail-Adresse. Außerdem haben Sie das Recht,
+        sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.
     </p>
 </LegalPageLayout>

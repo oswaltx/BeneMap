@@ -3,7 +3,7 @@
 </script>
 
 <LegalPageLayout title="Impressum">
-    <h2>Angaben gemäß § 5 TMG</h2>
+    <h2>Angaben gemäß § 5 DDG</h2>
     <p>
         <span class="placeholder">[DEIN NAME]</span><br />
         <span class="placeholder">[DEINE ANSCHRIFT]</span>
