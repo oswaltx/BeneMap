@@ -4,6 +4,7 @@
 
 <footer>
     <Link href="/impressum" activeClass="active">Impressum</Link>
+    <Link href="/datenschutz" activeClass="active">Datenschutz</Link>
 </footer>
 
 <style>

@@ -8,6 +8,7 @@ import Profile from "./lib/Profile.svelte";
 import Login from "./pages/Login.svelte";
 import Register from "./pages/Register.svelte";
 import Impressum from "./pages/Impressum.svelte";
+import Datenschutz from "./pages/Datenschutz.svelte";
 
 export const route = writable<string>(window.location.pathname);
 
@@ -19,6 +20,7 @@ export const routes: Record<string, Component> = {
     "/login": Login,
     "/register": Register,
     "/impressum": Impressum,
+    "/datenschutz": Datenschutz,
 };
 
 export function navigate(path: string) {
