@@ -132,7 +132,7 @@
                 onclick={() => (selectedMarkerId = null)}
             >
                 <TileLayer
-                    url={'https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png'}
+                    url={`https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png?key=${import.meta.env.VITE_CARTO_API_KEY}`}
                     options={{ attribution }}
                 />
 
