@@ -11,7 +11,6 @@ kanban-plugin: board
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] Passwort-Reset
-- [ ] Datenschutzerklärung anpassen — Abschnitt "Speicherdauer" auf die neue Konto-Selbstlöschung verweisen statt auf Löschung per Kontakt-E-Mail
 ## Doing
 
 
@@ -36,6 +35,7 @@ kanban-plugin: board
 - [x] Kategorie-Dropdown — Anbieter wählen die Kategorie beim Anlegen/Bearbeiten aus einer festen Liste (dieselben Kategorien wie bei Städtischen Angeboten, plus "Sonstiges") statt sie frei einzutippen
 - [x] Impressum & Datenschutzerklärung — rechtliche Pflichtseiten (§5 DDG, DSGVO) verlinkt aus neuem Footer; Betreiberdaten als Platzhalter, vor echtem Livegang auszufüllen
 - [x] Konto-Selbstlöschung — jeder eingeloggte Nutzer (Ehrenamtler & Anbieter) kann sein Konto auf der Profilseite mit Passwort-Bestätigung endgültig löschen; kaskadiert über eigene Aktivitäten/Bewertungen/Anmeldungen, invalidiert alle Sessions des Kontos
+- [x] Datenschutzerklärung aktualisiert — Abschnitt "Speicherdauer" verweist jetzt auf die Konto-Selbstlöschung statt auf Löschung per Kontakt-E-Mail
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
