@@ -7,6 +7,7 @@ import AddActivity from "./lib/AddActivity.svelte";
 import Profile from "./lib/Profile.svelte";
 import Login from "./pages/Login.svelte";
 import Register from "./pages/Register.svelte";
+import Impressum from "./pages/Impressum.svelte";
 
 export const route = writable<string>(window.location.pathname);
 
@@ -17,17 +18,14 @@ export const routes: Record<string, Component> = {
     "/profile": Profile,
     "/login": Login,
     "/register": Register,
+    "/impressum": Impressum,
 };
 
 export function navigate(path: string) {
     history.pushState({}, "", path);
     route.set(path);
-    (window as any)._paq?.push(['setCustomUrl', path]);
-    (window as any)._paq?.push(['trackPageView']);
 }
 
 window.addEventListener("popstate", () => {
     route.set(window.location.pathname);
-    (window as any)._paq?.push(['setCustomUrl', window.location.pathname]);
-    (window as any)._paq?.push(['trackPageView']);
 });
