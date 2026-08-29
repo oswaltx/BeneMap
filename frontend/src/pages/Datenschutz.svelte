@@ -46,9 +46,11 @@
 
     <h2>4. Speicherdauer</h2>
     <p>
-        Ihre Daten werden gespeichert, bis Sie per E-Mail an die oben genannte
-        Adresse die Löschung Ihres Kontos verlangen. Eine automatisierte
-        Selbstlöschfunktion steht aktuell noch nicht zur Verfügung.
+        Ihre Daten werden gespeichert, bis Sie Ihr Konto löschen. Sie können
+        Ihr Konto jederzeit selbst über Ihre Profilseite ("Konto löschen")
+        endgültig löschen — dabei werden auch Ihre eigenen Aktivitäten,
+        Bewertungen und Anmeldungen entfernt. Alternativ können Sie sich auch
+        per E-Mail an die oben genannte Adresse wenden.
     </p>
 
     <h2>5. Cookies</h2>
