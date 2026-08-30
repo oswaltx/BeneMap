@@ -44,12 +44,12 @@
 
             <label>
                 Neues Passwort
-                <input type="password" bind:value={newPassword} required minlength="8" />
+                <input type="password" bind:value={newPassword} required minlength="8" maxlength="72" />
             </label>
 
             <label>
                 Passwort bestätigen
-                <input type="password" bind:value={confirmPassword} required minlength="8" />
+                <input type="password" bind:value={confirmPassword} required minlength="8" maxlength="72" />
             </label>
 
             <button type="submit" disabled={submitting}>

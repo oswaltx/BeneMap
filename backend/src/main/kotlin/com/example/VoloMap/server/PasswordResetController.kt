@@ -1,11 +1,9 @@
 package com.example.VoloMap.server
 
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Size
-import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -17,7 +15,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.UUID
 
-data class ForgotPasswordRequest(val email: String)
+data class ForgotPasswordRequest(@field:Email @field:Size(max = 254) val email: String)
 data class ResetPasswordRequest(val token: String, @field:Size(min = 8, max = 72) val newPassword: String)
 
 @RestController
@@ -25,14 +23,12 @@ class PasswordResetController(
     private val userRepository: UserRepository,
     private val passwordResetTokenRepository: PasswordResetTokenRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val mailSender: JavaMailSender,
+    private val mailer: PasswordResetMailer,
     private val rateLimiter: ForgotPasswordRateLimiter,
     private val sessionRegistry: SessionRegistry,
 ) {
-    private val logger = LoggerFactory.getLogger(PasswordResetController::class.java)
-
     @PostMapping("/auth/forgot-password")
-    fun forgotPassword(@RequestBody req: ForgotPasswordRequest): ResponseEntity<*> {
+    fun forgotPassword(@Valid @RequestBody req: ForgotPasswordRequest): ResponseEntity<*> {
         val email = req.email.trim().lowercase()
         val waitSeconds = rateLimiter.checkAndRecord(email)
         if (waitSeconds != null) {
@@ -49,7 +45,7 @@ class PasswordResetController(
                 expiresAt = Instant.now().plus(Duration.ofMinutes(30)),
             )
             passwordResetTokenRepository.save(token)
-            sendResetEmail(user.email, token.token)
+            mailer.send(user.email, token.token)
         }
         return ResponseEntity.ok().build<Unit>()
     }
@@ -75,24 +71,5 @@ class PasswordResetController(
             }
 
         return ResponseEntity.noContent().build<Unit>()
-    }
-
-    private fun sendResetEmail(email: String, token: String) {
-        try {
-            val message = SimpleMailMessage()
-            message.setTo(email)
-            message.setSubject("Passwort zurücksetzen — Benemap")
-            message.setText(
-                "Hallo,\n\n" +
-                    "du hast angefragt, dein Passwort für Benemap zurückzusetzen. " +
-                    "Klicke auf den folgenden Link, um ein neues Passwort zu setzen " +
-                    "(gültig für 30 Minuten):\n\n" +
-                    "http://localhost:5173/reset-password?token=$token\n\n" +
-                    "Falls du das nicht warst, kannst du diese E-Mail ignorieren."
-            )
-            mailSender.send(message)
-        } catch (e: Exception) {
-            logger.warn("Failed to send password reset email to $email", e)
-        }
     }
 }

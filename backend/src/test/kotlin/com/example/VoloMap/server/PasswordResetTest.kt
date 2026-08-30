@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.timeout
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -74,7 +75,7 @@ class PasswordResetTest {
 
         val tokens = passwordResetTokenRepository.findByUser(user)
         assertEquals(1, tokens.size)
-        verify(mailSender).send(any<SimpleMailMessage>())
+        verify(mailSender, timeout(2000)).send(any<SimpleMailMessage>())
     }
 
     @Test
@@ -194,6 +195,9 @@ class PasswordResetTest {
                 .content("""{"email":"resetsessions1@example.com","password":"geheim123"}""")
         ).andReturn()
         val secondSession = secondLoginResult.request.session as MockHttpSession
+
+        mockMvc.perform(get("/auth/me").session(firstSession)).andExpect(status().isOk)
+        mockMvc.perform(get("/auth/me").session(secondSession)).andExpect(status().isOk)
 
         val user = userRepository.findByEmail("resetsessions1@example.com")!!
         val token = passwordResetTokenRepository.save(

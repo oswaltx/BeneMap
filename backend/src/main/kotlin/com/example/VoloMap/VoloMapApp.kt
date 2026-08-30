@@ -4,8 +4,10 @@ import com.example.VoloMap.server.Scraper
 import com.example.VoloMap.server.VolunteerActivityRepository
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.scheduling.annotation.EnableAsync
 
 @SpringBootApplication
+@EnableAsync
 class VoloMapApp
 
 fun main(args: Array<String>) {
