@@ -11,6 +11,7 @@ kanban-plugin: board
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] E-Mail-Verifizierung bei Registrierung — vor Beta-Veröffentlichung: verhindert getippte/falsche E-Mail-Adressen, die sonst z.B. Passwort-Reset für immer unbrauchbar machen würden
+- [ ] "Passwort vergessen?"-Link im Konto-löschen-Dialog — Nutzer, die ihr Passwort zur Bestätigung nicht wissen, sitzen sonst fest
 ## Doing
 
 
