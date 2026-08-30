@@ -5,6 +5,7 @@
 /backend/.gradle/
 /backend/logs/
 /backend/data/
+/data/
 *.log
 
 # IntelliJ / IDE files - nutzerspezifische Dateien ignorieren, Projektkonfiguration tracken
