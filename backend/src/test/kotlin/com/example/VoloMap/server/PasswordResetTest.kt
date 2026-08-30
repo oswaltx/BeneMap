@@ -1,5 +1,6 @@
 package com.example.VoloMap.server
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -38,6 +39,12 @@ class PasswordResetTest {
 
     @BeforeEach
     fun cleanUp() {
+        passwordResetTokenRepository.deleteAll()
+        userRepository.deleteAll()
+    }
+
+    @AfterEach
+    fun tearDown() {
         passwordResetTokenRepository.deleteAll()
         userRepository.deleteAll()
     }
