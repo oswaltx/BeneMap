@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.Duration
 import java.time.Instant
 
 data class RatingRequest(
@@ -38,6 +39,7 @@ class RatingController(
     private val userRepository: UserRepository,
     private val activityRatingRepository: ActivityRatingRepository,
     private val providerRatingRepository: ProviderRatingRepository,
+    private val rateLimiter: RateLimiter,
 ) {
 
     @PostMapping("/activities/{id}/ratings")
@@ -45,9 +47,12 @@ class RatingController(
         @PathVariable id: Long,
         @Valid @RequestBody req: RatingRequest,
         authentication: Authentication
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<*> {
+        if (!rateLimiter.isAllowed("rating:${authentication.name}", 30, Duration.ofMinutes(60))) {
+            return ResponseEntity.status(429).body(ErrorResponse("Zu viele Anfragen. Bitte versuche es später erneut."))
+        }
         val activity = activityRepository.findById(id).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+            ?: return ResponseEntity.notFound().build<Any>()
         val user = userRepository.findByEmail(authentication.name)!!
         val existing = activityRatingRepository.findByUserAndActivity(user, activity)
         if (existing != null) {
@@ -59,7 +64,7 @@ class RatingController(
                 ActivityRating(user = user, activity = activity, stars = req.stars, comment = req.comment)
             )
         }
-        return ResponseEntity.ok().build()
+        return ResponseEntity.ok().build<Any>()
     }
 
     @GetMapping("/activities/{id}/ratings")
@@ -89,10 +94,13 @@ class RatingController(
         @PathVariable id: Long,
         @Valid @RequestBody req: RatingRequest,
         authentication: Authentication
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<*> {
+        if (!rateLimiter.isAllowed("rating:${authentication.name}", 30, Duration.ofMinutes(60))) {
+            return ResponseEntity.status(429).body(ErrorResponse("Zu viele Anfragen. Bitte versuche es später erneut."))
+        }
         val provider = userRepository.findById(id).orElse(null)
         if (provider == null || provider.role != Role.ANBIETER) {
-            return ResponseEntity.notFound().build()
+            return ResponseEntity.notFound().build<Any>()
         }
         val user = userRepository.findByEmail(authentication.name)!!
         val existing = providerRatingRepository.findByUserAndProvider(user, provider)
@@ -105,7 +113,7 @@ class RatingController(
                 ProviderRating(user = user, provider = provider, stars = req.stars, comment = req.comment)
             )
         }
-        return ResponseEntity.ok().build()
+        return ResponseEntity.ok().build<Any>()
     }
 
     @GetMapping("/providers/{id}/ratings")

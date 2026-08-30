@@ -7,6 +7,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 
 class MainControllerAddActivityTest {
@@ -33,10 +34,10 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val activity = VolunteerActivity(name = "Test", addressText = "Domkloster 4, Köln")
 
-        val result = controller.addActivity(activity, authenticationFor(provider.email))
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
 
         assertEquals(50.9413, result.body?.latitude)
         assertEquals(6.9583, result.body?.longitude)
@@ -53,10 +54,10 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val activity = VolunteerActivity(name = "Test", addressText = "Nonexistent Place XYZ")
 
-        val result = controller.addActivity(activity, authenticationFor(provider.email))
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
 
         assertEquals(200, result.statusCode.value())
         assertNull(result.body?.latitude)
@@ -71,7 +72,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0)
 
         controller.addActivity(activity, authenticationFor(provider.email))
@@ -87,11 +88,11 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val rawUrls = (1..12).joinToString("\n") { "https://example.com/photo$it.jpg" }
         val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0, photoUrls = rawUrls)
 
-        val result = controller.addActivity(activity, authenticationFor(provider.email))
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
 
         val storedLines = result.body?.photoUrls?.lines() ?: emptyList()
         assertEquals(10, storedLines.size)
@@ -106,10 +107,10 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0, maxParticipants = 0)
 
-        val result = controller.addActivity(activity, authenticationFor(provider.email))
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
 
         assertNull(result.body?.maxParticipants)
     }
@@ -122,10 +123,10 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0, photoUrls = "   \n  \n")
 
-        val result = controller.addActivity(activity, authenticationFor(provider.email))
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
 
         assertNull(result.body?.photoUrls)
     }
@@ -138,7 +139,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val activity = VolunteerActivity(
             name = "Test",
             latitude = 1.0,
@@ -146,7 +147,7 @@ class MainControllerAddActivityTest {
             sourceUrl = "javascript:alert(1)"
         )
 
-        val result = controller.addActivity(activity, authenticationFor(provider.email))
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
 
         assertNull(result.body?.sourceUrl)
     }
@@ -159,7 +160,7 @@ class MainControllerAddActivityTest {
         whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val activity = VolunteerActivity(
             name = "Test",
             latitude = 1.0,
@@ -170,7 +171,7 @@ class MainControllerAddActivityTest {
             sourceContactPhone = "000"
         )
 
-        val result = controller.addActivity(activity, authenticationFor(provider.email))
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
 
         assertNull(result.body?.sourceContactName)
         assertNull(result.body?.sourceContactWebsite)

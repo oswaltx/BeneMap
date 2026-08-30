@@ -50,7 +50,7 @@ class MainControllerEditActivityTest {
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, activityRatingRepository, mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, activityRatingRepository, mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Neu", addressText = "Domkloster 4, Köln")
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
@@ -72,7 +72,7 @@ class MainControllerEditActivityTest {
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Neu", maxParticipants = 8)
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
@@ -91,7 +91,7 @@ class MainControllerEditActivityTest {
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Neu", maxParticipants = -3)
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
@@ -114,7 +114,7 @@ class MainControllerEditActivityTest {
         whenever(geocodingService.geocode("Neue Adresse")).thenReturn(Pair(50.0, 6.0))
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Alt", addressText = "Neue Adresse")
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
@@ -139,7 +139,7 @@ class MainControllerEditActivityTest {
         whenever(geocodingService.geocode(any<String>())).thenReturn(null)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Alt", addressText = "Nicht auffindbar")
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
@@ -159,7 +159,7 @@ class MainControllerEditActivityTest {
         whenever(repository.findById(5)).thenReturn(Optional.of(existing))
         whenever(userRepository.findByEmail(otherAnbieter.email)).thenReturn(otherAnbieter)
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Gehackt")
 
         val result = controller.updateActivity(5, req, authenticationFor(otherAnbieter.email))
@@ -175,7 +175,7 @@ class MainControllerEditActivityTest {
         val userRepository: UserRepository = mock()
         whenever(repository.findById(999)).thenReturn(Optional.empty())
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Egal")
 
         val result = controller.updateActivity(999, req, authenticationFor(owner.email))
@@ -194,7 +194,7 @@ class MainControllerEditActivityTest {
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Alt", dateTime = null)
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
@@ -211,7 +211,7 @@ class MainControllerEditActivityTest {
         whenever(repository.findById(5)).thenReturn(Optional.of(existing))
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Übernommen")
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))
@@ -230,7 +230,7 @@ class MainControllerEditActivityTest {
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val rawUrls = (1..12).joinToString("\n") { "https://example.com/photo$it.jpg" }
         val req = UpdateActivityRequest(name = "Alt", photoUrls = rawUrls)
 
@@ -253,7 +253,7 @@ class MainControllerEditActivityTest {
         whenever(userRepository.findByEmail(owner.email)).thenReturn(owner)
         whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
 
-        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock())
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
         val req = UpdateActivityRequest(name = "Alt")
 
         val result = controller.updateActivity(5, req, authenticationFor(owner.email))

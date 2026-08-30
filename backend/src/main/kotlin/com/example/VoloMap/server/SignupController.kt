@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.Duration
 
 data class SignupEntry(val name: String, val email: String)
 
@@ -23,6 +24,7 @@ class SignupController(
     private val activityRepository: VolunteerActivityRepository,
     private val userRepository: UserRepository,
     private val activitySignupRepository: ActivitySignupRepository,
+    private val rateLimiter: RateLimiter,
 ) {
 
     @Transactional
@@ -31,6 +33,9 @@ class SignupController(
         @PathVariable id: Long,
         authentication: Authentication
     ): ResponseEntity<*> {
+        if (!rateLimiter.isAllowed("signup:${authentication.name}", 30, Duration.ofMinutes(60))) {
+            return ResponseEntity.status(429).body(ErrorResponse("Zu viele Anfragen. Bitte versuche es später erneut."))
+        }
         val activity = activityRepository.findByIdForUpdate(id)
             ?: return ResponseEntity.notFound().build<Any>()
         val user = userRepository.findByEmail(authentication.name)!!

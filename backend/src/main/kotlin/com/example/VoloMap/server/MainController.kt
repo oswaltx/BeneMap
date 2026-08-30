@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -22,6 +23,7 @@ class MainController(
     private val activityRatingRepository: ActivityRatingRepository,
     private val providerRatingRepository: ProviderRatingRepository,
     private val activitySignupRepository: ActivitySignupRepository,
+    private val rateLimiter: RateLimiter,
 ) {
 
     @GetMapping("/")
@@ -99,7 +101,10 @@ class MainController(
     fun addActivity(
         @RequestBody activity: VolunteerActivity,
         authentication: Authentication
-    ): ResponseEntity<VolunteerActivity> {
+    ): ResponseEntity<*> {
+        if (!rateLimiter.isAllowed("add-activity:${authentication.name}", 20, Duration.ofMinutes(60))) {
+            return ResponseEntity.status(429).body(ErrorResponse("Zu viele Anfragen. Bitte versuche es später erneut."))
+        }
         activity.id = 0
         activity.sourceUrl = null
         activity.sourceContactName = null
@@ -126,6 +131,9 @@ class MainController(
         @RequestBody req: AddRecurringActivityRequest,
         authentication: Authentication
     ): ResponseEntity<*> {
+        if (!rateLimiter.isAllowed("add-activity:${authentication.name}", 20, Duration.ofMinutes(60))) {
+            return ResponseEntity.status(429).body(ErrorResponse("Zu viele Anfragen. Bitte versuche es später erneut."))
+        }
         if (req.recurrenceIntervalDays < 1) {
             return ResponseEntity.badRequest().body(ErrorResponse("recurrenceIntervalDays muss mindestens 1 sein."))
         }

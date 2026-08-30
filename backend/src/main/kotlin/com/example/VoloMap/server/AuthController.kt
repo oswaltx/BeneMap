@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.Duration
 
 data class RegisterRequest(
     @field:Email val email: String,
@@ -58,6 +59,7 @@ class AuthController(
     private val activitySignupRepository: ActivitySignupRepository,
     private val passwordResetTokenRepository: PasswordResetTokenRepository,
     private val sessionRegistry: SessionRegistry,
+    private val rateLimiter: RateLimiter,
 ) {
 
     @PostMapping("/register")
@@ -66,6 +68,9 @@ class AuthController(
         request: HttpServletRequest,
         response: HttpServletResponse
     ): ResponseEntity<*> {
+        if (!rateLimiter.isAllowed("register:${request.remoteAddr}", 5, Duration.ofMinutes(60))) {
+            return ResponseEntity.status(429).body(ErrorResponse("Zu viele Anfragen. Bitte versuche es später erneut."))
+        }
         val email = req.email.trim().lowercase()
         if (userRepository.existsByEmail(email)) {
             return ResponseEntity.status(409).body(ErrorResponse("E-Mail bereits registriert."))
@@ -89,6 +94,9 @@ class AuthController(
         request: HttpServletRequest,
         response: HttpServletResponse
     ): ResponseEntity<*> {
+        if (!rateLimiter.isAllowed("login:${request.remoteAddr}", 10, Duration.ofMinutes(5))) {
+            return ResponseEntity.status(429).body(ErrorResponse("Zu viele Anfragen. Bitte versuche es später erneut."))
+        }
         val email = req.email.trim().lowercase()
         try {
             establishSession(email, req.password, request, response)
