@@ -35,7 +35,8 @@ kanban-plugin: board
 - [x] Impressum & Datenschutzerklärung — rechtliche Pflichtseiten (§5 DDG, DSGVO) verlinkt aus neuem Footer; Betreiberdaten als Platzhalter, vor echtem Livegang auszufüllen
 - [x] Konto-Selbstlöschung — jeder eingeloggte Nutzer (Ehrenamtler & Anbieter) kann sein Konto auf der Profilseite mit Passwort-Bestätigung endgültig löschen; kaskadiert über eigene Aktivitäten/Bewertungen/Anmeldungen, invalidiert alle Sessions des Kontos
 - [x] Datenschutzerklärung aktualisiert — Abschnitt "Speicherdauer" verweist jetzt auf die Konto-Selbstlöschung statt auf Löschung per Kontakt-E-Mail
-- [x] Passwort-Reset — Nutzer können ihr Passwort per E-Mail-Link zurücksetzen; Rate-Limiting (60s/5min), Reset invalidiert alle anderen Sessions des Kontos; SMTP-Zugangsdaten (Brevo) noch nicht hinterlegt, App läuft trotzdem normal weiter
+- [x] Passwort-Reset — Nutzer können ihr Passwort per E-Mail-Link zurücksetzen; Rate-Limiting (60s/5min), Reset invalidiert alle anderen Sessions des Kontos; SMTP über Brevo (noreply@benemap.org) läuft, live verifiziert
+- [x] Rate-Limiting auf sensiblen Endpoints — Login (10/5min/IP), Registrierung (5/60min/IP), Aktivität anlegen (20/60min/Nutzer), Bewertungen & Anmeldungen (30/60min/Nutzer), Abuse-Schutz vor Livegang
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
