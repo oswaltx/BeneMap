@@ -123,6 +123,25 @@ class AuthControllerTest {
     }
 
     @Test
+    fun `forces a scheme onto a photo URL without one`() {
+        val register = mockMvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"gustav@example.com","password":"geheim123","name":"Gustav","role":"ANBIETER"}""")
+        ).andReturn()
+        val session = register.request.session as MockHttpSession
+
+        mockMvc.perform(
+            put("/auth/me")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"photoUrl":"javascript:alert(1)"}""")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.photoUrl").value("https://javascript:alert(1)"))
+    }
+
+    @Test
     fun `updating profile without a session is unauthorized`() {
         mockMvc.perform(
             put("/auth/me")

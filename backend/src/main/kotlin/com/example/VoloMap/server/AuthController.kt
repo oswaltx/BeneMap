@@ -135,6 +135,7 @@ class AuthController(
     ): ResponseEntity<UserResponse> {
         val user = userRepository.findByEmail(authentication.name)!!
         user.photoUrl = req.photoUrl?.trim()?.ifBlank { null }
+            ?.let { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
         user.websiteUrl = req.websiteUrl?.trim()?.ifBlank { null }
             ?.let { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
         userRepository.save(user)

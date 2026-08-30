@@ -285,7 +285,11 @@ private fun normalizeMaxParticipants(value: Int?): Int? = value?.takeIf { it >= 
 
 private fun parsePhotoUrls(raw: String?): List<String> {
     if (raw.isNullOrBlank()) return emptyList()
-    return raw.lines().map { it.trim() }.filter { it.isNotEmpty() }.take(MAX_PHOTO_URLS)
+    return raw.lines()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .map { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
+        .take(MAX_PHOTO_URLS)
 }
 
 private fun normalizePhotoUrls(raw: String?): String? {

@@ -100,6 +100,28 @@ class MainControllerAddActivityTest {
     }
 
     @Test
+    fun `forces a scheme onto photo URLs without one`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true))
+        val activity = VolunteerActivity(
+            name = "Test",
+            latitude = 1.0,
+            longitude = 2.0,
+            photoUrls = "javascript:alert(1)\nexample.com/photo.jpg"
+        )
+
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
+
+        val storedLines = result.body?.photoUrls?.lines() ?: emptyList()
+        assertEquals(listOf("https://javascript:alert(1)", "https://example.com/photo.jpg"), storedLines)
+    }
+
+    @Test
     fun `normalizes a non-positive maxParticipants to null (unlimited)`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()
