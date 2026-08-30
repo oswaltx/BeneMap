@@ -29,6 +29,7 @@
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         implementation("org.springframework.boot:spring-boot-starter-security")
         implementation("org.springframework.boot:spring-boot-starter-validation")
+        implementation("org.springframework.boot:spring-boot-starter-mail")
         implementation("org.jsoup:jsoup:1.17.2") //Scraping
         implementation("org.json:json:20240303")
         implementation("tools.jackson.module:jackson-module-kotlin:3.0.0")

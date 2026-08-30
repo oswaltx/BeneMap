@@ -73,7 +73,7 @@ class SecurityConfig(
             .addFilterAfter(UserExistsFilter(userRepository), SecurityContextHolderFilter::class.java)
             .authorizeHttpRequests {
                 it.requestMatchers(HttpMethod.GET, "/", "/markers", "/categories", "/activities/*/ratings", "/providers/*/ratings", "/activities/*/signups").permitAll()
-                it.requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                it.requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/forgot-password").permitAll()
                 it.requestMatchers(HttpMethod.POST, "/add", "/add-recurring").hasRole("ANBIETER")
                 it.requestMatchers(HttpMethod.PUT, "/activities/*").hasRole("ANBIETER")
                 it.requestMatchers(HttpMethod.DELETE, "/activities/*").hasRole("ANBIETER")
