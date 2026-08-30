@@ -2,6 +2,7 @@ package com.example.VoloMap.server
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,8 +15,10 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mock.web.MockHttpSession
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Duration
@@ -49,12 +52,13 @@ class PasswordResetTest {
         userRepository.deleteAll()
     }
 
-    private fun register(email: String) {
-        mockMvc.perform(
+    private fun register(email: String): MockHttpSession {
+        val result = mockMvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"email":"$email","password":"geheim123","name":"Test","role":"USER"}""")
-        )
+        ).andReturn()
+        return result.request.session as MockHttpSession
     }
 
     @Test
@@ -119,5 +123,90 @@ class PasswordResetTest {
         val tokens = passwordResetTokenRepository.findByUser(user)
         assertEquals(1, tokens.size)
         assertTrue(tokens[0].id != staleToken.id)
+    }
+
+    @Test
+    fun `full flow - request reset, use token, login with new password, old password stops working`() {
+        register("fullflow1@example.com")
+        val user = userRepository.findByEmail("fullflow1@example.com")!!
+
+        mockMvc.perform(
+            post("/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"fullflow1@example.com"}""")
+        ).andExpect(status().isOk)
+
+        val resetToken = passwordResetTokenRepository.findByUser(user)[0].token
+
+        mockMvc.perform(
+            post("/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"token":"$resetToken","newPassword":"neuesPasswort456"}""")
+        ).andExpect(status().isNoContent)
+
+        assertNull(passwordResetTokenRepository.findByToken(resetToken))
+
+        mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"fullflow1@example.com","password":"geheim123"}""")
+        ).andExpect(status().isUnauthorized)
+
+        mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"fullflow1@example.com","password":"neuesPasswort456"}""")
+        ).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `reset with an invalid token is rejected`() {
+        mockMvc.perform(
+            post("/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"token":"does-not-exist","newPassword":"neuesPasswort456"}""")
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.error").value("Link ist ungültig oder abgelaufen."))
+    }
+
+    @Test
+    fun `reset with an expired token is rejected`() {
+        register("expiredtoken1@example.com")
+        val user = userRepository.findByEmail("expiredtoken1@example.com")!!
+        val expired = passwordResetTokenRepository.save(
+            PasswordResetToken(user = user, token = "already-expired-token", expiresAt = Instant.now().minus(Duration.ofMinutes(1)))
+        )
+
+        mockMvc.perform(
+            post("/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"token":"${expired.token}","newPassword":"neuesPasswort456"}""")
+        ).andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `resetting the password invalidates every other active session of the account`() {
+        val firstSession = register("resetsessions1@example.com")
+        val secondLoginResult = mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"resetsessions1@example.com","password":"geheim123"}""")
+        ).andReturn()
+        val secondSession = secondLoginResult.request.session as MockHttpSession
+
+        val user = userRepository.findByEmail("resetsessions1@example.com")!!
+        val token = passwordResetTokenRepository.save(
+            PasswordResetToken(user = user, token = "session-invalidation-token", expiresAt = Instant.now().plus(Duration.ofMinutes(30)))
+        )
+
+        mockMvc.perform(
+            post("/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"token":"${token.token}","newPassword":"neuesPasswort456"}""")
+        ).andExpect(status().isNoContent)
+
+        mockMvc.perform(get("/auth/me").session(firstSession)).andExpect(status().isUnauthorized)
+        mockMvc.perform(get("/auth/me").session(secondSession)).andExpect(status().isUnauthorized)
     }
 }

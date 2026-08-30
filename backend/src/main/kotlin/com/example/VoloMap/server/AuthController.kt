@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
 import org.springframework.security.web.context.SecurityContextRepository
@@ -55,6 +56,8 @@ class AuthController(
     private val activityRatingRepository: ActivityRatingRepository,
     private val providerRatingRepository: ProviderRatingRepository,
     private val activitySignupRepository: ActivitySignupRepository,
+    private val passwordResetTokenRepository: PasswordResetTokenRepository,
+    private val sessionRegistry: SessionRegistry,
 ) {
 
     @PostMapping("/register")
@@ -165,6 +168,7 @@ class AuthController(
         providerRatingRepository.deleteAll(userProviderRatings)
         val userActivitySignups: List<ActivitySignup> = activitySignupRepository.findByUser(user)
         activitySignupRepository.deleteAll(userActivitySignups)
+        passwordResetTokenRepository.deleteAll(passwordResetTokenRepository.findByUser(user))
 
         userRepository.delete(user)
 
@@ -187,5 +191,11 @@ class AuthController(
             request.changeSessionId()
         }
         securityContextRepository.saveContext(context, request, response)
+        // AuthController authenticates directly via AuthenticationManager instead of going
+        // through Spring Security's standard login filter chain, so SessionManagementFilter
+        // never gets a chance to register this session with the SessionRegistry (it only
+        // does so for authentications it observes before the SecurityContext is persisted).
+        // Register explicitly so password-reset session invalidation can find this session.
+        sessionRegistry.registerNewSession(request.session.id, authResult.principal!!)
     }
 }
