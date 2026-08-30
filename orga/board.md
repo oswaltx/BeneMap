@@ -10,6 +10,7 @@ kanban-plugin: board
 - [ ] Research: Existing volunteer map solutions
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Zeitaufwand und Verbindlichkeit
+- [ ] E-Mail-Verifizierung bei Registrierung — vor Beta-Veröffentlichung: verhindert getippte/falsche E-Mail-Adressen, die sonst z.B. Passwort-Reset für immer unbrauchbar machen würden
 ## Doing
 
 
