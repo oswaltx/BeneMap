@@ -1,48 +1,41 @@
 <script lang="ts">
-    import { login } from "../auth";
-    import { navigate } from "../router";
-    import Link from "../lib/Link.svelte";
+    import { requestPasswordReset } from "../auth";
 
     let email = "";
-    let password = "";
     let submitting = false;
-    let errorMessage: string | null = null;
+    let message: string | null = null;
+    let messageIsWarning = false;
 
     async function handleSubmit() {
         submitting = true;
-        errorMessage = null;
-        const error = await login(email, password);
+        message = null;
+        const error = await requestPasswordReset(email);
         submitting = false;
         if (error) {
-            errorMessage = error;
+            message = error;
+            messageIsWarning = true;
         } else {
-            navigate("/");
+            message = "Falls ein Konto mit dieser E-Mail existiert, wurde eine E-Mail mit einem Link zum Zurücksetzen verschickt.";
+            messageIsWarning = false;
         }
     }
 </script>
 
 <div class="page">
     <form on:submit|preventDefault={handleSubmit}>
-        <h2>Login</h2>
+        <h2>Passwort vergessen</h2>
 
         <label>
             E-Mail
             <input type="email" bind:value={email} required />
         </label>
 
-        <label>
-            Passwort
-            <input type="password" bind:value={password} required />
-        </label>
-
         <button type="submit" disabled={submitting}>
-            {submitting ? "Wird geprüft…" : "Einloggen"}
+            {submitting ? "Wird gesendet…" : "Link anfordern"}
         </button>
 
-        <Link href="/forgot-password">Passwort vergessen?</Link>
-
-        {#if errorMessage}
-            <p class="warning">{errorMessage}</p>
+        {#if message}
+            <p class:warning={messageIsWarning}>{message}</p>
         {/if}
     </form>
 </div>

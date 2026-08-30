@@ -77,6 +77,30 @@ export async function logout(): Promise<void> {
     currentUser.set(null);
 }
 
+export async function requestPasswordReset(email: string): Promise<string | null> {
+    const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+        return extractError(res, "Anfrage fehlgeschlagen.");
+    }
+    return null;
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<string | null> {
+    const res = await fetch(`${API_BASE}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, newPassword }),
+    });
+    if (!res.ok) {
+        return extractError(res, "Zurücksetzen fehlgeschlagen.");
+    }
+    return null;
+}
+
 export async function getDeletionImpact(): Promise<{ activityCount: number }> {
     const res = await fetch(`${API_BASE}/auth/me/deletion-impact`, { credentials: "include" });
     if (!res.ok) {
