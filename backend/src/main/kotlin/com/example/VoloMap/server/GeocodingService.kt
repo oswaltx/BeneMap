@@ -15,7 +15,7 @@ class GeocodingService {
             val url = "https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=1"
 
             val response = Jsoup.connect(url)
-                .userAgent("VoloMap-Scraper/1.0 (TH Köln; david_ari_ikerimma.oswalt@smail.th-koeln.de)")
+                .userAgent("BeneMap/1.0 (+https://benemap.org; contact: noreply@benemap.org)")
                 .ignoreContentType(true)
                 .get()
                 .body()
