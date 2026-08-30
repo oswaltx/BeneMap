@@ -14,6 +14,9 @@ kanban-plugin: board
 - [ ] "Passwort vergessen?"-Link im Konto-löschen-Dialog — Nutzer, die ihr Passwort zur Bestätigung nicht wissen, sitzen sonst fest
 - [ ] About-Seite mit Inhalt füllen — aktuell komplett leer (`About.svelte`)
 - [ ] Backup-Strategie für die H2-Datenbankdatei — aktuell keine automatisierte Sicherung
+- [ ] Lizenz für das Projekt festlegen
+- [ ] Contribution-Regeln schreiben (CONTRIBUTING.md)
+- [ ] Projekt als öffentliches Repo auf GitHub hochladen
 ## Doing
 
 
