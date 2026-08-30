@@ -16,7 +16,7 @@ kanban-plugin: board
 - [ ] Backup-Strategie für die H2-Datenbankdatei — aktuell keine automatisierte Sicherung
 - [ ] Lizenz für das Projekt festlegen
 - [ ] Contribution-Regeln schreiben (CONTRIBUTING.md)
-- [ ] Projekt als öffentliches Repo auf GitHub hochladen
+- [ ] Domain auf dem Uberspace-Server hinzufügen
 ## Doing
 
 
@@ -44,6 +44,7 @@ kanban-plugin: board
 - [x] Datenschutzerklärung aktualisiert — Abschnitt "Speicherdauer" verweist jetzt auf die Konto-Selbstlöschung statt auf Löschung per Kontakt-E-Mail
 - [x] Passwort-Reset — Nutzer können ihr Passwort per E-Mail-Link zurücksetzen; Rate-Limiting (60s/5min), Reset invalidiert alle anderen Sessions des Kontos; SMTP über Brevo (noreply@benemap.org) läuft, live verifiziert
 - [x] Rate-Limiting auf sensiblen Endpoints — Login (10/5min/IP), Registrierung (5/60min/IP), Aktivität anlegen (20/60min/Nutzer), Bewertungen & Anmeldungen (30/60min/Nutzer), Abuse-Schutz vor Livegang
+- [x] Projekt als öffentliches Repo auf GitHub hochgeladen — github.com/oswaltx/BeneMap, Codeberg-Remote bleibt parallel bestehen (Hinweis-Bio wegen KI-Code-Richtlinie)
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
