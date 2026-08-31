@@ -11,6 +11,7 @@ import Impressum from "./pages/Impressum.svelte";
 import Datenschutz from "./pages/Datenschutz.svelte";
 import ForgotPassword from "./pages/ForgotPassword.svelte";
 import ResetPassword from "./pages/ResetPassword.svelte";
+import VerifyEmail from "./pages/VerifyEmail.svelte";
 
 export const route = writable<string>(window.location.pathname);
 
@@ -25,6 +26,7 @@ export const routes: Record<string, Component> = {
     "/datenschutz": Datenschutz,
     "/forgot-password": ForgotPassword,
     "/reset-password": ResetPassword,
+    "/verify-email": VerifyEmail,
 };
 
 export function navigate(path: string) {

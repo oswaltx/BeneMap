@@ -27,17 +27,29 @@ class MainControllerSecurityTest {
     @Autowired
     lateinit var userRepository: UserRepository
 
+    @Autowired
+    lateinit var emailVerificationTokenRepository: EmailVerificationTokenRepository
+
     @BeforeEach
     fun cleanUp() {
         activityRepository.deleteAll()
+        emailVerificationTokenRepository.deleteAll()
         userRepository.deleteAll()
     }
 
     private fun registerAndSession(email: String, role: String): MockHttpSession {
-        val result = mockMvc.perform(
+        mockMvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"email":"$email","password":"geheim123","name":"Test","role":"$role"}""")
+        )
+        val user = userRepository.findByEmail(email)!!
+        user.emailVerified = true
+        userRepository.save(user)
+        val result = mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"$email","password":"geheim123"}""")
         ).andReturn()
         return result.request.session as MockHttpSession
     }

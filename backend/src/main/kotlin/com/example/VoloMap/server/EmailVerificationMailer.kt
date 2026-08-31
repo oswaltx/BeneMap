@@ -8,12 +8,12 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 @Component
-class PasswordResetMailer(
+class EmailVerificationMailer(
     private val mailSender: JavaMailSender,
     @Value("\${spring.mail.from:no-reply@benemap.local}") private val fromAddress: String,
     @Value("\${app.base-url:http://localhost:5173}") private val baseUrl: String,
 ) {
-    private val logger = LoggerFactory.getLogger(PasswordResetMailer::class.java)
+    private val logger = LoggerFactory.getLogger(EmailVerificationMailer::class.java)
 
     @Async
     fun send(email: String, token: String) {
@@ -21,18 +21,17 @@ class PasswordResetMailer(
             val message = SimpleMailMessage()
             message.setFrom(fromAddress)
             message.setTo(email)
-            message.setSubject("Passwort zurücksetzen — Benemap")
+            message.setSubject("E-Mail bestätigen — Benemap")
             message.setText(
                 "Hallo,\n\n" +
-                    "du hast angefragt, dein Passwort für Benemap zurückzusetzen. " +
-                    "Klicke auf den folgenden Link, um ein neues Passwort zu setzen " +
-                    "(gültig für 30 Minuten):\n\n" +
-                    "$baseUrl/reset-password?token=$token\n\n" +
-                    "Falls du das nicht warst, kannst du diese E-Mail ignorieren."
+                    "bitte bestätige deine E-Mail-Adresse für dein Benemap-Konto, indem du auf " +
+                    "den folgenden Link klickst (gültig für 24 Stunden):\n\n" +
+                    "$baseUrl/verify-email?token=$token\n\n" +
+                    "Falls du dich nicht bei Benemap registriert hast, kannst du diese E-Mail ignorieren."
             )
             mailSender.send(message)
         } catch (e: Exception) {
-            logger.warn("Failed to send password reset email to $email", e)
+            logger.warn("Failed to send verification email to $email", e)
         }
     }
 }

@@ -35,7 +35,11 @@ export async function fetchCurrentUser(): Promise<void> {
     }
 }
 
-export async function login(email: string, password: string): Promise<string | null> {
+export type LoginResult =
+    | { ok: true }
+    | { ok: false; error: string; unverified: boolean };
+
+export async function login(email: string, password: string): Promise<LoginResult> {
     const res = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         credentials: "include",
@@ -43,12 +47,17 @@ export async function login(email: string, password: string): Promise<string | n
         body: JSON.stringify({ email, password }),
     });
     if (!res.ok) {
-        return extractError(res, "Login fehlgeschlagen.");
+        return { ok: false, error: await extractError(res, "Login fehlgeschlagen."), unverified: res.status === 403 };
     }
     currentUser.set(await res.json());
-    return null;
+    return { ok: true };
 }
 
+/**
+ * Registration no longer logs the user in — the account stays disabled until
+ * the verification link is clicked. On success, the caller should show a
+ * "check your email" notice rather than navigating on.
+ */
 export async function register(
     email: string,
     password: string,
@@ -57,14 +66,36 @@ export async function register(
 ): Promise<string | null> {
     const res = await fetch(`${API_BASE}/auth/register`, {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name, role }),
     });
     if (!res.ok) {
         return extractError(res, "Registrierung fehlgeschlagen.");
     }
-    currentUser.set(await res.json());
+    return null;
+}
+
+export async function resendVerification(email: string): Promise<string | null> {
+    const res = await fetch(`${API_BASE}/auth/resend-verification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+        return extractError(res, "Anfrage fehlgeschlagen.");
+    }
+    return null;
+}
+
+export async function verifyEmail(token: string): Promise<string | null> {
+    const res = await fetch(`${API_BASE}/auth/verify-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+    });
+    if (!res.ok) {
+        return extractError(res, "Bestätigung fehlgeschlagen.");
+    }
     return null;
 }
 

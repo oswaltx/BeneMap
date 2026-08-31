@@ -42,6 +42,7 @@ class SecurityConfig(
             .withUsername(user.email)
             .password(user.passwordHash)
             .authorities(SimpleGrantedAuthority("ROLE_${user.role}"))
+            .disabled(!user.emailVerified)
             .build()
     }
 
@@ -99,10 +100,14 @@ class SecurityConfig(
                 it.requestMatchers(
                     HttpMethod.GET,
                     "/about", "/add", "/profile", "/login", "/register",
-                    "/impressum", "/datenschutz", "/forgot-password", "/reset-password",
+                    "/impressum", "/datenschutz", "/forgot-password", "/reset-password", "/verify-email",
                     "/index.html", "/assets/**", "/vite.svg",
                 ).permitAll()
-                it.requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/forgot-password", "/auth/reset-password").permitAll()
+                it.requestMatchers(
+                    HttpMethod.POST,
+                    "/auth/register", "/auth/login", "/auth/forgot-password", "/auth/reset-password",
+                    "/auth/verify-email", "/auth/resend-verification",
+                ).permitAll()
                 it.requestMatchers(HttpMethod.POST, "/add", "/add-recurring").hasRole("ANBIETER")
                 it.requestMatchers(HttpMethod.PUT, "/activities/*").hasRole("ANBIETER")
                 it.requestMatchers(HttpMethod.DELETE, "/activities/*").hasRole("ANBIETER")

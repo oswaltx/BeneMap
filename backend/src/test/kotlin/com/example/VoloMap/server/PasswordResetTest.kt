@@ -38,26 +38,63 @@ class PasswordResetTest {
     @Autowired
     lateinit var passwordResetTokenRepository: PasswordResetTokenRepository
 
+    @Autowired
+    lateinit var emailVerificationTokenRepository: EmailVerificationTokenRepository
+
+    // This class never creates activities itself, but @SpringBootTest classes share one
+    // in-memory database across the whole suite run — a preceding class that left
+    // activities behind (referencing users via createdBy) would otherwise block
+    // userRepository.deleteAll() below with a FK violation.
+    @Autowired
+    lateinit var activityRepository: VolunteerActivityRepository
+
+    @Autowired
+    lateinit var activityRatingRepository: ActivityRatingRepository
+
+    @Autowired
+    lateinit var providerRatingRepository: ProviderRatingRepository
+
+    @Autowired
+    lateinit var activitySignupRepository: ActivitySignupRepository
+
     @MockitoBean
     lateinit var mailSender: JavaMailSender
 
     @BeforeEach
     fun cleanUp() {
+        activitySignupRepository.deleteAll()
+        activityRatingRepository.deleteAll()
+        providerRatingRepository.deleteAll()
+        activityRepository.deleteAll()
         passwordResetTokenRepository.deleteAll()
+        emailVerificationTokenRepository.deleteAll()
         userRepository.deleteAll()
     }
 
     @AfterEach
     fun tearDown() {
+        activitySignupRepository.deleteAll()
+        activityRatingRepository.deleteAll()
+        providerRatingRepository.deleteAll()
+        activityRepository.deleteAll()
         passwordResetTokenRepository.deleteAll()
+        emailVerificationTokenRepository.deleteAll()
         userRepository.deleteAll()
     }
 
     private fun register(email: String): MockHttpSession {
-        val result = mockMvc.perform(
+        mockMvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"email":"$email","password":"geheim123","name":"Test","role":"USER"}""")
+        )
+        val user = userRepository.findByEmail(email)!!
+        user.emailVerified = true
+        userRepository.save(user)
+        val result = mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"$email","password":"geheim123"}""")
         ).andReturn()
         return result.request.session as MockHttpSession
     }
@@ -75,7 +112,8 @@ class PasswordResetTest {
 
         val tokens = passwordResetTokenRepository.findByUser(user)
         assertEquals(1, tokens.size)
-        verify(mailSender, timeout(2000)).send(any<SimpleMailMessage>())
+        // 2 invocations: one verification email from register(), one password-reset email here.
+        verify(mailSender, timeout(2000).times(2)).send(any<SimpleMailMessage>())
     }
 
     @Test

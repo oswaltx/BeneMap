@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.DisabledException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.Duration
+import java.time.Instant
+import java.util.UUID
 
 data class RegisterRequest(
     @field:Email val email: String,
@@ -42,6 +45,7 @@ data class UserResponse(
     val websiteUrl: String? = null,
 )
 data class UpdateProfileRequest(val photoUrl: String? = null, val websiteUrl: String? = null)
+data class RegisterResponse(val message: String)
 data class ErrorResponse(val error: String)
 data class DeletionImpactResponse(val activityCount: Int)
 data class DeleteAccountRequest(val password: String)
@@ -58,6 +62,8 @@ class AuthController(
     private val providerRatingRepository: ProviderRatingRepository,
     private val activitySignupRepository: ActivitySignupRepository,
     private val passwordResetTokenRepository: PasswordResetTokenRepository,
+    private val emailVerificationTokenRepository: EmailVerificationTokenRepository,
+    private val emailVerificationMailer: EmailVerificationMailer,
     private val sessionRegistry: SessionRegistry,
     private val rateLimiter: RateLimiter,
 ) {
@@ -66,7 +72,6 @@ class AuthController(
     fun register(
         @Valid @RequestBody req: RegisterRequest,
         request: HttpServletRequest,
-        response: HttpServletResponse
     ): ResponseEntity<*> {
         if (!rateLimiter.isAllowed("register:${request.remoteAddr}", 5, Duration.ofMinutes(60))) {
             return ResponseEntity.status(429).body(ErrorResponse("Zu viele Anfragen. Bitte versuche es später erneut."))
@@ -75,7 +80,7 @@ class AuthController(
         if (userRepository.existsByEmail(email)) {
             return ResponseEntity.status(409).body(ErrorResponse("E-Mail bereits registriert."))
         }
-        userRepository.save(
+        val user = userRepository.save(
             User(
                 email = email,
                 passwordHash = passwordEncoder.encode(req.password)!!,
@@ -83,9 +88,18 @@ class AuthController(
                 role = req.role
             )
         )
-        establishSession(email, req.password, request, response)
-        val user = userRepository.findByEmail(email)!!
-        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
+
+        val token = EmailVerificationToken(
+            user = user,
+            token = UUID.randomUUID().toString(),
+            expiresAt = Instant.now().plus(Duration.ofHours(24)),
+        )
+        emailVerificationTokenRepository.save(token)
+        emailVerificationMailer.send(user.email, token.token)
+
+        return ResponseEntity.ok(
+            RegisterResponse("Fast geschafft! Wir haben dir eine E-Mail mit einem Bestätigungslink geschickt.")
+        )
     }
 
     @PostMapping("/login")
@@ -100,6 +114,9 @@ class AuthController(
         val email = req.email.trim().lowercase()
         try {
             establishSession(email, req.password, request, response)
+        } catch (e: DisabledException) {
+            return ResponseEntity.status(403)
+                .body(ErrorResponse("E-Mail noch nicht bestätigt. Bitte prüfe dein Postfach."))
         } catch (e: AuthenticationException) {
             return ResponseEntity.status(401).body(ErrorResponse("E-Mail oder Passwort falsch."))
         }
@@ -178,6 +195,7 @@ class AuthController(
         val userActivitySignups: List<ActivitySignup> = activitySignupRepository.findByUser(user)
         activitySignupRepository.deleteAll(userActivitySignups)
         passwordResetTokenRepository.deleteAll(passwordResetTokenRepository.findByUser(user))
+        emailVerificationTokenRepository.deleteAll(emailVerificationTokenRepository.findByUser(user))
 
         userRepository.delete(user)
 

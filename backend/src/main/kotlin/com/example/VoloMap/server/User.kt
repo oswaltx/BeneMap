@@ -32,5 +32,10 @@ class User(
     var photoUrl: String? = null,
     var websiteUrl: String? = null,
 
+    // columnDefinition backfills existing rows during the ddl-auto=update ALTER TABLE —
+    // without it, adding this NOT NULL column to an already-populated users table fails.
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    var emailVerified: Boolean = false,
+
     var createdAt: Instant = Instant.now(),
 )

@@ -2,11 +2,16 @@ package com.example.VoloMap.server
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.timeout
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.mail.SimpleMailMessage
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mock.web.MockHttpSession
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -24,23 +29,75 @@ class AuthControllerTest {
     @Autowired
     lateinit var userRepository: UserRepository
 
+    @Autowired
+    lateinit var emailVerificationTokenRepository: EmailVerificationTokenRepository
+
+    // This class never creates activities itself, but @SpringBootTest classes share one
+    // in-memory database across the whole suite run — a preceding class that left
+    // activities behind (referencing users via createdBy) would otherwise block
+    // userRepository.deleteAll() below with a FK violation.
+    @Autowired
+    lateinit var activityRepository: VolunteerActivityRepository
+
+    @Autowired
+    lateinit var activityRatingRepository: ActivityRatingRepository
+
+    @Autowired
+    lateinit var providerRatingRepository: ProviderRatingRepository
+
+    @Autowired
+    lateinit var activitySignupRepository: ActivitySignupRepository
+
+    @MockitoBean
+    lateinit var mailSender: JavaMailSender
+
     @BeforeEach
     fun cleanUp() {
+        activitySignupRepository.deleteAll()
+        activityRatingRepository.deleteAll()
+        providerRatingRepository.deleteAll()
+        activityRepository.deleteAll()
+        emailVerificationTokenRepository.deleteAll()
         userRepository.deleteAll()
     }
 
+    private fun markVerified(email: String) {
+        val user = userRepository.findByEmail(email)!!
+        user.emailVerified = true
+        userRepository.save(user)
+    }
+
+    private fun registerVerifyAndLogin(email: String, password: String, name: String, role: String): MockHttpSession {
+        mockMvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"$email","password":"$password","name":"$name","role":"$role"}""")
+        ).andExpect(status().isOk)
+        markVerified(email)
+        val result = mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"$email","password":"$password"}""")
+        ).andReturn()
+        return result.request.session as MockHttpSession
+    }
+
     @Test
-    fun `registers a new user and returns its profile`() {
+    fun `registering creates an unverified account and sends a verification email, without logging in`() {
         mockMvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"email":"anna@example.com","password":"geheim123","name":"Anna","role":"USER"}""")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.email").value("anna@example.com"))
-            .andExpect(jsonPath("$.name").value("Anna"))
-            .andExpect(jsonPath("$.role").value("USER"))
-            .andExpect(jsonPath("$.id").isNumber)
+            .andExpect(jsonPath("$.message").exists())
+
+        val user = userRepository.findByEmail("anna@example.com")!!
+        assert(!user.emailVerified) { "new user should not be verified yet" }
+        assert(emailVerificationTokenRepository.findByUser(user).size == 1)
+        org.mockito.kotlin.verify(mailSender, timeout(2000)).send(any<SimpleMailMessage>())
+
+        mockMvc.perform(get("/auth/me")).andExpect(status().isUnauthorized)
     }
 
     @Test
@@ -54,12 +111,22 @@ class AuthControllerTest {
     }
 
     @Test
-    fun `logs in with correct credentials and rejects wrong password`() {
+    fun `login is rejected until the email is verified, then works`() {
         mockMvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"email":"ben@example.com","password":"richtig123","name":"Ben","role":"ANBIETER"}""")
         ).andExpect(status().isOk)
+
+        mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"email":"ben@example.com","password":"richtig123"}""")
+        )
+            .andExpect(status().isForbidden)
+            .andExpect(jsonPath("$.error").exists())
+
+        markVerified("ben@example.com")
 
         mockMvc.perform(
             post("/auth/login")
@@ -76,12 +143,7 @@ class AuthControllerTest {
 
     @Test
     fun `me reflects session state across login and logout`() {
-        val register = mockMvc.perform(
-            post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"email":"cara@example.com","password":"geheim123","name":"Cara","role":"USER"}""")
-        ).andReturn()
-        val session = register.request.session as MockHttpSession
+        val session = registerVerifyAndLogin("cara@example.com", "geheim123", "Cara", "USER")
 
         mockMvc.perform(get("/auth/me").session(session))
             .andExpect(status().isOk)
@@ -102,12 +164,7 @@ class AuthControllerTest {
 
     @Test
     fun `owner can update their own profile photo and website`() {
-        val register = mockMvc.perform(
-            post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"email":"dana@example.com","password":"geheim123","name":"Dana","role":"ANBIETER"}""")
-        ).andReturn()
-        val session = register.request.session as MockHttpSession
+        val session = registerVerifyAndLogin("dana@example.com", "geheim123", "Dana", "ANBIETER")
 
         mockMvc.perform(
             put("/auth/me")
@@ -124,12 +181,7 @@ class AuthControllerTest {
 
     @Test
     fun `forces a scheme onto a photo URL without one`() {
-        val register = mockMvc.perform(
-            post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"email":"gustav@example.com","password":"geheim123","name":"Gustav","role":"ANBIETER"}""")
-        ).andReturn()
-        val session = register.request.session as MockHttpSession
+        val session = registerVerifyAndLogin("gustav@example.com", "geheim123", "Gustav", "ANBIETER")
 
         mockMvc.perform(
             put("/auth/me")
@@ -152,12 +204,7 @@ class AuthControllerTest {
 
     @Test
     fun `website URL without a scheme gets https prepended`() {
-        val register = mockMvc.perform(
-            post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"email":"eve@example.com","password":"geheim123","name":"Eve","role":"ANBIETER"}""")
-        ).andReturn()
-        val session = register.request.session as MockHttpSession
+        val session = registerVerifyAndLogin("eve@example.com", "geheim123", "Eve", "ANBIETER")
 
         mockMvc.perform(
             put("/auth/me")
@@ -171,12 +218,7 @@ class AuthControllerTest {
 
     @Test
     fun `updating profile cannot smuggle in role, email, or name changes`() {
-        val register = mockMvc.perform(
-            post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"email":"frank@example.com","password":"geheim123","name":"Frank","role":"ANBIETER"}""")
-        ).andReturn()
-        val session = register.request.session as MockHttpSession
+        val session = registerVerifyAndLogin("frank@example.com", "geheim123", "Frank", "ANBIETER")
 
         mockMvc.perform(
             put("/auth/me")

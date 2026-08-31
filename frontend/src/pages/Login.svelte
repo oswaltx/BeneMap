@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { login } from "../auth";
+    import { login, resendVerification } from "../auth";
     import { navigate } from "../router";
     import Link from "../lib/Link.svelte";
 
@@ -7,17 +7,31 @@
     let password = "";
     let submitting = false;
     let errorMessage: string | null = null;
+    let showResend = false;
+    let resendStatus: string | null = null;
+    let resendSubmitting = false;
 
     async function handleSubmit() {
         submitting = true;
         errorMessage = null;
-        const error = await login(email, password);
+        showResend = false;
+        resendStatus = null;
+        const result = await login(email, password);
         submitting = false;
-        if (error) {
-            errorMessage = error;
-        } else {
+        if (result.ok) {
             navigate("/");
+        } else {
+            errorMessage = result.error;
+            showResend = result.unverified;
         }
+    }
+
+    async function handleResend() {
+        resendSubmitting = true;
+        resendStatus = null;
+        await resendVerification(email);
+        resendSubmitting = false;
+        resendStatus = "Falls das Konto noch nicht bestätigt ist, haben wir einen neuen Link geschickt.";
     }
 </script>
 
@@ -43,6 +57,16 @@
 
         {#if errorMessage}
             <p class="warning">{errorMessage}</p>
+        {/if}
+
+        {#if showResend}
+            <button type="button" on:click={handleResend} disabled={resendSubmitting}>
+                {resendSubmitting ? "Wird gesendet…" : "Bestätigungslink erneut senden"}
+            </button>
+        {/if}
+
+        {#if resendStatus}
+            <p class="notice">{resendStatus}</p>
         {/if}
     </form>
 </div>
@@ -103,6 +127,12 @@
 
     p.warning {
         color: var(--color-error);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .notice {
+        color: var(--color-text-muted);
         font-size: 0.85rem;
         margin: 0;
     }

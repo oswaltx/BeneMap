@@ -13,7 +13,7 @@ class SpaWebConfig : WebMvcConfigurer {
     override fun addViewControllers(registry: ViewControllerRegistry) {
         listOf(
             "/about", "/add", "/profile", "/login", "/register",
-            "/impressum", "/datenschutz", "/forgot-password", "/reset-password",
+            "/impressum", "/datenschutz", "/forgot-password", "/reset-password", "/verify-email",
         ).forEach { registry.addViewController(it).setViewName("forward:/index.html") }
     }
 }
