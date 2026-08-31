@@ -2,6 +2,7 @@
     import { currentUser, authChecked, fetchWithSessionCheck, deleteAccount, getDeletionImpact } from "../auth";
     import { navigate } from "../router";
     import { API_BASE } from "./apiBase";
+    import Link from "./Link.svelte";
 
     let photoUrl = "";
     let websiteUrl = "";
@@ -127,6 +128,9 @@
                         Passwort zur Bestätigung
                         <input type="password" bind:value={deletePassword} />
                     </label>
+                    <p class="forgot-password-hint">
+                        Passwort nicht mehr bekannt? <Link href="/forgot-password">Passwort vergessen?</Link>
+                    </p>
                     <div class="delete-actions">
                         <button type="button" class="danger" disabled={deleteSubmitting} on:click={confirmDelete}>
                             {deleteSubmitting ? "Löscht…" : "Endgültig löschen"}
@@ -206,6 +210,12 @@
         color: var(--color-error);
         font-size: 0.85rem;
         margin: 0;
+    }
+
+    .forgot-password-hint {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
     }
 
     .notice {

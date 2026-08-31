@@ -10,11 +10,8 @@ kanban-plugin: board
 - [ ] Research: Existing volunteer map solutions
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Zeitaufwand und Verbindlichkeit
-- [ ] E-Mail-Verifizierung bei Registrierung — vor Beta-Veröffentlichung: verhindert getippte/falsche E-Mail-Adressen, die sonst z.B. Passwort-Reset für immer unbrauchbar machen würden
-- [ ] "Passwort vergessen?"-Link im Konto-löschen-Dialog — Nutzer, die ihr Passwort zur Bestätigung nicht wissen, sitzen sonst fest
-- [ ] Backup-Strategie für die H2-Datenbankdatei — aktuell keine automatisierte Sicherung
+- [ ] E-Mail-Verifizierung bei Registrierung — vor Beta-Veröffentlichung: verhindert getippte/falsche E-Mail-Adressen; kurz Design besprechen (blockiert Login? Resend-Flow?) vor Umsetzung
 - [ ] Lizenz für das Projekt festlegen
-- [ ] Frontend-Typfehler in `FilterBar.svelte:131` beheben (`npm run check`) — bestand schon vorher, blockiert den Build nicht, aber sollte aufgeräumt werden
 ## Doing
 
 
@@ -50,6 +47,9 @@ kanban-plugin: board
 - [x] contact@benemap.org eingerichtet (Weiterleitung)
 - [x] Favicon & Seitentitel gesetzt (Pin-Icon in Markenfarben, "Benemap — Freiwilligenkarte")
 - [x] Beta-/Cookie-Hinweisbanner — dismissible, verweist auf Datenschutzerklärung, erwähnt dass nur technisch notwendige Cookies (Login-Session) genutzt werden, kein Tracking
+- [x] "Passwort vergessen?"-Link im Konto-löschen-Dialog
+- [x] Frontend-Typfehler in `FilterBar.svelte` behoben (`npm run check` jetzt 0 Errors)
+- [x] Backup-Strategie für die H2-Datenbank — tägliches Cron-Skript auf dem Uberspace-Server (`~/benemap/backup.sh`, 3:17 Uhr, 14 Tage Aufbewahrung)
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application

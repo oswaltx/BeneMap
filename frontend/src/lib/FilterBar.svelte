@@ -16,7 +16,7 @@
     let selectedCategory: string | null = null;
     let selectedDate: string | null = null;
     let selectedWeekday: number | null = null;
-    let selectedTimeSlot: { label: string; from: number; to: number } | null = null;
+    let selectedTimeSlot: { label: string; from: number | null; to: number | null } | null = null;
     let showCityOffers = false;
 
     const weekdays = [
