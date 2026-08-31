@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] E-Mail-Verifizierung bei Registrierung — vor Beta-Veröffentlichung: verhindert getippte/falsche E-Mail-Adressen; kurz Design besprechen (blockiert Login? Resend-Flow?) vor Umsetzung
 - [ ] Lizenz für das Projekt festlegen
-- [ ] Nach Live-Scrape: prüfen dass `--scrape`-Flag in `~/benemap/start.sh` wieder entfernt ist (sonst re-scraped bei jedem Neustart)
 ## Doing
 
 
@@ -50,7 +49,8 @@ kanban-plugin: board
 - [x] Beta-/Cookie-Hinweisbanner — dismissible, verweist auf Datenschutzerklärung, erwähnt dass nur technisch notwendige Cookies (Login-Session) genutzt werden, kein Tracking
 - [x] "Passwort vergessen?"-Link im Konto-löschen-Dialog
 - [x] Frontend-Typfehler in `FilterBar.svelte` behoben (`npm run check` jetzt 0 Errors)
-- [x] Backup-Strategie für die H2-Datenbank — tägliches Cron-Skript auf dem Uberspace-Server (`~/benemap/backup.sh`, 3:17 Uhr, 14 Tage Aufbewahrung)
+- [x] Backup-Strategie für die H2-Datenbank — tägliches Cron-Skript auf dem Uberspace-Server (`~/benemap/backup.sh`, 3:17 Uhr, 14 Tage Aufbewahrung); `deploy.sh` zieht zusätzlich das neueste Backup bei jedem Deploy lokal nach `./backups/` (off-server-Kopie)
+- [x] Fake-Auto-Seed (30 Fake-Aktivitäten bei leerer DB) entfernt — war versehentlich live auf benemap.org; DB geleert und stattdessen echter Scrape (`--scrape`) angestoßen: 34 echte Angebote aus der Kölner Engagementdatenbank
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
