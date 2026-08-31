@@ -52,6 +52,10 @@ cd backend
 * Runs on `http://localhost:8080`
 * Provides REST endpoints (e.g., `/api/volunteers`)
 * Supports **CORS** for frontend development
+* Starts with an **empty map** — no data is seeded automatically. To get some pins to
+  look at: `./gradlew bootRun --args='--seed-fake'` (30 fake activities) or
+  `./gradlew bootRun --args='--scrape'` (real listings scraped from Cologne's municipal
+  volunteer database)
 
 ### Frontend (Svelte)
 

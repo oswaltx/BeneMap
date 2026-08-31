@@ -1,7 +1,6 @@
 package com.example.VoloMap
 
 import com.example.VoloMap.server.Scraper
-import com.example.VoloMap.server.VolunteerActivityRepository
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.scheduling.annotation.EnableAsync
@@ -13,8 +12,7 @@ class VoloMapApp
 fun main(args: Array<String>) {
     val context = runApplication<VoloMapApp>(*args)
 
-    val repository = context.getBean(VolunteerActivityRepository::class.java)
-    if (repository.count() == 0L && !args.contains("--scrape")) {
+    if (args.contains("--seed-fake")) {
         val scraper = context.getBean(Scraper::class.java)
         scraper.fakeScraper(30)
     }

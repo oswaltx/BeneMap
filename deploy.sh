@@ -35,4 +35,14 @@ echo "==> Waiting for startup..."
 sleep 5
 ssh -i "$SSH_KEY" "$SSH_HOST" "supervisorctl status benemap && curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://localhost:48100/"
 
+echo "==> Pulling latest DB backup down locally (off-server copy)..."
+mkdir -p backups
+LATEST_BACKUP=$(ssh -i "$SSH_KEY" "$SSH_HOST" "ls -1t $REMOTE_DIR/backups/ 2>/dev/null | head -1" || true)
+if [ -n "$LATEST_BACKUP" ]; then
+    scp -i "$SSH_KEY" "$SSH_HOST:$REMOTE_DIR/backups/$LATEST_BACKUP" "backups/$LATEST_BACKUP"
+    echo "    saved backups/$LATEST_BACKUP"
+else
+    echo "    no backup found on server yet (first one is created by cron at 3:17 AM)"
+fi
+
 echo "==> Deploy complete: https://benemap.org"

@@ -11,7 +11,7 @@
     });
 </script>
 <NavBar />
+<NoticeBanner />
 <Router />
 <Footer />
-<NoticeBanner />
 
