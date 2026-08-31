@@ -12,10 +12,9 @@ kanban-plugin: board
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] E-Mail-Verifizierung bei Registrierung — vor Beta-Veröffentlichung: verhindert getippte/falsche E-Mail-Adressen, die sonst z.B. Passwort-Reset für immer unbrauchbar machen würden
 - [ ] "Passwort vergessen?"-Link im Konto-löschen-Dialog — Nutzer, die ihr Passwort zur Bestätigung nicht wissen, sitzen sonst fest
-- [ ] About-Seite mit Inhalt füllen — aktuell komplett leer (`About.svelte`)
 - [ ] Backup-Strategie für die H2-Datenbankdatei — aktuell keine automatisierte Sicherung
 - [ ] Lizenz für das Projekt festlegen
-- [ ] Domain auf dem Uberspace-Server hinzufügen + App dort deployen
+- [ ] Frontend-Typfehler in `FilterBar.svelte:131` beheben (`npm run check`) — bestand schon vorher, blockiert den Build nicht, aber sollte aufgeräumt werden
 ## Doing
 
 
@@ -38,7 +37,7 @@ kanban-plugin: board
 - [x] Hover-Popup vereinheitlicht — Einzel-Pins nutzen jetzt dasselbe sticky Hover-Popup wie Cluster-Pins statt eines Tooltips, der sofort verschwand
 - [x] Anmeldefunktion — Ehrenamtler (Rolle USER) können sich direkt in der App für eine Aktivität anmelden ("Ich mache mit"), Anbieter sieht Name + E-Mail der Angemeldeten, optionale Teilnehmer-Obergrenze; gilt nur für app-native Aktivitäten, nicht für Städtische Angebote
 - [x] Kategorie-Dropdown — Anbieter wählen die Kategorie beim Anlegen/Bearbeiten aus einer festen Liste (dieselben Kategorien wie bei Städtischen Angeboten, plus "Sonstiges") statt sie frei einzutippen
-- [x] Impressum & Datenschutzerklärung — rechtliche Pflichtseiten (§5 DDG, DSGVO) verlinkt aus neuem Footer; Betreiberdaten als Platzhalter, vor echtem Livegang auszufüllen
+- [x] Impressum & Datenschutzerklärung — rechtliche Pflichtseiten (§5 DDG, DSGVO) verlinkt aus neuem Footer; Betreiberdaten jetzt ausgefüllt (David Oswalt, contact@benemap.org)
 - [x] Konto-Selbstlöschung — jeder eingeloggte Nutzer (Ehrenamtler & Anbieter) kann sein Konto auf der Profilseite mit Passwort-Bestätigung endgültig löschen; kaskadiert über eigene Aktivitäten/Bewertungen/Anmeldungen, invalidiert alle Sessions des Kontos
 - [x] Datenschutzerklärung aktualisiert — Abschnitt "Speicherdauer" verweist jetzt auf die Konto-Selbstlöschung statt auf Löschung per Kontakt-E-Mail
 - [x] Passwort-Reset — Nutzer können ihr Passwort per E-Mail-Link zurücksetzen; Rate-Limiting (60s/5min), Reset invalidiert alle anderen Sessions des Kontos; SMTP über Brevo (noreply@benemap.org) läuft, live verifiziert
@@ -46,6 +45,11 @@ kanban-plugin: board
 - [x] Projekt als öffentliches Repo auf GitHub hochgeladen — github.com/oswaltx/BeneMap, Codeberg-Remote bleibt parallel bestehen (Hinweis-Bio wegen KI-Code-Richtlinie)
 - [x] CONTRIBUTING.md geschrieben — Workflow, Code-Style, Tests, PR-Prozess
 - [x] README.md überarbeitet — echte Screenshots (Kartenansicht, Login), Feature-Übersicht, Tech-Stack, Roadmap-Abschnitt mit wichtigsten offenen TODOs
+- [x] About-Seite mit Inhalt gefüllt — Beschreibung, Beta-Status-Hinweis, Link zu GitHub
+- [x] App live auf benemap.org deployed — Uberspace (Supervisor-Service, Port 48100), DNS bei Porkbun, `deploy.sh` für künftige Updates; dabei drei Prod-only-Bugs gefunden & gefixt: toter "Hello World"-Root-Endpoint blockierte die SPA, Security-Regeln erlaubten keine SPA-Routen/Assets, CORS erlaubte nur localhost:5173 (Frontend rief zudem überall hart `localhost:8080` statt einer relativen API_BASE auf)
+- [x] contact@benemap.org eingerichtet (Weiterleitung)
+- [x] Favicon & Seitentitel gesetzt (Pin-Icon in Markenfarben, "Benemap — Freiwilligenkarte")
+- [x] Beta-/Cookie-Hinweisbanner — dismissible, verweist auf Datenschutzerklärung, erwähnt dass nur technisch notwendige Cookies (Login-Session) genutzt werden, kein Tracking
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
