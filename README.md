@@ -102,12 +102,13 @@ priorities are:
 
 - [ ] **E-Mail-Verifizierung bei Registrierung** — prevents typo'd/fake addresses that
   would otherwise permanently lock users out via password reset
-- [ ] **"Passwort vergessen?"-Link im Konto-löschen-Dialog** — users who don't remember
-  their password currently get stuck when trying to delete their account
-- [ ] **About-Seite mit Inhalt füllen** — currently empty
-- [ ] **Backup-Strategie für die H2-Datenbank** — no automated backups yet
-- [ ] **Lizenz für das Projekt festlegen**
-- [ ] **Domain + Deployment auf dem Uberspace-Server**
+- [ ] **Schritt-für-Schritt-Anleitung für Anbieter** — the target audience (Vereine,
+  Vermittlungsstellen) skews older and less app-experienced
+
+## License
+
+AGPLv3 — see [LICENSE](LICENSE). If you run a modified version of Benemap as a
+network service, you must make the source of your version available to its users.
 
 ## Contributing
 

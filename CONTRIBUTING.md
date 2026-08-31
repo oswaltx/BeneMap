@@ -61,7 +61,5 @@ directly) instead.
 
 ## License
 
-Benemap doesn't have a finalized license file yet (tracked on the project board). Until
-one is added, treat the source as "look but ask before reuse" — contributions submitted
-via pull request are assumed to be offered under whatever license the project ultimately
-adopts.
+Benemap is licensed under the [AGPLv3](LICENSE). By submitting a pull request, you agree
+your contribution is offered under the same license.

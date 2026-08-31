@@ -5,6 +5,7 @@
 <footer>
     <Link href="/impressum" activeClass="active">Impressum</Link>
     <Link href="/datenschutz" activeClass="active">Datenschutz</Link>
+    <a href="https://github.com/oswaltx/BeneMap" target="_blank" rel="noopener noreferrer">Quellcode</a>
 </footer>
 
 <style>
