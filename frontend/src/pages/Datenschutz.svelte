@@ -5,9 +5,9 @@
 <LegalPageLayout title="Datenschutzerklärung">
     <h2>1. Verantwortlicher</h2>
     <p>
-        <span class="placeholder">[DEIN NAME]</span><br />
-        <span class="placeholder">[DEINE ANSCHRIFT]</span><br />
-        E-Mail: <span class="placeholder">[DEINE E-MAIL]</span>
+        David Oswalt<br />
+        Aposte-Paulus-Straße 5<br />
+        E-Mail: contact@benemap.org
     </p>
 
     <h2>2. Welche Daten wir verarbeiten</h2>

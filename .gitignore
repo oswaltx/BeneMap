@@ -57,3 +57,6 @@ pnpm-debug.log*
 
 # Personal learning notes, not for the public repo
 /orga/lernen-*.md
+
+# Deploy script reveals server/hosting details, kept local-only
+/deploy.sh
