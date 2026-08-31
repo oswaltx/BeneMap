@@ -11,6 +11,7 @@ kanban-plugin: board
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] E-Mail-Verifizierung bei Registrierung — vor Beta-Veröffentlichung: verhindert getippte/falsche E-Mail-Adressen; kurz Design besprechen (blockiert Login? Resend-Flow?) vor Umsetzung
+- [ ] Kleine Schritt-für-Schritt-Anleitung für Anbieter (Registrieren, Aktivität anlegen, Anmeldungen einsehen) — Zielgruppe der Vereine/Vermittlungsstellen ist eher älter und weniger app-erfahren, sollte einfach und niedrigschwellig sein (z.B. verlinkt von der About-Seite oder direkt im Anbieter-Flow)
 - [ ] Lizenz für das Projekt festlegen
 ## Doing
 
