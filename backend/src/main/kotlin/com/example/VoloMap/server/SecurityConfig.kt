@@ -65,7 +65,7 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
-        config.allowedOrigins = listOf("http://localhost:5173")
+        config.allowedOrigins = listOf("http://localhost:5173", "https://benemap.org", "https://www.benemap.org")
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("*")
         config.allowCredentials = true
@@ -96,6 +96,12 @@ class SecurityConfig(
             }
             .authorizeHttpRequests {
                 it.requestMatchers(HttpMethod.GET, "/", "/markers", "/categories", "/activities/*/ratings", "/providers/*/ratings", "/activities/*/signups").permitAll()
+                it.requestMatchers(
+                    HttpMethod.GET,
+                    "/about", "/add", "/profile", "/login", "/register",
+                    "/impressum", "/datenschutz", "/forgot-password", "/reset-password",
+                    "/index.html", "/assets/**", "/vite.svg",
+                ).permitAll()
                 it.requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/forgot-password", "/auth/reset-password").permitAll()
                 it.requestMatchers(HttpMethod.POST, "/add", "/add-recurring").hasRole("ANBIETER")
                 it.requestMatchers(HttpMethod.PUT, "/activities/*").hasRole("ANBIETER")

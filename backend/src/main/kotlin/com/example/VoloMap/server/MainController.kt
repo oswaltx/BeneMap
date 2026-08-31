@@ -26,10 +26,6 @@ class MainController(
     private val rateLimiter: RateLimiter,
 ) {
 
-    @GetMapping("/")
-    fun index() = "Hello World!"
-
-
     @GetMapping("/markers")
     fun markers(
         @RequestParam(required = false) category: String?,

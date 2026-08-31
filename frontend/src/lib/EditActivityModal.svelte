@@ -2,6 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import { fetchWithSessionCheck } from "../auth";
     import { ACTIVITY_CATEGORIES } from "./categories";
+    import { API_BASE } from "./apiBase";
 
     export let marker: {
         id: number;
@@ -39,7 +40,7 @@
         statusMessage = null;
 
         try {
-            const res = await fetchWithSessionCheck(`http://localhost:8080/activities/${marker.id}`, {
+            const res = await fetchWithSessionCheck(`${API_BASE}/activities/${marker.id}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

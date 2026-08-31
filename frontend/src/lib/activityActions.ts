@@ -1,11 +1,12 @@
 import { fetchWithSessionCheck } from "../auth";
+import { API_BASE } from "./apiBase";
 
 export async function deleteActivity(id: number): Promise<boolean> {
     if (!confirm("Aktivität wirklich löschen? Das entfernt auch alle Bewertungen dazu.")) {
         return false;
     }
     try {
-        const res = await fetchWithSessionCheck(`http://localhost:8080/activities/${id}`, {
+        const res = await fetchWithSessionCheck(`${API_BASE}/activities/${id}`, {
             method: "DELETE",
             credentials: "include",
         });

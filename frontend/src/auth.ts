@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import { API_BASE } from "./lib/apiBase";
 
 export type Role = "ANBIETER" | "USER";
 
@@ -13,8 +14,6 @@ export interface AuthUser {
 
 export const currentUser = writable<AuthUser | null>(null);
 export const authChecked = writable<boolean>(false);
-
-const API_BASE = "http://localhost:8080";
 
 async function extractError(res: Response, fallback: string): Promise<string> {
     try {

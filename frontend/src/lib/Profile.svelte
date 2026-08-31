@@ -1,6 +1,7 @@
 <script lang="ts">
     import { currentUser, authChecked, fetchWithSessionCheck, deleteAccount, getDeletionImpact } from "../auth";
     import { navigate } from "../router";
+    import { API_BASE } from "./apiBase";
 
     let photoUrl = "";
     let websiteUrl = "";
@@ -21,7 +22,7 @@
         statusMessage = null;
 
         try {
-            const res = await fetchWithSessionCheck("http://localhost:8080/auth/me", {
+            const res = await fetchWithSessionCheck(`${API_BASE}/auth/me`, {
                 method: "PUT",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

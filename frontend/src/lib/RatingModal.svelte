@@ -2,6 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import Link from "./Link.svelte";
     import { currentUser, fetchWithSessionCheck } from "../auth";
+    import { API_BASE } from "./apiBase";
 
     export let target: "activity" | "provider";
     export let targetId: number;
@@ -40,7 +41,7 @@
         loading = true;
         loadError = null;
         try {
-            const res = await fetch(`http://localhost:8080/${endpoint}`, { credentials: "include" });
+            const res = await fetch(`${API_BASE}/${endpoint}`, { credentials: "include" });
             if (!res.ok) throw new Error("Request failed");
             const data: RatingListResponse = await res.json();
             average = data.average;
@@ -67,7 +68,7 @@
         submitting = true;
         submitError = null;
         try {
-            const res = await fetchWithSessionCheck(`http://localhost:8080/${endpoint}`, {
+            const res = await fetchWithSessionCheck(`${API_BASE}/${endpoint}`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

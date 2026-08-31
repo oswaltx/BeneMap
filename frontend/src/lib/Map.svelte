@@ -8,6 +8,7 @@
     import { groupByLocation } from "./groupByLocation";
     import ClusterMarker from "./ClusterMarker.svelte";
     import SingleMarkerPin from "./SingleMarkerPin.svelte";
+    import { API_BASE } from "./apiBase";
 
     let markers: any[] = [];
     let showCityOffers = false;
@@ -42,7 +43,7 @@
 
     onMount(async () => {
         try {
-            const res = await fetch("http://localhost:8080/categories");
+            const res = await fetch(`${API_BASE}/categories`);
             categories = await res.json();
         } catch (e) {
             errorMessage = "Kategorien konnten nicht geladen werden. Ist der Server erreichbar?";
@@ -64,7 +65,7 @@
 
         try {
             const res = await fetch(
-                "http://localhost:8080/markers?" + params.toString()
+                `${API_BASE}/markers?` + params.toString()
             );
             if (!res.ok) throw new Error("Request failed");
             const data = await res.json();

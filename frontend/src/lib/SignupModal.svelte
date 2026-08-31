@@ -2,6 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import Link from "./Link.svelte";
     import { currentUser, fetchWithSessionCheck } from "../auth";
+    import { API_BASE } from "./apiBase";
 
     export let activityId: number;
     export let isOwner: boolean;
@@ -33,7 +34,7 @@
         loading = true;
         loadError = null;
         try {
-            const res = await fetch(`http://localhost:8080/activities/${activityId}/signups`, { credentials: "include" });
+            const res = await fetch(`${API_BASE}/activities/${activityId}/signups`, { credentials: "include" });
             if (!res.ok) throw new Error("Request failed");
             const data: SignupStatusResponse = await res.json();
             count = data.count;
@@ -55,7 +56,7 @@
         submitting = true;
         submitError = null;
         try {
-            const res = await fetchWithSessionCheck(`http://localhost:8080/activities/${activityId}/signup`, {
+            const res = await fetchWithSessionCheck(`${API_BASE}/activities/${activityId}/signup`, {
                 method: signedUp ? "DELETE" : "POST",
                 credentials: "include",
             });

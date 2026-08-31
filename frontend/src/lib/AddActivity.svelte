@@ -2,6 +2,7 @@
     import Link from "./Link.svelte";
     import { currentUser, authChecked, fetchWithSessionCheck } from "../auth";
     import { ACTIVITY_CATEGORIES } from "./categories";
+    import { API_BASE } from "./apiBase";
 
     let name = "";
     let description = "";
@@ -52,8 +53,8 @@
 
         const wasRecurring = isRecurring;
         const endpoint = isRecurring
-            ? "http://localhost:8080/add-recurring"
-            : "http://localhost:8080/add";
+            ? `${API_BASE}/add-recurring`
+            : `${API_BASE}/add`;
         const body = isRecurring
             ? {
                   ...baseBody,
