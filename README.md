@@ -1,23 +1,42 @@
 
-# Volunteer Map for Everyone!
+# Benemap — Volunteer Map for Everyone
+
+An interactive map where volunteer organizations publish activities and volunteers find
+and join them nearby. Open source, non-commercial.
+
+![Map view](docs/screenshots/map-view.png)
+
+## Features
+
+* Interactive map of volunteer activities, with clustering for nearby pins
+* Anbieter (organizations) can register, publish activities (one-off or recurring), and
+  manage their own listings
+* Volunteers can sign up for activities directly in the app ("Ich mache mit")
+* Rating system for activities and providers
+* Städtische Angebote — scraped, undated listings from Cologne's municipal volunteer
+  database, shown alongside app-native activities
+* Category filtering, search by name/address, photo galleries
+* Account self-service: profile photo/website, password reset via email, full
+  self-deletion (GDPR-friendly)
+
+<img src="docs/screenshots/login.png" alt="Login screen" width="500">
 
 ## Project Structure
 
 ```
 /orga        // organization / documentation / planning files
-/frontend    // Svelte frontend (SPA, fetches data from backend)
-/backend     // Spring Boot backend (REST API + database)
+/frontend    // Svelte 5 frontend (SPA, fetches data from backend)
+/backend     // Spring Boot (Kotlin) backend (REST API + H2 database)
 ```
 
 ---
 
-## Basic Idea
+## Tech Stack
 
-* Open source, non-commercial
-* Interactive map for volunteers
-* Volunteer hosts can **register their events** and **sync via calendar**
-* Frontend fetches data from backend via **REST API**
-* SPA handled by **Svelte**, backend handled by **Spring Boot + Kotlin**
+* **Frontend**: Svelte 5 + TypeScript + Vite, Leaflet-based map (via `sveaflet`)
+* **Backend**: Spring Boot + Kotlin, Spring Security (session auth), Spring Data JPA
+* **Database**: H2 (file-based)
+* **Mail**: SMTP via Brevo, for password-reset emails
 
 ---
 
@@ -34,8 +53,6 @@ cd backend
 * Provides REST endpoints (e.g., `/api/volunteers`)
 * Supports **CORS** for frontend development
 
----
-
 ### Frontend (Svelte)
 
 ```bash
@@ -47,7 +64,12 @@ npm run dev            # runs Svelte dev server
 * Runs on `http://localhost:5173`
 * Fetches data from backend via `/api` endpoints
 
----
+### Tests
+
+```bash
+cd backend && ./gradlew test      # backend test suite
+cd frontend && npm run check      # type-check frontend
+```
 
 ### Production Build
 
@@ -61,12 +83,28 @@ npm run build
 * Copy `frontend/dist/` → `backend/src/main/resources/static/`
 * Spring Boot will now serve both frontend (`/`) and backend (`/api`) from **one server**
 
----
-
 ### Notes
 
 * No HTML templates in backend — frontend Svelte SPA handles UI
 * Modular frontend allows multiple pages/components
-* Can extend with database entities (e.g., `VolunteerActivity`)
 * Works best with JS enabled; Svelte SPA will be blank if JS is blocked
 
+---
+
+## Roadmap / Most important TODOs
+
+Full backlog lives in [`orga/board.md`](orga/board.md). Before a public beta, the
+priorities are:
+
+- [ ] **E-Mail-Verifizierung bei Registrierung** — prevents typo'd/fake addresses that
+  would otherwise permanently lock users out via password reset
+- [ ] **"Passwort vergessen?"-Link im Konto-löschen-Dialog** — users who don't remember
+  their password currently get stuck when trying to delete their account
+- [ ] **About-Seite mit Inhalt füllen** — currently empty
+- [ ] **Backup-Strategie für die H2-Datenbank** — no automated backups yet
+- [ ] **Lizenz für das Projekt festlegen**
+- [ ] **Domain + Deployment auf dem Uberspace-Server**
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get set up and submit changes.

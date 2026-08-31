@@ -15,8 +15,7 @@ kanban-plugin: board
 - [ ] About-Seite mit Inhalt füllen — aktuell komplett leer (`About.svelte`)
 - [ ] Backup-Strategie für die H2-Datenbankdatei — aktuell keine automatisierte Sicherung
 - [ ] Lizenz für das Projekt festlegen
-- [ ] Contribution-Regeln schreiben (CONTRIBUTING.md)
-- [ ] Domain auf dem Uberspace-Server hinzufügen
+- [ ] Domain auf dem Uberspace-Server hinzufügen + App dort deployen
 ## Doing
 
 
@@ -45,6 +44,8 @@ kanban-plugin: board
 - [x] Passwort-Reset — Nutzer können ihr Passwort per E-Mail-Link zurücksetzen; Rate-Limiting (60s/5min), Reset invalidiert alle anderen Sessions des Kontos; SMTP über Brevo (noreply@benemap.org) läuft, live verifiziert
 - [x] Rate-Limiting auf sensiblen Endpoints — Login (10/5min/IP), Registrierung (5/60min/IP), Aktivität anlegen (20/60min/Nutzer), Bewertungen & Anmeldungen (30/60min/Nutzer), Abuse-Schutz vor Livegang
 - [x] Projekt als öffentliches Repo auf GitHub hochgeladen — github.com/oswaltx/BeneMap, Codeberg-Remote bleibt parallel bestehen (Hinweis-Bio wegen KI-Code-Richtlinie)
+- [x] CONTRIBUTING.md geschrieben — Workflow, Code-Style, Tests, PR-Prozess
+- [x] README.md überarbeitet — echte Screenshots (Kartenansicht, Login), Feature-Übersicht, Tech-Stack, Roadmap-Abschnitt mit wichtigsten offenen TODOs
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
