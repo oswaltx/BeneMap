@@ -3,6 +3,7 @@
     import NavBar from "./lib/NavBar.svelte";
     import Router from "./lib/Router.svelte";
     import Footer from "./lib/Footer.svelte";
+    import NoticeBanner from "./lib/NoticeBanner.svelte";
     import { fetchCurrentUser } from "./auth";
 
     onMount(() => {
@@ -12,4 +13,5 @@
 <NavBar />
 <Router />
 <Footer />
+<NoticeBanner />
 
