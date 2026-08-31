@@ -10,7 +10,6 @@ kanban-plugin: board
 - [ ] Research: Existing volunteer map solutions
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Zeitaufwand und Verbindlichkeit
-- [ ] E-Mail-Verifizierung bei Registrierung — vor Beta-Veröffentlichung: verhindert getippte/falsche E-Mail-Adressen. Design festgelegt: Login komplett gesperrt bis E-Mail bestätigt (analog zum bestehenden Passwort-Reset-Token-Muster: 24h gültig, single-use, "E-Mail erneut senden"-Button mit Rate-Limiting)
 - [ ] Kleine Schritt-für-Schritt-Anleitung für Anbieter (Registrieren, Aktivität anlegen, Anmeldungen einsehen) — Zielgruppe der Vereine/Vermittlungsstellen ist eher älter und weniger app-erfahren, sollte einfach und niedrigschwellig sein (z.B. verlinkt von der About-Seite oder direkt im Anbieter-Flow)
 ## Doing
 
@@ -52,6 +51,7 @@ kanban-plugin: board
 - [x] Backup-Strategie für die H2-Datenbank — tägliches Cron-Skript auf dem Uberspace-Server (`~/benemap/backup.sh`, 3:17 Uhr, 14 Tage Aufbewahrung); `deploy.sh` zieht zusätzlich das neueste Backup bei jedem Deploy lokal nach `./backups/` (off-server-Kopie)
 - [x] Fake-Auto-Seed (30 Fake-Aktivitäten bei leerer DB) entfernt — war versehentlich live auf benemap.org; DB geleert und stattdessen echter Scrape (`--scrape`) angestoßen: 34 echte Angebote aus der Kölner Engagementdatenbank
 - [x] Lizenz festgelegt — AGPLv3 (Copyleft inkl. SaaS-Klausel), LICENSE-Datei + README/CONTRIBUTING aktualisiert, "Quellcode"-Link im Footer ergänzt (AGPL-Netzwerk-Klausel)
+- [x] E-Mail-Verifizierung bei Registrierung — Login gesperrt bis bestätigt, 24h-Token analog zum Passwort-Reset, Resend-Flow mit Rate-Limiting; dabei zwei weitere Prod-Bugs gefunden & gefixt: Passwort-Reset-Mails verlinkten hart auf localhost:5173 (nie live getestet), und `ddl-auto=update` scheitert beim Hinzufügen einer NOT-NULL-Spalte zu einer bereits befüllten Tabelle ohne SQL-Default
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
