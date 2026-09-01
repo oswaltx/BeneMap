@@ -11,7 +11,6 @@ kanban-plugin: board
 - [ ] Research: Calendar sync implementation (iCal/Google API)
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] Kleine Schritt-für-Schritt-Anleitung für Anbieter (Registrieren, Aktivität anlegen, Anmeldungen einsehen) — Zielgruppe der Vereine/Vermittlungsstellen ist eher älter und weniger app-erfahren, sollte einfach und niedrigschwellig sein (z.B. verlinkt von der About-Seite oder direkt im Anbieter-Flow)
-- [ ] Checkbox bei Registrierung: Zustimmung zu Datenschutzerklärung + Nutzungsbedingungen (TOS) erforderlich — Nutzungsbedingungen/AGB-Seite existiert noch gar nicht (bisher nur Impressum & Datenschutz), muss also mit erstellt werden. Freigegeben zur autonomen Umsetzung.
 - [ ] Dependabot-Security-Alerts beheben (20 offen, github.com/oswaltx/BeneMap/security/dependabot) — alles Dev-Dependencies im Frontend (vite, postcss, devalue, svelte), betrifft primär die Dev-Umgebung nicht den produktiven Build; entsprechende Update-PRs liegen schon bereit, brauchen nur Review + Merge
 ## Doing
 
@@ -54,6 +53,8 @@ kanban-plugin: board
 - [x] Fake-Auto-Seed (30 Fake-Aktivitäten bei leerer DB) entfernt — war versehentlich live auf benemap.org; DB geleert und stattdessen echter Scrape (`--scrape`) angestoßen: 34 echte Angebote aus der Kölner Engagementdatenbank
 - [x] Lizenz festgelegt — AGPLv3 (Copyleft inkl. SaaS-Klausel), LICENSE-Datei + README/CONTRIBUTING aktualisiert, "Quellcode"-Link im Footer ergänzt (AGPL-Netzwerk-Klausel)
 - [x] E-Mail-Verifizierung bei Registrierung — Login gesperrt bis bestätigt, 24h-Token analog zum Passwort-Reset, Resend-Flow mit Rate-Limiting; dabei zwei weitere Prod-Bugs gefunden & gefixt: Passwort-Reset-Mails verlinkten hart auf localhost:5173 (nie live getestet), und `ddl-auto=update` scheitert beim Hinzufügen einer NOT-NULL-Spalte zu einer bereits befüllten Tabelle ohne SQL-Default
+- [x] Mails auf HTML mit klickbarem Link umgestellt; dabei zwei weitere Live-Bugs gefunden & gefixt: Brevo-SMTP-Login war die falsche Adresse (`noreply@benemap.org` statt `b72de9001@smtp-brevo.com`), und SPF-Record erlaubte Brevo nicht als Absender (Mails wurden als Spam/gefälscht abgelehnt) — `include:spf.brevo.com` ergänzt
+- [x] Nutzungsbedingungen-Seite erstellt + Zustimmungs-Checkbox (Datenschutz + TOS) bei Registrierung Pflicht
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
