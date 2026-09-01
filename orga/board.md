@@ -55,6 +55,7 @@ kanban-plugin: board
 - [x] Mails auf HTML mit klickbarem Link umgestellt; dabei zwei weitere Live-Bugs gefunden & gefixt: Brevo-SMTP-Login war die falsche Adresse (`noreply@benemap.org` statt `b72de9001@smtp-brevo.com`), und SPF-Record erlaubte Brevo nicht als Absender (Mails wurden als Spam/gefälscht abgelehnt) — `include:spf.brevo.com` ergänzt
 - [x] Nutzungsbedingungen-Seite erstellt + Zustimmungs-Checkbox (Datenschutz + TOS) bei Registrierung Pflicht
 - [x] Dependabot-Security-Alerts behoben — alle 4 PRs gemerged (devalue, postcss, svelte 5.57, vite v7→v8 + vite-plugin-svelte v6→v7 als Major-Bumps separat getestet); lokal `npm audit` jetzt 0 Vulnerabilities
+- [x] Matomo-Reichweitenmessung eingebaut — selbst gehostet (matomo.oswalt.eu, Site-ID 2), cookielos + IP-anonymisiert (kein Consent-Banner nötig), manuelles Pageview-Tracking bei SPA-Routenwechseln (sonst würde nur der allererste Aufruf gezählt); Datenschutzerklärung + Beta-Banner entsprechend aktualisiert (behaupteten vorher "kein Tracking")
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
