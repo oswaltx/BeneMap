@@ -6,6 +6,7 @@
     let password = "";
     let name = "";
     let role: Role = "USER";
+    let acceptedTerms = false;
     let submitting = false;
     let errorMessage: string | null = null;
     let registered = false;
@@ -75,7 +76,16 @@
                 </select>
             </label>
 
-            <button type="submit" disabled={submitting}>
+            <label class="checkbox-row">
+                <input type="checkbox" bind:checked={acceptedTerms} required />
+                Ich habe die
+                <a href="/datenschutz" target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a>
+                und die
+                <a href="/nutzungsbedingungen" target="_blank" rel="noopener noreferrer">Nutzungsbedingungen</a>
+                gelesen und akzeptiere sie.
+            </label>
+
+            <button type="submit" disabled={submitting || !acceptedTerms}>
                 {submitting ? "Wird angelegt…" : "Registrieren"}
             </button>
 
@@ -146,6 +156,23 @@
         color: var(--color-error);
         font-size: 0.85rem;
         margin: 0;
+    }
+
+    .checkbox-row {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 4px 6px;
+        font-size: 0.85rem;
+        color: var(--color-text);
+        cursor: pointer;
+    }
+
+    .checkbox-row input {
+        margin-top: 2px;
+        flex-shrink: 0;
+        width: auto;
     }
 
     .notice-box {

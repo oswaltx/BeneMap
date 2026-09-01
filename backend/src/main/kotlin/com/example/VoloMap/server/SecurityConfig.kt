@@ -100,7 +100,7 @@ class SecurityConfig(
                 it.requestMatchers(
                     HttpMethod.GET,
                     "/about", "/add", "/profile", "/login", "/register",
-                    "/impressum", "/datenschutz", "/forgot-password", "/reset-password", "/verify-email",
+                    "/impressum", "/datenschutz", "/nutzungsbedingungen", "/forgot-password", "/reset-password", "/verify-email",
                     "/index.html", "/assets/**", "/vite.svg",
                 ).permitAll()
                 it.requestMatchers(

@@ -9,6 +9,7 @@ import Login from "./pages/Login.svelte";
 import Register from "./pages/Register.svelte";
 import Impressum from "./pages/Impressum.svelte";
 import Datenschutz from "./pages/Datenschutz.svelte";
+import Nutzungsbedingungen from "./pages/Nutzungsbedingungen.svelte";
 import ForgotPassword from "./pages/ForgotPassword.svelte";
 import ResetPassword from "./pages/ResetPassword.svelte";
 import VerifyEmail from "./pages/VerifyEmail.svelte";
@@ -24,6 +25,7 @@ export const routes: Record<string, Component> = {
     "/register": Register,
     "/impressum": Impressum,
     "/datenschutz": Datenschutz,
+    "/nutzungsbedingungen": Nutzungsbedingungen,
     "/forgot-password": ForgotPassword,
     "/reset-password": ResetPassword,
     "/verify-email": VerifyEmail,
