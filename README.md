@@ -3,6 +3,7 @@
 
 An interactive map where volunteer organizations publish activities and volunteers find
 and join them nearby. Open source, non-commercial.
+Check it out on [https://benemap.org/](https://benemap.org/)
 
 ![Map view](docs/screenshots/map-view.png)
 
