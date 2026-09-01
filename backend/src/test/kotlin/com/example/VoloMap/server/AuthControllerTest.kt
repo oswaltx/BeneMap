@@ -1,14 +1,16 @@
 package com.example.VoloMap.server
 
+import jakarta.mail.Session
+import jakarta.mail.internet.MimeMessage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.timeout
 import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -53,6 +55,9 @@ class AuthControllerTest {
 
     @BeforeEach
     fun cleanUp() {
+        // The mailer builds a real MimeMessage via mailSender.createMimeMessage() — on a
+        // mock that returns null unless stubbed, which would NPE before send() is reached.
+        whenever(mailSender.createMimeMessage()).thenReturn(MimeMessage(Session.getInstance(java.util.Properties())))
         activitySignupRepository.deleteAll()
         activityRatingRepository.deleteAll()
         providerRatingRepository.deleteAll()
@@ -95,7 +100,7 @@ class AuthControllerTest {
         val user = userRepository.findByEmail("anna@example.com")!!
         assert(!user.emailVerified) { "new user should not be verified yet" }
         assert(emailVerificationTokenRepository.findByUser(user).size == 1)
-        org.mockito.kotlin.verify(mailSender, timeout(2000)).send(any<SimpleMailMessage>())
+        org.mockito.kotlin.verify(mailSender, timeout(2000)).send(any<MimeMessage>())
 
         mockMvc.perform(get("/auth/me")).andExpect(status().isUnauthorized)
     }

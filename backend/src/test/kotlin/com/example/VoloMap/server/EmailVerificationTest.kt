@@ -1,5 +1,7 @@
 package com.example.VoloMap.server
 
+import jakarta.mail.Session
+import jakarta.mail.internet.MimeMessage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -10,11 +12,11 @@ import org.mockito.Mockito.timeout
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
@@ -58,6 +60,9 @@ class EmailVerificationTest {
 
     @BeforeEach
     fun cleanUp() {
+        // The mailer builds a real MimeMessage via mailSender.createMimeMessage() — on a
+        // mock that returns null unless stubbed, which would NPE before send() is reached.
+        whenever(mailSender.createMimeMessage()).thenReturn(MimeMessage(Session.getInstance(java.util.Properties())))
         activitySignupRepository.deleteAll()
         activityRatingRepository.deleteAll()
         providerRatingRepository.deleteAll()
@@ -170,7 +175,7 @@ class EmailVerificationTest {
         val tokens = emailVerificationTokenRepository.findByUser(user)
         assertEquals(1, tokens.size)
         assertTrue(tokens[0].token != originalToken)
-        verify(mailSender, timeout(2000).times(2)).send(any<SimpleMailMessage>())
+        verify(mailSender, timeout(2000).times(2)).send(any<MimeMessage>())
     }
 
     @Test
@@ -182,7 +187,7 @@ class EmailVerificationTest {
         ).andExpect(status().isOk)
 
         assertTrue(emailVerificationTokenRepository.findAll().isEmpty())
-        verify(mailSender, never()).send(any<SimpleMailMessage>())
+        verify(mailSender, never()).send(any<MimeMessage>())
     }
 
     @Test

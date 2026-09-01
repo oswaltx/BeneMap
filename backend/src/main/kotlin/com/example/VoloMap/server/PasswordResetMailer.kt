@@ -2,8 +2,8 @@ package com.example.VoloMap.server
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
@@ -18,19 +18,26 @@ class PasswordResetMailer(
     @Async
     fun send(email: String, token: String) {
         try {
-            val message = SimpleMailMessage()
-            message.setFrom(fromAddress)
-            message.setTo(email)
-            message.setSubject("Passwort zurücksetzen — Benemap")
-            message.setText(
+            val link = "$baseUrl/reset-password?token=$token"
+            val mimeMessage = mailSender.createMimeMessage()
+            val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
+            helper.setFrom(fromAddress)
+            helper.setTo(email)
+            helper.setSubject("Passwort zurücksetzen — Benemap")
+            helper.setText(
                 "Hallo,\n\n" +
                     "du hast angefragt, dein Passwort für Benemap zurückzusetzen. " +
                     "Klicke auf den folgenden Link, um ein neues Passwort zu setzen " +
                     "(gültig für 30 Minuten):\n\n" +
-                    "$baseUrl/reset-password?token=$token\n\n" +
-                    "Falls du das nicht warst, kannst du diese E-Mail ignorieren."
+                    "$link\n\n" +
+                    "Falls du das nicht warst, kannst du diese E-Mail ignorieren.",
+                "<p>Hallo,</p>" +
+                    "<p>du hast angefragt, dein Passwort für Benemap zurückzusetzen. Klicke auf den " +
+                    "folgenden Link, um ein neues Passwort zu setzen (gültig für 30 Minuten):</p>" +
+                    "<p><a href=\"$link\">$link</a></p>" +
+                    "<p>Falls du das nicht warst, kannst du diese E-Mail ignorieren.</p>"
             )
-            mailSender.send(message)
+            mailSender.send(mimeMessage)
         } catch (e: Exception) {
             logger.warn("Failed to send password reset email to $email", e)
         }
