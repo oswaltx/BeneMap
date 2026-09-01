@@ -55,12 +55,27 @@
 
     <h2>5. Cookies</h2>
     <p>
-        Wir setzen ausschließlich ein technisch notwendiges Session-Cookie zur
-        Anmeldung ein (SameSite=Lax). Es findet kein Tracking und keine
-        Analyse Ihres Nutzungsverhaltens statt.
+        Wir setzen ein technisch notwendiges Session-Cookie zur Anmeldung ein
+        (SameSite=Lax). Für die Reichweitenmessung (siehe Punkt 6) werden
+        keine Cookies gesetzt.
     </p>
 
-    <h2>6. Drittanbieter</h2>
+    <h2>6. Reichweitenmessung (Matomo)</h2>
+    <p>
+        Wir nutzen die Analysesoftware Matomo, die wir selbst auf einem
+        eigenen Server betreiben — Ihre Daten werden dabei nicht an Dritte
+        weitergegeben. Matomo ist so konfiguriert, dass es keine Cookies
+        setzt und Ihre IP-Adresse vor der Speicherung anonymisiert. Erfasst
+        werden aufgerufene Seiten, ungefähre Herkunft (über die anonymisierte
+        IP), verwendeter Browser/Bildschirmgröße und Verweildauer — ein
+        Rückschluss auf Ihre Person ist damit nicht möglich. Rechtsgrundlage
+        ist unser berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO) an der
+        bedarfsgerechten Weiterentwicklung der Plattform. Da weder Cookies
+        noch personenbezogene Kennungen gespeichert werden, ist hierfür keine
+        Einwilligung erforderlich.
+    </p>
+
+    <h2>7. Drittanbieter</h2>
     <p>
         <strong>OpenStreetMap Nominatim:</strong> Wenn Sie eine Adresse für eine
         Aktivität eingeben, wird diese zur Ermittlung der Geokoordinaten an den
@@ -79,7 +94,7 @@
         </a>.
     </p>
 
-    <h2>7. Ihre Rechte</h2>
+    <h2>8. Ihre Rechte</h2>
     <p>
         Sie haben das Recht auf Auskunft, Berichtigung, Löschung und
         Einschränkung der Verarbeitung Ihrer Daten sowie ein Recht auf

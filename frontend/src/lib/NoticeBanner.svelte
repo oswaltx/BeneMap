@@ -27,8 +27,10 @@
     <div class="banner" role="note">
         <p>
             Benemap befindet sich in der <strong>Beta-Phase</strong> — es kann noch zu Änderungen
-            und gelegentlichen Fehlern kommen. Wir verwenden ausschließlich technisch notwendige
-            Cookies (Login-Session), keine Tracking- oder Werbe-Cookies. Mehr dazu in der
+            und gelegentlichen Fehlern kommen. Wir setzen ein technisch notwendiges Cookie
+            (Login-Session) sowie eine cookielose, anonymisierte Reichweitenmessung
+            (selbst gehostetes Matomo) ein — keine Werbe-Cookies, kein Tracking über
+            mehrere Seiten hinweg. Mehr dazu in der
             <Link href="/datenschutz">Datenschutzerklärung</Link>.
         </p>
         <button onclick={dismiss}>Verstanden</button>

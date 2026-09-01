@@ -16,6 +16,18 @@ import VerifyEmail from "./pages/VerifyEmail.svelte";
 
 export const route = writable<string>(window.location.pathname);
 
+// Matomo's default snippet only tracks the very first load — this SPA never
+// does a full page reload on internal navigation, so route changes need an
+// explicit pageview push or they'd never show up in the analytics.
+function trackPageView(path: string) {
+    const paq = (window as unknown as { _paq?: unknown[][] })._paq;
+    if (!paq) return;
+    paq.push(["setCustomUrl", path]);
+    paq.push(["trackPageView"]);
+}
+
+trackPageView(window.location.pathname);
+
 export const routes: Record<string, Component> = {
     "/": Home,
     "/about": About,
@@ -34,8 +46,10 @@ export const routes: Record<string, Component> = {
 export function navigate(path: string) {
     history.pushState({}, "", path);
     route.set(path);
+    trackPageView(path);
 }
 
 window.addEventListener("popstate", () => {
     route.set(window.location.pathname);
+    trackPageView(window.location.pathname);
 });
