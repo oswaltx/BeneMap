@@ -12,6 +12,7 @@ kanban-plugin: board
 - [ ] Zeitaufwand und Verbindlichkeit
 - [ ] Kleine Schritt-für-Schritt-Anleitung für Anbieter (Registrieren, Aktivität anlegen, Anmeldungen einsehen) — Zielgruppe der Vereine/Vermittlungsstellen ist eher älter und weniger app-erfahren, sollte einfach und niedrigschwellig sein (z.B. verlinkt von der About-Seite oder direkt im Anbieter-Flow)
 - [ ] Checkbox bei Registrierung: Zustimmung zu Datenschutzerklärung + Nutzungsbedingungen (TOS) erforderlich — Nutzungsbedingungen/AGB-Seite existiert noch gar nicht (bisher nur Impressum & Datenschutz), muss also mit erstellt werden. Freigegeben zur autonomen Umsetzung.
+- [ ] Dependabot-Security-Alerts beheben (20 offen, github.com/oswaltx/BeneMap/security/dependabot) — alles Dev-Dependencies im Frontend (vite, postcss, devalue, svelte), betrifft primär die Dev-Umgebung nicht den produktiven Build; entsprechende Update-PRs liegen schon bereit, brauchen nur Review + Merge
 ## Doing
 
 
