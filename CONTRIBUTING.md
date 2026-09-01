@@ -56,8 +56,7 @@ followed by a blank line and more detail if the change isn't self-explanatory.
 ## Reporting security issues
 
 Please **don't** open a public issue for security vulnerabilities. See
-[SECURITY.md](SECURITY.md) (or, if that file doesn't exist yet, contact the maintainer
-directly) instead.
+[SECURITY.md](SECURITY.md) instead.
 
 ## License
 
