@@ -303,4 +303,36 @@
     .reset {
         align-self: flex-start;
     }
+
+    @media (max-width: 640px) {
+        .toggle {
+            padding: 10px 14px;
+            font-size: 0.95rem;
+        }
+
+        select,
+        .pill-row button,
+        .reset {
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            min-height: 44px;
+        }
+
+        .pill-row button {
+            min-width: 44px;
+        }
+
+        .checkbox-row {
+            padding: 6px 0;
+        }
+
+        .checkbox-row input {
+            width: 20px;
+            height: 20px;
+        }
+
+        .popover {
+            width: min(380px, 94vw);
+        }
+    }
 </style>

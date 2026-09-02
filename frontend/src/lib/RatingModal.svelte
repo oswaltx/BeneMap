@@ -307,4 +307,33 @@
         border-top: 1px solid var(--color-border);
         padding-top: 12px;
     }
+
+    @media (max-width: 640px) {
+        .modal {
+            width: min(420px, 94vw);
+        }
+
+        .close {
+            font-size: 1.6rem;
+            padding: 8px;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .star-button {
+            font-size: 1.8rem;
+            padding: 4px;
+        }
+
+        button[type="submit"] {
+            min-height: 44px;
+        }
+
+        textarea {
+            font-size: 16px;
+        }
+    }
 </style>

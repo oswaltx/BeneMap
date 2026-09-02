@@ -76,4 +76,14 @@
     button:hover {
         filter: brightness(1.05);
     }
+
+    @media (max-width: 640px) {
+        .banner {
+            padding: 10px 14px;
+        }
+
+        button {
+            min-height: 40px;
+        }
+    }
 </style>

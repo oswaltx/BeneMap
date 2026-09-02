@@ -30,6 +30,14 @@
         outline: none;
         border-color: var(--color-primary);
     }
+
+    @media (max-width: 640px) {
+        input {
+            padding: 12px 14px;
+            /* 16px avoids iOS Safari auto-zooming the page on focus */
+            font-size: 16px;
+        }
+    }
 </style>
 
 <input

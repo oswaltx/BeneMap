@@ -183,4 +183,16 @@
         border-radius: var(--radius-pill);
         white-space: nowrap;
     }
+
+    @media (max-width: 640px) {
+        .cluster-popup {
+            min-width: 240px;
+            max-width: 82vw;
+        }
+
+        .cluster-row {
+            padding: 10px 12px;
+            min-height: 44px;
+        }
+    }
 </style>

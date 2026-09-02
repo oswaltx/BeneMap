@@ -5,6 +5,7 @@
     import Footer from "./lib/Footer.svelte";
     import NoticeBanner from "./lib/NoticeBanner.svelte";
     import { fetchCurrentUser } from "./auth";
+    import { route } from "./router";
 
     onMount(() => {
         fetchCurrentUser();
@@ -13,5 +14,15 @@
 <NavBar />
 <NoticeBanner />
 <Router />
-<Footer />
+<div class:map-page={$route === "/"}>
+    <Footer />
+</div>
+
+<style>
+    @media (max-width: 640px) {
+        .map-page {
+            display: none;
+        }
+    }
+</style>
 

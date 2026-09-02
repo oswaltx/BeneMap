@@ -53,8 +53,8 @@
 <CircleMarker
     latLng={[marker.lat, marker.lng]}
     options={marker.sourceUrl
-        ? { radius: 10, bubblingMouseEvents: false, color: "#F4C542", dashArray: "4, 4" }
-        : { radius: 10, bubblingMouseEvents: false }}
+        ? { radius: 12, bubblingMouseEvents: false, color: "#F4C542", dashArray: "4, 4" }
+        : { radius: 12, bubblingMouseEvents: false }}
     onmouseover={openNow}
     onmouseout={scheduleClose}
     onclick={select}

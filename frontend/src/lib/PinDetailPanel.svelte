@@ -31,6 +31,7 @@
         providerRating: number | null;
         providerRatingCount: number;
     };
+    export let embedded = false;
 
     const dispatch = createEventDispatcher<{ close: void; refresh: void }>();
 
@@ -62,7 +63,7 @@
     }
 </script>
 
-<div class="panel">
+<div class="panel" class:embedded>
     <div class="panel-header">
         {#if marker.category}
             <span
@@ -74,7 +75,9 @@
             <button class="edit-link" on:click={() => (editing = true)}>Bearbeiten</button>
             <button class="edit-link" on:click={handleDelete}>Löschen</button>
         {/if}
-        <button class="close" on:click={() => dispatch("close")} aria-label="Schließen">×</button>
+        {#if !embedded}
+            <button class="close" on:click={() => dispatch("close")} aria-label="Schließen">×</button>
+        {/if}
     </div>
 
     {#if marker.photoUrls.length > 0}
@@ -202,6 +205,15 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
+    }
+
+    .panel.embedded {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        box-shadow: none;
+        padding: 0;
     }
 
     .panel-header {
@@ -385,5 +397,38 @@
     .source-contact-phone {
         font-size: 0.8rem;
         color: var(--color-text-muted);
+    }
+
+    @media (max-width: 640px) {
+        .close {
+            font-size: 1.6rem;
+            padding: 8px;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-link {
+            padding: 8px 10px;
+            font-size: 0.8rem;
+        }
+
+        .rating-badge {
+            padding: 9px 14px;
+            font-size: 0.85rem;
+        }
+
+        .thumb {
+            flex: 0 0 56px;
+            height: 56px;
+        }
+
+        .source-contact-link,
+        .provider-website,
+        .source-link {
+            padding: 4px 0;
+        }
     }
 </style>

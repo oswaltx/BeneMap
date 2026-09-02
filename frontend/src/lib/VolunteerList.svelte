@@ -203,4 +203,21 @@
         text-align: center;
         padding: 12px 0;
     }
+
+    @media (max-width: 640px) {
+        .card {
+            padding: 14px;
+        }
+
+        .rating-badge {
+            padding: 9px 14px;
+            font-size: 0.8rem;
+            min-height: 38px;
+        }
+
+        .edit-link {
+            padding: 9px 10px;
+            font-size: 0.8rem;
+        }
+    }
 </style>
