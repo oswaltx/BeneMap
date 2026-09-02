@@ -56,6 +56,7 @@ kanban-plugin: board
 - [x] Nutzungsbedingungen-Seite erstellt + Zustimmungs-Checkbox (Datenschutz + TOS) bei Registrierung Pflicht
 - [x] Dependabot-Security-Alerts behoben — alle 4 PRs gemerged (devalue, postcss, svelte 5.57, vite v7→v8 + vite-plugin-svelte v6→v7 als Major-Bumps separat getestet); lokal `npm audit` jetzt 0 Vulnerabilities
 - [x] Matomo-Reichweitenmessung eingebaut — selbst gehostet (matomo.oswalt.eu, Site-ID 2), cookielos + IP-anonymisiert (kein Consent-Banner nötig), manuelles Pageview-Tracking bei SPA-Routenwechseln (sonst würde nur der allererste Aufruf gezählt); Datenschutzerklärung + Beta-Banner entsprechend aktualisiert (behaupteten vorher "kein Tracking")
+- [x] Mobile UX der Karte überarbeitet — Kern-Bug behoben: Tippen auf einen Pin öffnete auf Mobile bislang nichts (Detail-Panel war Desktop-only); jetzt dreistufiges Bottom-Sheet (peek/halb/voll) mit Drag- und Tap-Gesten, zeigt das Aktivitäts-Detail direkt im Sheet inkl. Zurück-Button, Google-Maps/Mapy-Stil. Dazu: Hamburger-Navigation (mehr Platz für die Karte), Footer auf der mobilen Kartenseite ausgeblendet, "Meinen Standort"-Button, Zoom-Controls neu positioniert (überlappten vorher das Sheet), größere Touch-Ziele bei Filtern/Popups/Modals/Listenkarten (~44px), 16px-Schriftgröße bei Mobile-Inputs (verhindert iOS-Safari-Zoom beim Fokussieren)
 - [ ] Add map library to frontend (Leaflet or MapLibre)
 - [ ] Create basic Map component in Svelte
 - [x] create basic springboot application
