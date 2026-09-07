@@ -66,6 +66,7 @@ class AuthController(
     private val emailVerificationMailer: EmailVerificationMailer,
     private val sessionRegistry: SessionRegistry,
     private val rateLimiter: RateLimiter,
+    private val photoStorageService: PhotoStorageService,
 ) {
 
     @PostMapping("/register")
@@ -151,13 +152,21 @@ class AuthController(
         authentication: Authentication
     ): ResponseEntity<UserResponse> {
         val user = userRepository.findByEmail(authentication.name)!!
-        user.photoUrl = req.photoUrl?.trim()?.ifBlank { null }
-            ?.let { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
+        val oldPhotoUrl = user.photoUrl
+        user.photoUrl = req.photoUrl?.trim()?.ifBlank { null }?.let { normalizePhotoUrlValue(it) }
         user.websiteUrl = req.websiteUrl?.trim()?.ifBlank { null }
             ?.let { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
         userRepository.save(user)
+
+        if (oldPhotoUrl != null && oldPhotoUrl != user.photoUrl && !isPhotoStillUsedInOwnActivities(oldPhotoUrl, user)) {
+            photoStorageService.deleteIfOwnedBy(oldPhotoUrl, user)
+        }
+
         return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
     }
+
+    private fun isPhotoStillUsedInOwnActivities(url: String, owner: User): Boolean =
+        volunteerActivityRepository.findByCreatedBy(owner).any { parsePhotoUrls(it.photoUrls).contains(url) }
 
     @GetMapping("/me/deletion-impact")
     fun deletionImpact(authentication: Authentication): ResponseEntity<DeletionImpactResponse> {
@@ -196,6 +205,7 @@ class AuthController(
         activitySignupRepository.deleteAll(userActivitySignups)
         passwordResetTokenRepository.deleteAll(passwordResetTokenRepository.findByUser(user))
         emailVerificationTokenRepository.deleteAll(emailVerificationTokenRepository.findByUser(user))
+        photoStorageService.deleteAllOwnedBy(user)
 
         userRepository.delete(user)
 

@@ -3,13 +3,14 @@
     import { currentUser, authChecked, fetchWithSessionCheck } from "../auth";
     import { ACTIVITY_CATEGORIES } from "./categories";
     import { API_BASE } from "./apiBase";
+    import PhotoDropzone from "./PhotoDropzone.svelte";
 
     let name = "";
     let description = "";
     let addressText = "";
     let category = "";
     let dateTime = "";
-    let photoUrlsText = "";
+    let photoUrls: string[] = [];
     let maxParticipants = "";
     let isRecurring = false;
     let recurrenceCount = 1;
@@ -47,7 +48,7 @@
             addressText: addressText || null,
             category: category || null,
             dateTime: dateTime ? dateTime + ":00" : undefined,
-            photoUrls: photoUrlsText.trim() || undefined,
+            photoUrls: photoUrls.length > 0 ? photoUrls.join("\n") : undefined,
             maxParticipants: maxParticipants ? Number(maxParticipants) : null,
         };
 
@@ -101,7 +102,7 @@
             addressText = "";
             category = "";
             dateTime = "";
-            photoUrlsText = "";
+            photoUrls = [];
             maxParticipants = "";
             isRecurring = false;
             recurrenceCount = 1;
@@ -159,8 +160,8 @@
             </label>
 
             <label>
-                Foto-URLs (eine pro Zeile)
-                <textarea bind:value={photoUrlsText} rows="3" placeholder={"https://...\nhttps://..."}></textarea>
+                Fotos
+                <PhotoDropzone bind:urls={photoUrls} />
             </label>
 
             <label>

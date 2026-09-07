@@ -6,6 +6,7 @@
     import { categoryColor } from "./categoryColor";
     import { deleteActivity } from "./activityActions";
     import { currentUser } from "../auth";
+    import { resolvePhotoUrl } from "./apiBase";
 
     export let marker: {
         id: number;
@@ -82,7 +83,7 @@
 
     {#if marker.photoUrls.length > 0}
         <div class="gallery">
-            <img class="hero-photo" src={marker.photoUrls[safePhotoIndex]} alt="" />
+            <img class="hero-photo" src={resolvePhotoUrl(marker.photoUrls[safePhotoIndex])} alt="" />
             {#if marker.photoUrls.length > 1}
                 <div class="photo-strip">
                     {#each marker.photoUrls as url, i}
@@ -92,7 +93,7 @@
                             on:click={() => (selectedPhotoIndex = i)}
                             aria-label={`Foto ${i + 1} anzeigen`}
                         >
-                            <img src={url} alt="" />
+                            <img src={resolvePhotoUrl(url)} alt="" />
                         </button>
                     {/each}
                 </div>
@@ -148,7 +149,7 @@
         <div class="provider">
             <div class="provider-header">
                 {#if marker.providerPhotoUrl}
-                    <img class="provider-avatar" src={marker.providerPhotoUrl} alt={marker.providerName ?? "Anbieter"} />
+                    <img class="provider-avatar" src={resolvePhotoUrl(marker.providerPhotoUrl)} alt={marker.providerName ?? "Anbieter"} />
                 {/if}
                 <span class="provider-name">{marker.providerName}</span>
             </div>
