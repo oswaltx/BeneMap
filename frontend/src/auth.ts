@@ -10,6 +10,7 @@ export interface AuthUser {
     role: Role;
     photoUrl: string | null;
     websiteUrl: string | null;
+    externalCalendarUrl: string | null;
 }
 
 export const currentUser = writable<AuthUser | null>(null);

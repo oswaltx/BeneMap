@@ -59,15 +59,18 @@
         }
     }
 
-    function calendarUrl(token: string, scheme: "http" | "webcal"): string {
+    function buildIcsUrl(path: string, scheme: "http" | "webcal"): string {
         const base = API_BASE || window.location.origin;
-        const withHttp = `${base}/calendar/${token}.ics`;
+        const withHttp = `${base}${path}`;
         return scheme === "webcal" ? withHttp.replace(/^https?:/, "webcal:") : withHttp;
     }
+
+    let externalCalendarUrl = "";
 
     $: if ($currentUser && !prefilled) {
         photoUrls = $currentUser.photoUrl ? [$currentUser.photoUrl] : [];
         websiteUrl = $currentUser.websiteUrl ?? "";
+        externalCalendarUrl = $currentUser.externalCalendarUrl ?? "";
         prefilled = true;
     }
 
@@ -87,6 +90,7 @@
                 body: JSON.stringify({
                     photoUrl: photoUrls[0] ?? null,
                     websiteUrl: websiteUrl.trim() || null,
+                    externalCalendarUrl: externalCalendarUrl.trim() || null,
                 }),
             });
 
@@ -160,6 +164,18 @@
                         <input type="text" bind:value={websiteUrl} placeholder="https://..." />
                     </label>
 
+                    <label>
+                        Externer Kalender zum Importieren (optional)
+                        <input
+                            type="text"
+                            bind:value={externalCalendarUrl}
+                            placeholder="https://calendar.google.com/.../basic.ics"
+                        />
+                    </label>
+                    <p class="hours-meta">
+                        Termine aus diesem Kalender werden alle 30 Minuten automatisch als Aktivitäten übernommen.
+                    </p>
+
                     <button type="submit" disabled={submitting}>
                         {submitting ? "Speichert…" : "Speichern"}
                     </button>
@@ -168,6 +184,19 @@
                         <p class:warning={statusIsWarning}>{statusMessage}</p>
                     {/if}
                 </form>
+
+                <div class="hours-card">
+                    <h3>Dein Anbieter-Kalender</h3>
+                    <p class="hours-meta">
+                        Abonniere deine eigenen BeneMap-Aktivitäten in deinem Kalender.
+                    </p>
+                    <a
+                        class="button-link"
+                        href={buildIcsUrl(`/providers/${$currentUser.id}/calendar.ics`, "webcal")}
+                    >
+                        Anbieter-Kalender abonnieren
+                    </a>
+                </div>
             {/if}
 
             {#if $currentUser.role === "USER" && hours}
@@ -190,7 +219,7 @@
                         Abonniere deine Anmeldungen in Google/Apple/Outlook-Kalender — neue Anmeldungen erscheinen
                         automatisch.
                     </p>
-                    <a class="button-link" href={calendarUrl(calendarToken, "webcal")}>Kalender abonnieren</a>
+                    <a class="button-link" href={buildIcsUrl(`/calendar/${calendarToken}.ics`, "webcal")}>Kalender abonnieren</a>
                     <button
                         type="button"
                         class="regenerate-link"

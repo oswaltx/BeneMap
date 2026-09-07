@@ -126,4 +126,28 @@ class CalendarControllerTest {
         mockMvc.perform(get("/auth/me/calendar-token"))
             .andExpect(status().isUnauthorized)
     }
+
+    @Test
+    fun `provider calendar is public and contains the provider's own activities`() {
+        registerAndSession("anbieter1@example.com", "ANBIETER")
+        val provider = userRepository.findByEmail("anbieter1@example.com")!!
+        activityRepository.save(
+            VolunteerActivity(name = "Anbieter-Aktion", dateTime = LocalDateTime.now().plusDays(1), createdBy = provider)
+        )
+
+        val ics = mockMvc.perform(get("/providers/${provider.id}/calendar.ics"))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+
+        org.junit.jupiter.api.Assertions.assertTrue(ics.contains("Anbieter-Aktion"))
+    }
+
+    @Test
+    fun `provider calendar for a non-provider or unknown id returns 404`() {
+        val session = registerAndSession("user1@example.com", "USER")
+        val user = userRepository.findByEmail("user1@example.com")!!
+
+        mockMvc.perform(get("/providers/${user.id}/calendar.ics")).andExpect(status().isNotFound)
+        mockMvc.perform(get("/providers/999999/calendar.ics")).andExpect(status().isNotFound)
+    }
 }

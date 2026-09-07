@@ -43,8 +43,13 @@ data class UserResponse(
     val role: Role,
     val photoUrl: String? = null,
     val websiteUrl: String? = null,
+    val externalCalendarUrl: String? = null,
 )
-data class UpdateProfileRequest(val photoUrl: String? = null, val websiteUrl: String? = null)
+data class UpdateProfileRequest(
+    val photoUrl: String? = null,
+    val websiteUrl: String? = null,
+    val externalCalendarUrl: String? = null,
+)
 data class RegisterResponse(val message: String)
 data class ErrorResponse(val error: String)
 data class DeletionImpactResponse(val activityCount: Int)
@@ -123,7 +128,7 @@ class AuthController(
             return ResponseEntity.status(401).body(ErrorResponse("E-Mail oder Passwort falsch."))
         }
         val user = userRepository.findByEmail(email)!!
-        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl, user.externalCalendarUrl))
     }
 
     @PostMapping("/logout")
@@ -139,13 +144,13 @@ class AuthController(
     @GetMapping("/me")
     fun me(authentication: Authentication): ResponseEntity<UserResponse> {
         val user = userRepository.findByEmail(authentication.name)!!
-        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl, user.externalCalendarUrl))
     }
 
     /**
-     * PUT /auth/me request body uses full-replace semantics for both fields: sending
-     * only `photoUrl` will silently clear an existing `websiteUrl` (and vice versa),
-     * since both fields are always overwritten, never merged.
+     * PUT /auth/me request body uses full-replace semantics for all fields: sending
+     * only `photoUrl` will silently clear an existing `websiteUrl`/`externalCalendarUrl`
+     * (and vice versa), since every field is always overwritten, never merged.
      */
     @PutMapping("/me")
     fun updateProfile(
@@ -157,13 +162,15 @@ class AuthController(
         user.photoUrl = req.photoUrl?.trim()?.ifBlank { null }?.let { normalizePhotoUrlValue(it) }
         user.websiteUrl = req.websiteUrl?.trim()?.ifBlank { null }
             ?.let { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
+        user.externalCalendarUrl = req.externalCalendarUrl?.trim()?.ifBlank { null }
+            ?.let { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
         userRepository.save(user)
 
         if (oldPhotoUrl != null && oldPhotoUrl != user.photoUrl && !isPhotoStillUsedInOwnActivities(oldPhotoUrl, user)) {
             photoStorageService.deleteIfOwnedBy(oldPhotoUrl, user)
         }
 
-        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl))
+        return ResponseEntity.ok(UserResponse(user.id, user.email, user.name, user.role, user.photoUrl, user.websiteUrl, user.externalCalendarUrl))
     }
 
     private fun isPhotoStillUsedInOwnActivities(url: String, owner: User): Boolean =
