@@ -13,10 +13,10 @@ import java.time.Instant
 
 @Entity
 @Table(
-    name = "activity_signups",
+    name = "favorites",
     uniqueConstraints = [UniqueConstraint(columnNames = ["user_id", "activity_id"])]
 )
-class ActivitySignup(
+class Favorite(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
@@ -30,8 +30,4 @@ class ActivitySignup(
     var activity: VolunteerActivity,
 
     var createdAt: Instant = Instant.now(),
-
-    // Gesetzt sobald ReminderJob eine Erinnerungsmail für diese Anmeldung verschickt
-    // hat — verhindert doppelte Mails bei jedem stündlichen Lauf.
-    var reminderSentAt: Instant? = null,
 )

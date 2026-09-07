@@ -18,6 +18,7 @@ data class Marker(
     val providerName: String?,
     val providerPhotoUrl: String?,
     val providerWebsiteUrl: String?,
+    val providerVerified: Boolean,
     val providerRating: Double?,
     val providerRatingCount: Int,
     val sourceUrl: String?,
@@ -27,4 +28,5 @@ data class Marker(
     val sourceContactPhone: String?,
     val signupCount: Int,
     val maxParticipants: Int?,
+    val durationHours: Double?,
 )

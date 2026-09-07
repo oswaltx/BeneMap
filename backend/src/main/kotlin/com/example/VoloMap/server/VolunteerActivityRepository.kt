@@ -12,6 +12,8 @@ interface VolunteerActivityRepository : JpaRepository<VolunteerActivity, Long> {
     fun existsBySourceUrl(sourceUrl: String): Boolean
 
     fun findByCreatedBy(user: User): List<VolunteerActivity>
+    fun findByCreatedByAndExternalCalendarUid(user: User, externalCalendarUid: String): VolunteerActivity?
+    fun findByCreatedByAndExternalCalendarUidIsNotNull(user: User): List<VolunteerActivity>
 
     // Pessimistic write lock so concurrent sign-up requests for the same activity are
     // serialized — prevents overbooking a maxParticipants-limited activity and prevents

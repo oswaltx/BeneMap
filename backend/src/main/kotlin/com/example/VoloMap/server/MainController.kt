@@ -25,6 +25,7 @@ class MainController(
     private val activitySignupRepository: ActivitySignupRepository,
     private val rateLimiter: RateLimiter,
     private val photoStorageService: PhotoStorageService,
+    private val favoriteRepository: FavoriteRepository,
 ) {
 
     @GetMapping("/markers")
@@ -34,6 +35,9 @@ class MainController(
         @RequestParam(required = false) timeFrom: Int?,
         @RequestParam(required = false) timeTo: Int?,
         @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) lat: Double? = null,
+        @RequestParam(required = false) lng: Double? = null,
+        @RequestParam(required = false) radiusKm: Double? = null,
     ): List<Marker> {
         val filterDate = date?.let { LocalDate.parse(it) }
         val searchText = search?.trim()?.lowercase()
@@ -66,6 +70,7 @@ class MainController(
                     providerName = activity.createdBy?.name,
                     providerPhotoUrl = activity.createdBy?.photoUrl,
                     providerWebsiteUrl = activity.createdBy?.websiteUrl,
+                    providerVerified = activity.createdBy?.verified ?: false,
                     providerRating = providerRatings.map { it.stars }.average().takeIf { providerRatings.isNotEmpty() },
                     providerRatingCount = providerRatings.size,
                     sourceUrl = activity.sourceUrl,
@@ -75,6 +80,7 @@ class MainController(
                     sourceContactPhone = activity.sourceContactPhone,
                     signupCount = signups.size,
                     maxParticipants = activity.maxParticipants,
+                    durationHours = activity.durationHours,
                 )
             }
             .filter { filterDate == null || it.dateTime?.toLocalDate() == filterDate }
@@ -85,6 +91,10 @@ class MainController(
                         it.name.lowercase().contains(searchText) ||
                         it.address.lowercase().contains(searchText) ||
                         it.description.lowercase().contains(searchText)
+            }
+            .filter {
+                lat == null || lng == null || radiusKm == null ||
+                        haversineKm(lat, lng, it.lat, it.lng) <= radiusKm
             }
     }
     @GetMapping("/categories")
@@ -111,6 +121,7 @@ class MainController(
         activity.createdBy = userRepository.findByEmail(authentication.name)
         activity.photoUrls = normalizePhotoUrls(activity.photoUrls)
         activity.maxParticipants = normalizeMaxParticipants(activity.maxParticipants)
+        activity.durationHours = normalizeDurationHours(activity.durationHours)
 
         if (activity.latitude == null && activity.longitude == null && !activity.addressText.isNullOrBlank()) {
             val coords = geocodingService.geocode(activity.addressText!!)
@@ -167,6 +178,7 @@ class MainController(
                     dateTime = occurrenceDateTime,
                     createdBy = provider,
                     maxParticipants = normalizeMaxParticipants(req.maxParticipants),
+                    durationHours = normalizeDurationHours(req.durationHours),
                 )
             )
         }
@@ -194,6 +206,7 @@ class MainController(
         activity.category = req.category
         activity.photoUrls = normalizePhotoUrls(req.photoUrls)
         activity.maxParticipants = normalizeMaxParticipants(req.maxParticipants)
+        activity.durationHours = normalizeDurationHours(req.durationHours)
         if (req.dateTime != null) {
             activity.dateTime = req.dateTime
         }
@@ -243,6 +256,7 @@ class MainController(
         }
         activityRatingRepository.deleteAll(activityRatingRepository.findByActivity(activity))
         activitySignupRepository.deleteAll(activitySignupRepository.findByActivity(activity))
+        favoriteRepository.deleteByActivity(activity)
         if (user != null) {
             releaseOrphanedPhotos(parsePhotoUrls(activity.photoUrls), user, excludingActivityId = activity.id)
         }
@@ -288,6 +302,7 @@ data class UpdateActivityRequest(
     val dateTime: LocalDateTime? = null,
     val photoUrls: String? = null,
     val maxParticipants: Int? = null,
+    val durationHours: Double? = null,
 )
 
 private const val MAX_RECURRING_OCCURRENCES = 60
@@ -302,6 +317,21 @@ data class AddRecurringActivityRequest(
     val photoUrls: String? = null,
     val recurrenceIntervalDays: Int,
     val maxParticipants: Int? = null,
+    val durationHours: Double? = null,
 )
 
 private fun normalizeMaxParticipants(value: Int?): Int? = value?.takeIf { it >= 1 }
+
+private fun normalizeDurationHours(value: Double?): Double? = value?.takeIf { it > 0 }
+
+private const val EARTH_RADIUS_KM = 6371.0
+
+private fun haversineKm(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
+    val dLat = Math.toRadians(lat2 - lat1)
+    val dLng = Math.toRadians(lng2 - lng1)
+    val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2)
+    val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return EARTH_RADIUS_KM * c
+}

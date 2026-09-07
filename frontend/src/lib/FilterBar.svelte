@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
+    import { currentUser } from "../auth";
 
     export let categories: string[] = [];
 
@@ -11,6 +12,7 @@
             timeTo: number | null;
         };
         toggleCityOffers: boolean;
+        toggleFavoritesOnly: boolean;
     }>();
 
     let selectedCategory: string | null = null;
@@ -18,6 +20,7 @@
     let selectedWeekday: number | null = null;
     let selectedTimeSlot: { label: string; from: number | null; to: number | null } | null = null;
     let showCityOffers = false;
+    let favoritesOnly = false;
 
     const weekdays = [
         { label: "Mo", day: 1 },
@@ -68,13 +71,15 @@
         selectedWeekday = null;
         selectedTimeSlot = null;
         showCityOffers = false;
+        favoritesOnly = false;
         dispatch("toggleCityOffers", false);
+        dispatch("toggleFavoritesOnly", false);
         apply();
     }
 
     let expanded = false;
 
-    $: activeCount = [selectedCategory, selectedWeekday, selectedTimeSlot].filter((v) => v !== null).length + (showCityOffers ? 1 : 0);
+    $: activeCount = [selectedCategory, selectedWeekday, selectedTimeSlot].filter((v) => v !== null).length + (showCityOffers ? 1 : 0) + (favoritesOnly ? 1 : 0);
 </script>
 
 <div class="filter">
@@ -145,6 +150,16 @@
                     />
                     Städtische Angebote (Köln) anzeigen
                 </label>
+                {#if $currentUser}
+                    <label class="checkbox-row">
+                        <input
+                            type="checkbox"
+                            bind:checked={favoritesOnly}
+                            on:change={() => dispatch("toggleFavoritesOnly", favoritesOnly)}
+                        />
+                        Nur Favoriten anzeigen
+                    </label>
+                {/if}
             </div>
             {#if showCityOffers && (selectedDate || selectedTimeSlot)}
                 <p class="hint">

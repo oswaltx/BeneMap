@@ -14,6 +14,7 @@
         dateTime: string | null;
         photoUrls: string[];
         maxParticipants: number | null;
+        durationHours: number | null;
     };
 
     const dispatch = createEventDispatcher<{ close: void; saved: void }>();
@@ -25,6 +26,7 @@
     let dateTime = marker.dateTime ? marker.dateTime.slice(0, 16) : "";
     let photoUrls = marker.photoUrls.slice();
     let maxParticipants = marker.maxParticipants != null ? String(marker.maxParticipants) : "";
+    let durationHours = marker.durationHours != null ? String(marker.durationHours) : "";
 
     let submitting = false;
     let statusMessage: string | null = null;
@@ -53,6 +55,7 @@
                     dateTime: dateTime ? dateTime + ":00" : undefined,
                     photoUrls: photoUrls.length > 0 ? photoUrls.join("\n") : undefined,
                     maxParticipants: maxParticipants ? Number(maxParticipants) : null,
+                    durationHours: durationHours ? Number(durationHours) : null,
                 }),
             });
 
@@ -129,6 +132,11 @@
         <label>
             Maximale Teilnehmerzahl (optional)
             <input type="number" min="1" bind:value={maxParticipants} placeholder="unbegrenzt" />
+        </label>
+
+        <label>
+            Dauer in Stunden (optional, für Ehrenamtsstunden-Tracking)
+            <input type="number" min="0.5" step="0.5" bind:value={durationHours} placeholder="z.B. 2" />
         </label>
 
         <button type="submit" disabled={submitting}>

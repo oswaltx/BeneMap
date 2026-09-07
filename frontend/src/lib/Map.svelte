@@ -9,10 +9,14 @@
     import ClusterMarker from "./ClusterMarker.svelte";
     import SingleMarkerPin from "./SingleMarkerPin.svelte";
     import { API_BASE } from "./apiBase";
+    import { favoriteIds } from "./favorites";
 
     let markers: any[] = [];
     let showCityOffers = false;
-    $: visibleMarkers = markers.filter((m) => showCityOffers || !m.sourceUrl);
+    let favoritesOnly = false;
+    $: visibleMarkers = markers
+        .filter((m) => showCityOffers || !m.sourceUrl)
+        .filter((m) => !favoritesOnly || $favoriteIds.has(m.id));
     $: markerGroups = groupByLocation(visibleMarkers);
     let categories: string[] = [];
     let errorMessage: string | null = null;
@@ -127,6 +131,45 @@
         search: "",
     };
 
+    let nearMeEnabled = false;
+    let nearMeRadiusKm = 10;
+    let nearMeLocation: { lat: number; lng: number } | null = null;
+    let nearMeError: string | null = null;
+    let nearMeLoading = false;
+
+    function toggleNearMe() {
+        if (nearMeEnabled) {
+            nearMeEnabled = false;
+            nearMeLocation = null;
+            nearMeError = null;
+            fetchMarkers();
+            return;
+        }
+        if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
+            nearMeError = "Standortbestimmung wird von diesem Browser nicht unterstützt.";
+            return;
+        }
+        nearMeLoading = true;
+        nearMeError = null;
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                nearMeLoading = false;
+                nearMeEnabled = true;
+                nearMeLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                fetchMarkers();
+            },
+            () => {
+                nearMeLoading = false;
+                nearMeError = "Standort konnte nicht ermittelt werden.";
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    }
+
+    function handleRadiusChange() {
+        if (nearMeEnabled) fetchMarkers();
+    }
+
     onMount(() => {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
@@ -153,6 +196,11 @@
         if (query.timeFrom) params.append("timeFrom", query.timeFrom);
         if (query.timeTo) params.append("timeTo", query.timeTo);
         if (query.search) params.append("search", query.search);
+        if (nearMeEnabled && nearMeLocation) {
+            params.append("lat", nearMeLocation.lat.toString());
+            params.append("lng", nearMeLocation.lng.toString());
+            params.append("radiusKm", nearMeRadiusKm.toString());
+        }
 
         try {
             const res = await fetch(
@@ -163,9 +211,29 @@
             if (seq !== fetchMarkersSeq) return;
             markers = data;
             errorMessage = null;
+            openDeepLinkedActivity(data);
         } catch (e) {
             if (seq !== fetchMarkersSeq) return;
             errorMessage = "Aktivitäten konnten nicht geladen werden. Ist der Server erreichbar?";
+        }
+    }
+
+    // A shared activity link looks like "/?activity=123" — open its detail panel
+    // once the markers it refers to have actually loaded. Only handled on the
+    // first successful fetch: later refetches (filters, near-me) must not keep
+    // re-opening a panel the user has since closed.
+    let deepLinkHandled = false;
+    function openDeepLinkedActivity(loadedMarkers: any[]) {
+        if (deepLinkHandled) return;
+        deepLinkHandled = true;
+        const idParam = new URLSearchParams(window.location.search).get("activity");
+        if (!idParam) return;
+        const id = Number(idParam);
+        const target = loadedMarkers.find((m) => m.id === id);
+        if (!target) return;
+        selectedMarkerId = id;
+        if (!isDesktop) {
+            sheetState = "full";
         }
     }
 
@@ -207,6 +275,10 @@
         showCityOffers = event.detail;
     }
 
+    function handleToggleFavoritesOnly(event: CustomEvent<boolean>) {
+        favoritesOnly = event.detail;
+    }
+
     const attribution = '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 </script>
 
@@ -222,7 +294,26 @@
 
         <div class="search-panel" class:panel-open={panelOpen}>
             <SearchBar on:search={handleSearch} />
-            <FilterBar {categories} on:filter={handleFilter} on:toggleCityOffers={handleToggleCityOffers} />
+            <FilterBar {categories} on:filter={handleFilter} on:toggleCityOffers={handleToggleCityOffers} on:toggleFavoritesOnly={handleToggleFavoritesOnly} />
+            <div class="near-me-row">
+                <button
+                    class="near-me-toggle"
+                    class:active={nearMeEnabled}
+                    on:click={toggleNearMe}
+                    disabled={nearMeLoading}
+                >
+                    {nearMeLoading ? "Standort wird ermittelt…" : nearMeEnabled ? "📍 In meiner Nähe" : "📍 In meiner Nähe suchen"}
+                </button>
+                {#if nearMeEnabled}
+                    <select bind:value={nearMeRadiusKm} on:change={handleRadiusChange}>
+                        <option value={5}>5 km</option>
+                        <option value={10}>10 km</option>
+                        <option value={25}>25 km</option>
+                        <option value={50}>50 km</option>
+                    </select>
+                {/if}
+            </div>
+            {#if nearMeError}<p class="error">{nearMeError}</p>{/if}
             {#if errorMessage}<p class="error">{errorMessage}</p>{/if}
         </div>
 
@@ -356,6 +447,48 @@
         color: var(--color-error);
         font-size: 0.8rem;
         margin: 0;
+    }
+
+    .near-me-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .near-me-toggle {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 5px 10px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+        color: var(--color-text);
+        cursor: pointer;
+    }
+
+    .near-me-toggle:hover {
+        border-color: var(--color-primary);
+    }
+
+    .near-me-toggle.active {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .near-me-toggle:disabled {
+        opacity: 0.7;
+        cursor: default;
+    }
+
+    .near-me-row select {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 5px 8px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-bg);
+        color: var(--color-text);
     }
 
     .bottom-sheet {

@@ -80,4 +80,17 @@ class VolunteerActivity constructor(
 
     // Optionale Teilnehmer-Obergrenze für die Anmeldefunktion. null = unbegrenzt.
     var maxParticipants: Int? = null,
+
+    // Optionale Dauer in Stunden für das Ehrenamtsstunden-Tracking (siehe
+    // HoursController). null bedeutet "unbekannt" — beim Summieren wird dafür ein
+    // Standardwert angenommen, nicht 0, da die meisten Einsätze eine gewisse
+    // Mindestdauer haben.
+    var durationHours: Double? = null,
+
+    // Gesetzt für Aktivitäten, die CalendarImportJob aus dem externen Kalender
+    // eines Anbieters übernommen hat — die UID des Original-Events aus der
+    // ICS-Datei. Erlaubt beim nächsten Import-Lauf, dieselbe Aktivität wieder-
+    // zuerkennen (Update statt Duplikat) und sie zu löschen, falls sie aus dem
+    // externen Kalender verschwunden ist.
+    var externalCalendarUid: String? = null,
 )
