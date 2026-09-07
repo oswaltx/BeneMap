@@ -67,6 +67,7 @@ class AuthController(
     private val sessionRegistry: SessionRegistry,
     private val rateLimiter: RateLimiter,
     private val photoStorageService: PhotoStorageService,
+    private val favoriteRepository: FavoriteRepository,
 ) {
 
     @PostMapping("/register")
@@ -193,6 +194,7 @@ class AuthController(
             activityRatingRepository.deleteAll(activityRatings)
             val activitySignups: List<ActivitySignup> = activitySignupRepository.findByActivity(activity)
             activitySignupRepository.deleteAll(activitySignups)
+            favoriteRepository.deleteByActivity(activity)
             volunteerActivityRepository.delete(activity)
         }
         val providerRatings: List<ProviderRating> = providerRatingRepository.findByProvider(user)
@@ -203,6 +205,7 @@ class AuthController(
         providerRatingRepository.deleteAll(userProviderRatings)
         val userActivitySignups: List<ActivitySignup> = activitySignupRepository.findByUser(user)
         activitySignupRepository.deleteAll(userActivitySignups)
+        favoriteRepository.deleteAll(favoriteRepository.findByUser(user))
         passwordResetTokenRepository.deleteAll(passwordResetTokenRepository.findByUser(user))
         emailVerificationTokenRepository.deleteAll(emailVerificationTokenRepository.findByUser(user))
         photoStorageService.deleteAllOwnedBy(user)

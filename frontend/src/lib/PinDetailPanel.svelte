@@ -7,6 +7,7 @@
     import { deleteActivity } from "./activityActions";
     import { currentUser } from "../auth";
     import { resolvePhotoUrl } from "./apiBase";
+    import { favoriteIds, toggleFavorite } from "./favorites";
 
     export let marker: {
         id: number;
@@ -29,6 +30,7 @@
         providerName: string | null;
         providerPhotoUrl: string | null;
         providerWebsiteUrl: string | null;
+        providerVerified: boolean;
         providerRating: number | null;
         providerRatingCount: number;
     };
@@ -39,7 +41,29 @@
     let openRating: { target: "activity" | "provider"; targetId: number; targetLabel: string } | null = null;
     let showSignup = false;
     $: isOwner = $currentUser?.id === marker.providerId;
+    $: isFavorite = $favoriteIds.has(marker.id);
     let editing = false;
+    let shareStatus: string | null = null;
+
+    async function share() {
+        const url = `${window.location.origin}/?activity=${marker.id}`;
+        const shareNavigator = navigator as Navigator & { share?: (data: ShareData) => Promise<void> };
+        if (shareNavigator.share) {
+            try {
+                await shareNavigator.share({ title: marker.name, url });
+            } catch (e) {
+                // Nutzer hat den Teilen-Dialog abgebrochen — kein Fehler.
+            }
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(url);
+            shareStatus = "Link kopiert!";
+        } catch (e) {
+            shareStatus = "Link konnte nicht kopiert werden.";
+        }
+        setTimeout(() => (shareStatus = null), 2500);
+    }
     let selectedPhotoIndex = 0;
     $: safePhotoIndex = selectedPhotoIndex < marker.photoUrls.length ? selectedPhotoIndex : 0;
 
@@ -72,6 +96,20 @@
                 style="background:{categoryColor(marker.category).bg}; color:{categoryColor(marker.category).text};"
             >{marker.category}</span>
         {/if}
+        <button class="share-button" on:click={share} aria-label="Aktivität teilen" title="Aktivität teilen">
+            🔗
+        </button>
+        {#if $currentUser}
+            <button
+                class="favorite-toggle"
+                class:active={isFavorite}
+                on:click={() => toggleFavorite(marker.id)}
+                aria-label={isFavorite ? "Von Favoriten entfernen" : "Zu Favoriten hinzufügen"}
+                title={isFavorite ? "Von Favoriten entfernen" : "Zu Favoriten hinzufügen"}
+            >
+                {isFavorite ? "♥" : "♡"}
+            </button>
+        {/if}
         {#if isOwner}
             <button class="edit-link" on:click={() => (editing = true)}>Bearbeiten</button>
             <button class="edit-link" on:click={handleDelete}>Löschen</button>
@@ -100,6 +138,8 @@
             {/if}
         </div>
     {/if}
+
+    {#if shareStatus}<p class="share-status">{shareStatus}</p>{/if}
 
     <h3>{marker.name}</h3>
     {#if marker.dateTime}
@@ -152,6 +192,9 @@
                     <img class="provider-avatar" src={resolvePhotoUrl(marker.providerPhotoUrl)} alt={marker.providerName ?? "Anbieter"} />
                 {/if}
                 <span class="provider-name">{marker.providerName}</span>
+                {#if marker.providerVerified}
+                    <span class="verified-badge" title="Verifizierter Anbieter">✓</span>
+                {/if}
             </div>
             {#if marker.providerWebsiteUrl}
                 <a class="provider-website" href={marker.providerWebsiteUrl} target="_blank" rel="noopener noreferrer">Website besuchen</a>
@@ -245,6 +288,44 @@
 
     .edit-link:hover {
         color: var(--color-primary);
+    }
+
+    .share-button {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        line-height: 1;
+        cursor: pointer;
+        color: var(--color-text-muted);
+        padding: 0 4px;
+    }
+
+    .share-button:hover {
+        color: var(--color-primary);
+    }
+
+    .share-status {
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--color-primary);
+    }
+
+    .favorite-toggle {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        line-height: 1;
+        cursor: pointer;
+        color: var(--color-text-muted);
+        padding: 0 4px;
+    }
+
+    .favorite-toggle.active {
+        color: var(--color-error);
+    }
+
+    .favorite-toggle:hover {
+        color: var(--color-error);
     }
 
     .tag {
@@ -352,6 +433,19 @@
         display: flex;
         align-items: center;
         gap: 8px;
+    }
+
+    .verified-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: var(--color-primary-text);
+        font-size: 0.65rem;
+        font-weight: 700;
     }
 
     .provider-avatar {
