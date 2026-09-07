@@ -30,4 +30,8 @@ class ActivitySignup(
     var activity: VolunteerActivity,
 
     var createdAt: Instant = Instant.now(),
+
+    // Gesetzt sobald ReminderJob eine Erinnerungsmail für diese Anmeldung verschickt
+    // hat — verhindert doppelte Mails bei jedem stündlichen Lauf.
+    var reminderSentAt: Instant? = null,
 )
