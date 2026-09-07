@@ -12,6 +12,7 @@
     let dateTime = "";
     let photoUrls: string[] = [];
     let maxParticipants = "";
+    let durationHours = "";
     let isRecurring = false;
     let recurrenceCount = 1;
     let recurrenceUnit: "days" | "weeks" = "weeks";
@@ -50,6 +51,7 @@
             dateTime: dateTime ? dateTime + ":00" : undefined,
             photoUrls: photoUrls.length > 0 ? photoUrls.join("\n") : undefined,
             maxParticipants: maxParticipants ? Number(maxParticipants) : null,
+            durationHours: durationHours ? Number(durationHours) : null,
         };
 
         const wasRecurring = isRecurring;
@@ -104,6 +106,7 @@
             dateTime = "";
             photoUrls = [];
             maxParticipants = "";
+            durationHours = "";
             isRecurring = false;
             recurrenceCount = 1;
             recurrenceUnit = "weeks";
@@ -167,6 +170,11 @@
             <label>
                 Maximale Teilnehmerzahl (optional)
                 <input type="number" min="1" bind:value={maxParticipants} placeholder="unbegrenzt" />
+            </label>
+
+            <label>
+                Dauer in Stunden (optional, für Ehrenamtsstunden-Tracking)
+                <input type="number" min="0.5" step="0.5" bind:value={durationHours} placeholder="z.B. 2" />
             </label>
 
             <label class="checkbox-label">

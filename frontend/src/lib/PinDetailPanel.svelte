@@ -24,6 +24,7 @@
         sourceContactPhone: string | null;
         signupCount: number;
         maxParticipants: number | null;
+        durationHours: number | null;
         activityRating: number | null;
         activityRatingCount: number;
         providerId: number | null;
@@ -143,7 +144,12 @@
 
     <h3>{marker.name}</h3>
     {#if marker.dateTime}
-        <p class="meta">{new Date(marker.dateTime).toLocaleString("de-DE")}</p>
+        <p class="meta">
+            {new Date(marker.dateTime).toLocaleString("de-DE")}
+            {#if marker.durationHours}
+                &middot; {marker.durationHours} Std.
+            {/if}
+        </p>
     {/if}
     <p class="meta">{marker.address}</p>
 
@@ -227,7 +233,7 @@
 
 {#if editing}
     <EditActivityModal
-        marker={{ id: marker.id, name: marker.name, description: marker.description, address: marker.address, category: marker.category, dateTime: marker.dateTime, photoUrls: marker.photoUrls, maxParticipants: marker.maxParticipants }}
+        marker={{ id: marker.id, name: marker.name, description: marker.description, address: marker.address, category: marker.category, dateTime: marker.dateTime, photoUrls: marker.photoUrls, maxParticipants: marker.maxParticipants, durationHours: marker.durationHours }}
         on:close={() => (editing = false)}
         on:saved={() => dispatch("refresh")}
     />

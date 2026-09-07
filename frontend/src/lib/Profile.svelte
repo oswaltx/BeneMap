@@ -9,6 +9,23 @@
     let websiteUrl = "";
     let prefilled = false;
 
+    let hours: { totalHours: number; completedActivityCount: number } | null = null;
+    let hoursLoaded = false;
+
+    $: if ($currentUser?.role === "USER" && !hoursLoaded) {
+        hoursLoaded = true;
+        loadHours();
+    }
+
+    async function loadHours() {
+        try {
+            const res = await fetchWithSessionCheck(`${API_BASE}/auth/me/hours`, { credentials: "include" });
+            if (res.ok) hours = await res.json();
+        } catch {
+            // Stunden-Anzeige ist rein informativ — schlägt der Abruf fehl, bleibt sie leer.
+        }
+    }
+
     $: if ($currentUser && !prefilled) {
         photoUrls = $currentUser.photoUrl ? [$currentUser.photoUrl] : [];
         websiteUrl = $currentUser.websiteUrl ?? "";
@@ -112,6 +129,19 @@
                         <p class:warning={statusIsWarning}>{statusMessage}</p>
                     {/if}
                 </form>
+            {/if}
+
+            {#if $currentUser.role === "USER" && hours}
+                <div class="hours-card">
+                    <h3>Ehrenamtsstunden</h3>
+                    <p class="hours-total">{hours.totalHours} Stunden</p>
+                    <p class="hours-meta">
+                        {hours.completedActivityCount} abgeschlossene {hours.completedActivityCount === 1 ? "Aktivität" : "Aktivitäten"}
+                    </p>
+                    <a class="button-link" href={`${API_BASE}/auth/me/certificate.pdf`} download="ehrenamt-zertifikat.pdf">
+                        Zertifikat herunterladen (PDF)
+                    </a>
+                </div>
             {/if}
 
             <div class="danger-zone">
@@ -224,6 +254,51 @@
         font-size: 0.9rem;
         text-align: center;
         max-width: 420px;
+    }
+
+    .hours-card {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        box-shadow: var(--shadow-panel);
+    }
+
+    .hours-card h3 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .hours-total {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--color-primary);
+    }
+
+    .hours-meta {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+    }
+
+    .button-link {
+        align-self: flex-start;
+        margin-top: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        text-decoration: none;
+        padding: 8px 12px;
+        border: 1px solid var(--color-primary);
+        border-radius: var(--radius-md);
+    }
+
+    .button-link:hover {
+        background: var(--color-accent);
     }
 
     .danger-zone {

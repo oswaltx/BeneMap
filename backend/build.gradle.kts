@@ -33,6 +33,7 @@
         implementation("org.jsoup:jsoup:1.17.2") //Scraping
         implementation("org.json:json:20240303")
         implementation("tools.jackson.module:jackson-module-kotlin:3.0.0")
+        implementation("org.apache.pdfbox:pdfbox:2.0.31") // Ehrenamtsstunden-Zertifikat als PDF (siehe CertificateService)
         runtimeOnly("com.h2database:h2")
 
         testImplementation("org.springframework.boot:spring-boot-starter-test")

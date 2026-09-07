@@ -138,6 +138,22 @@ class MainControllerAddActivityTest {
     }
 
     @Test
+    fun `normalizes a non-positive durationHours to null`() {
+        val repository: VolunteerActivityRepository = mock()
+        val geocodingService: GeocodingService = mock()
+        val userRepository: UserRepository = mock()
+        whenever(userRepository.findByEmail(provider.email)).thenReturn(provider)
+        whenever(repository.save(any<VolunteerActivity>())).thenAnswer { it.arguments[0] }
+
+        val controller = MainController(repository, geocodingService, userRepository, mock(), mock(), mock(), RateLimiter(enabled = true), mock(), mock())
+        val activity = VolunteerActivity(name = "Test", latitude = 1.0, longitude = 2.0, durationHours = 0.0)
+
+        val result = controller.addActivity(activity, authenticationFor(provider.email)) as ResponseEntity<VolunteerActivity>
+
+        assertNull(result.body?.durationHours)
+    }
+
+    @Test
     fun `blank photo URLs field is stored as null`() {
         val repository: VolunteerActivityRepository = mock()
         val geocodingService: GeocodingService = mock()

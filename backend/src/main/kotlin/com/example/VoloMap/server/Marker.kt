@@ -28,4 +28,5 @@ data class Marker(
     val sourceContactPhone: String?,
     val signupCount: Int,
     val maxParticipants: Int?,
+    val durationHours: Double?,
 )

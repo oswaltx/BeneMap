@@ -80,4 +80,10 @@ class VolunteerActivity constructor(
 
     // Optionale Teilnehmer-Obergrenze für die Anmeldefunktion. null = unbegrenzt.
     var maxParticipants: Int? = null,
+
+    // Optionale Dauer in Stunden für das Ehrenamtsstunden-Tracking (siehe
+    // HoursController). null bedeutet "unbekannt" — beim Summieren wird dafür ein
+    // Standardwert angenommen, nicht 0, da die meisten Einsätze eine gewisse
+    // Mindestdauer haben.
+    var durationHours: Double? = null,
 )

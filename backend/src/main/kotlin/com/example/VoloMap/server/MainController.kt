@@ -80,6 +80,7 @@ class MainController(
                     sourceContactPhone = activity.sourceContactPhone,
                     signupCount = signups.size,
                     maxParticipants = activity.maxParticipants,
+                    durationHours = activity.durationHours,
                 )
             }
             .filter { filterDate == null || it.dateTime?.toLocalDate() == filterDate }
@@ -120,6 +121,7 @@ class MainController(
         activity.createdBy = userRepository.findByEmail(authentication.name)
         activity.photoUrls = normalizePhotoUrls(activity.photoUrls)
         activity.maxParticipants = normalizeMaxParticipants(activity.maxParticipants)
+        activity.durationHours = normalizeDurationHours(activity.durationHours)
 
         if (activity.latitude == null && activity.longitude == null && !activity.addressText.isNullOrBlank()) {
             val coords = geocodingService.geocode(activity.addressText!!)
@@ -176,6 +178,7 @@ class MainController(
                     dateTime = occurrenceDateTime,
                     createdBy = provider,
                     maxParticipants = normalizeMaxParticipants(req.maxParticipants),
+                    durationHours = normalizeDurationHours(req.durationHours),
                 )
             )
         }
@@ -203,6 +206,7 @@ class MainController(
         activity.category = req.category
         activity.photoUrls = normalizePhotoUrls(req.photoUrls)
         activity.maxParticipants = normalizeMaxParticipants(req.maxParticipants)
+        activity.durationHours = normalizeDurationHours(req.durationHours)
         if (req.dateTime != null) {
             activity.dateTime = req.dateTime
         }
@@ -298,6 +302,7 @@ data class UpdateActivityRequest(
     val dateTime: LocalDateTime? = null,
     val photoUrls: String? = null,
     val maxParticipants: Int? = null,
+    val durationHours: Double? = null,
 )
 
 private const val MAX_RECURRING_OCCURRENCES = 60
@@ -312,9 +317,12 @@ data class AddRecurringActivityRequest(
     val photoUrls: String? = null,
     val recurrenceIntervalDays: Int,
     val maxParticipants: Int? = null,
+    val durationHours: Double? = null,
 )
 
 private fun normalizeMaxParticipants(value: Int?): Int? = value?.takeIf { it >= 1 }
+
+private fun normalizeDurationHours(value: Double?): Double? = value?.takeIf { it > 0 }
 
 private const val EARTH_RADIUS_KM = 6371.0
 
