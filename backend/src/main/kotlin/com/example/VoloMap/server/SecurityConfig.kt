@@ -98,6 +98,7 @@ class SecurityConfig(
             .authorizeHttpRequests {
                 it.requestMatchers(HttpMethod.GET, "/", "/markers", "/categories", "/activities/*/ratings", "/providers/*/ratings", "/activities/*/signups").permitAll()
                 it.requestMatchers(HttpMethod.GET, "/uploads/photos/*").permitAll()
+                it.requestMatchers(HttpMethod.GET, "/calendar/*.ics", "/providers/*/calendar.ics").permitAll()
                 it.requestMatchers(
                     HttpMethod.GET,
                     "/about", "/add", "/profile", "/login", "/register",

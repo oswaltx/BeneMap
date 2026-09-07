@@ -26,6 +26,45 @@
         }
     }
 
+    let calendarToken: string | null = null;
+    let calendarTokenLoaded = false;
+    let regeneratingToken = false;
+
+    $: if ($currentUser?.role === "USER" && !calendarTokenLoaded) {
+        calendarTokenLoaded = true;
+        loadCalendarToken();
+    }
+
+    async function loadCalendarToken() {
+        try {
+            const res = await fetchWithSessionCheck(`${API_BASE}/auth/me/calendar-token`, { credentials: "include" });
+            if (res.ok) calendarToken = (await res.json()).token;
+        } catch {
+            // Kalender-Link ist ein Komfort-Feature — schlägt der Abruf fehl, bleibt er leer.
+        }
+    }
+
+    async function regenerateCalendarToken() {
+        regeneratingToken = true;
+        try {
+            const res = await fetchWithSessionCheck(`${API_BASE}/auth/me/calendar-token/regenerate`, {
+                method: "POST",
+                credentials: "include",
+            });
+            if (res.ok) calendarToken = (await res.json()).token;
+        } catch {
+            // s.o.
+        } finally {
+            regeneratingToken = false;
+        }
+    }
+
+    function calendarUrl(token: string, scheme: "http" | "webcal"): string {
+        const base = API_BASE || window.location.origin;
+        const withHttp = `${base}/calendar/${token}.ics`;
+        return scheme === "webcal" ? withHttp.replace(/^https?:/, "webcal:") : withHttp;
+    }
+
     $: if ($currentUser && !prefilled) {
         photoUrls = $currentUser.photoUrl ? [$currentUser.photoUrl] : [];
         websiteUrl = $currentUser.websiteUrl ?? "";
@@ -141,6 +180,25 @@
                     <a class="button-link" href={`${API_BASE}/auth/me/certificate.pdf`} download="ehrenamt-zertifikat.pdf">
                         Zertifikat herunterladen (PDF)
                     </a>
+                </div>
+            {/if}
+
+            {#if $currentUser.role === "USER" && calendarToken}
+                <div class="hours-card">
+                    <h3>Kalender-Abo</h3>
+                    <p class="hours-meta">
+                        Abonniere deine Anmeldungen in Google/Apple/Outlook-Kalender — neue Anmeldungen erscheinen
+                        automatisch.
+                    </p>
+                    <a class="button-link" href={calendarUrl(calendarToken, "webcal")}>Kalender abonnieren</a>
+                    <button
+                        type="button"
+                        class="regenerate-link"
+                        on:click={regenerateCalendarToken}
+                        disabled={regeneratingToken}
+                    >
+                        {regeneratingToken ? "Erzeugt neuen Link…" : "Neuen Abo-Link erzeugen (alter wird ungültig)"}
+                    </button>
                 </div>
             {/if}
 
@@ -299,6 +357,22 @@
 
     .button-link:hover {
         background: var(--color-accent);
+    }
+
+    .regenerate-link {
+        align-self: flex-start;
+        margin-top: 4px;
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .regenerate-link:hover {
+        color: var(--color-primary);
     }
 
     .danger-zone {
