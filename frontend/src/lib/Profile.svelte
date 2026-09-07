@@ -3,13 +3,14 @@
     import { navigate } from "../router";
     import { API_BASE } from "./apiBase";
     import Link from "./Link.svelte";
+    import PhotoDropzone from "./PhotoDropzone.svelte";
 
-    let photoUrl = "";
+    let photoUrls: string[] = [];
     let websiteUrl = "";
     let prefilled = false;
 
     $: if ($currentUser && !prefilled) {
-        photoUrl = $currentUser.photoUrl ?? "";
+        photoUrls = $currentUser.photoUrl ? [$currentUser.photoUrl] : [];
         websiteUrl = $currentUser.websiteUrl ?? "";
         prefilled = true;
     }
@@ -28,7 +29,7 @@
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    photoUrl: photoUrl.trim() || null,
+                    photoUrl: photoUrls[0] ?? null,
                     websiteUrl: websiteUrl.trim() || null,
                 }),
             });
@@ -94,8 +95,8 @@
             {#if $currentUser.role === "ANBIETER"}
                 <form on:submit|preventDefault={handleSubmit}>
                     <label>
-                        Profilbild-URL
-                        <input type="text" bind:value={photoUrl} placeholder="https://..." />
+                        Profilbild
+                        <PhotoDropzone bind:urls={photoUrls} maxPhotos={1} />
                     </label>
 
                     <label>

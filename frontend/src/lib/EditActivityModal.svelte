@@ -3,6 +3,7 @@
     import { fetchWithSessionCheck } from "../auth";
     import { ACTIVITY_CATEGORIES } from "./categories";
     import { API_BASE } from "./apiBase";
+    import PhotoDropzone from "./PhotoDropzone.svelte";
 
     export let marker: {
         id: number;
@@ -22,7 +23,7 @@
     let addressText = marker.address;
     let category = marker.category;
     let dateTime = marker.dateTime ? marker.dateTime.slice(0, 16) : "";
-    let photoUrlsText = marker.photoUrls.join("\n");
+    let photoUrls = marker.photoUrls.slice();
     let maxParticipants = marker.maxParticipants != null ? String(marker.maxParticipants) : "";
 
     let submitting = false;
@@ -50,7 +51,7 @@
                     addressText: addressText || null,
                     category: category || null,
                     dateTime: dateTime ? dateTime + ":00" : undefined,
-                    photoUrls: photoUrlsText.trim() || undefined,
+                    photoUrls: photoUrls.length > 0 ? photoUrls.join("\n") : undefined,
                     maxParticipants: maxParticipants ? Number(maxParticipants) : null,
                 }),
             });
@@ -121,8 +122,8 @@
         </label>
 
         <label>
-            Foto-URLs (eine pro Zeile)
-            <textarea bind:value={photoUrlsText} rows="3" placeholder={"https://...\nhttps://..."}></textarea>
+            Fotos
+            <PhotoDropzone bind:urls={photoUrls} />
         </label>
 
         <label>

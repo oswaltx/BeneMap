@@ -24,6 +24,7 @@ class MainController(
     private val providerRatingRepository: ProviderRatingRepository,
     private val activitySignupRepository: ActivitySignupRepository,
     private val rateLimiter: RateLimiter,
+    private val photoStorageService: PhotoStorageService,
 ) {
 
     @GetMapping("/markers")
@@ -186,6 +187,8 @@ class MainController(
             return ResponseEntity.status(403).build<Any>()
         }
 
+        val oldPhotoUrls = parsePhotoUrls(activity.photoUrls)
+
         activity.name = req.name
         activity.description = req.description
         activity.category = req.category
@@ -217,6 +220,12 @@ class MainController(
         }
 
         val saved = repository.save(activity)
+
+        if (user != null) {
+            val removedUrls = oldPhotoUrls - parsePhotoUrls(saved.photoUrls).toSet()
+            releaseOrphanedPhotos(removedUrls, user, excludingActivityId = saved.id)
+        }
+
         return ResponseEntity.ok(UpdateActivityResponse(saved, geocodingFailed))
     }
 
@@ -234,8 +243,27 @@ class MainController(
         }
         activityRatingRepository.deleteAll(activityRatingRepository.findByActivity(activity))
         activitySignupRepository.deleteAll(activitySignupRepository.findByActivity(activity))
+        if (user != null) {
+            releaseOrphanedPhotos(parsePhotoUrls(activity.photoUrls), user, excludingActivityId = activity.id)
+        }
         repository.delete(activity)
         return ResponseEntity.noContent().build()
+    }
+
+    // Deletes uploaded-photo files/rows in `urls` that no longer appear on any other
+    // activity or the profile photo of `owner` — a URL can legitimately be reused
+    // across an owner's own activities, so it must only be freed once truly orphaned.
+    private fun releaseOrphanedPhotos(urls: List<String>, owner: User, excludingActivityId: Long?) {
+        if (urls.isEmpty()) return
+        val stillReferenced = repository.findByCreatedBy(owner)
+            .filter { it.id != excludingActivityId }
+            .flatMap { parsePhotoUrls(it.photoUrls) }
+            .toSet() + setOfNotNull(owner.photoUrl)
+        for (url in urls) {
+            if (url !in stillReferenced) {
+                photoStorageService.deleteIfOwnedBy(url, owner)
+            }
+        }
     }
 
 }
@@ -262,7 +290,6 @@ data class UpdateActivityRequest(
     val maxParticipants: Int? = null,
 )
 
-private const val MAX_PHOTO_URLS = 10
 private const val MAX_RECURRING_OCCURRENCES = 60
 private const val RECURRENCE_HORIZON_MONTHS = 3L
 
@@ -278,17 +305,3 @@ data class AddRecurringActivityRequest(
 )
 
 private fun normalizeMaxParticipants(value: Int?): Int? = value?.takeIf { it >= 1 }
-
-private fun parsePhotoUrls(raw: String?): List<String> {
-    if (raw.isNullOrBlank()) return emptyList()
-    return raw.lines()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .map { if (it.startsWith("http://") || it.startsWith("https://")) it else "https://$it" }
-        .take(MAX_PHOTO_URLS)
-}
-
-private fun normalizePhotoUrls(raw: String?): String? {
-    val parsed = parsePhotoUrls(raw)
-    return if (parsed.isEmpty()) null else parsed.joinToString("\n")
-}
