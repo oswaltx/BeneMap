@@ -4,6 +4,7 @@ import biweekly.Biweekly
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.net.InetAddress
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -26,7 +27,12 @@ class CalendarImportJob(
     private val geocodingService: GeocodingService,
 ) {
     private val logger = LoggerFactory.getLogger(CalendarImportJob::class.java)
-    private val httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
+    private val httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(10))
+        // A redirect could point at an internal address our upfront host check never
+        // sees — never follow one automatically, a rejected redirect just fails the sync.
+        .followRedirects(HttpClient.Redirect.NEVER)
+        .build()
 
     @Scheduled(fixedRate = 30 * 60 * 1000)
     fun importAllProviderCalendars() {
@@ -43,6 +49,10 @@ class CalendarImportJob(
 
     private fun importFor(provider: User) {
         val url = provider.externalCalendarUrl ?: return
+        if (!isSafeExternalUrl(url)) {
+            logger.warn("Refusing to fetch external calendar for ${provider.email}: URL is not an allowed public http(s) address")
+            return
+        }
         val request = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).GET().build()
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         if (response.statusCode() !in 200..299) {
@@ -50,6 +60,35 @@ class CalendarImportJob(
             return
         }
         syncFromIcsText(provider, response.body())
+    }
+
+    // Anbieter geben diese URL selbst ein (PUT /auth/me) — ohne diese Prüfung könnte
+    // sie den Server dazu bringen, beliebige interne Adressen anzufragen (SSRF), z.B.
+    // Cloud-Metadata-Endpunkte oder interne Admin-Oberflächen. Nur http(s) auf eine
+    // öffentlich auflösende, nicht-private IP ist erlaubt.
+    internal fun isSafeExternalUrl(url: String): Boolean {
+        val uri = try {
+            URI.create(url)
+        } catch (e: Exception) {
+            return false
+        }
+        if (uri.scheme != "http" && uri.scheme != "https") return false
+        val host = uri.host ?: return false
+
+        val addresses = try {
+            InetAddress.getAllByName(host)
+        } catch (e: Exception) {
+            return false
+        }
+        if (addresses.isEmpty()) return false
+
+        return addresses.all { address ->
+            !address.isAnyLocalAddress &&
+                !address.isLoopbackAddress &&
+                !address.isLinkLocalAddress &&
+                !address.isSiteLocalAddress &&
+                !address.isMulticastAddress
+        }
     }
 
     /** Parses `icsText` and upserts/removes the given provider's imported activities to match it. Separated from `importFor` so tests can feed ICS text directly instead of standing up a real HTTP server. */

@@ -1,13 +1,17 @@
 package com.example.VoloMap.server
 
+import com.sun.net.httpserver.HttpServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.net.InetAddress
+import java.net.InetSocketAddress
 
 @SpringBootTest
 class CalendarImportJobTest {
@@ -112,5 +116,47 @@ class CalendarImportJobTest {
         assertEquals(1, activities.size)
         assertEquals("Manuell angelegt", activities[0].name)
         assertNull(activities[0].externalCalendarUid)
+    }
+
+    @Test
+    fun `rejects loopback, link-local and private-network calendar URLs`() {
+        assertFalse(calendarImportJob.isSafeExternalUrl("http://127.0.0.1/cal.ics"))
+        assertFalse(calendarImportJob.isSafeExternalUrl("http://localhost/cal.ics"))
+        assertFalse(calendarImportJob.isSafeExternalUrl("http://169.254.169.254/latest/meta-data/"))
+        assertFalse(calendarImportJob.isSafeExternalUrl("http://10.0.0.5/cal.ics"))
+        assertFalse(calendarImportJob.isSafeExternalUrl("http://192.168.1.1/cal.ics"))
+        assertFalse(calendarImportJob.isSafeExternalUrl("ftp://example.com/cal.ics"))
+        assertFalse(calendarImportJob.isSafeExternalUrl("not a url"))
+    }
+
+    @Test
+    fun `accepts an ordinary public https calendar URL`() {
+        // An IP literal avoids depending on real DNS resolution being available in CI/sandboxes.
+        assertTrue(calendarImportJob.isSafeExternalUrl("https://8.8.8.8/basic.ics"))
+    }
+
+    @Test
+    fun `importAllProviderCalendars never fetches a provider-supplied loopback URL`() {
+        val server = HttpServer.create(InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0)
+        var wasHit = false
+        server.createContext("/cal.ics") { exchange ->
+            wasHit = true
+            val body = ics(event("uid-ssrf@example.com", "Sollte nie ankommen", "20270601T090000Z")).toByteArray()
+            exchange.sendResponseHeaders(200, body.size.toLong())
+            exchange.responseBody.use { it.write(body) }
+        }
+        server.start()
+        try {
+            val provider = newProvider("ssrf-provider@example.com")
+            provider.externalCalendarUrl = "http://127.0.0.1:${server.address.port}/cal.ics"
+            userRepository.save(provider)
+
+            calendarImportJob.importAllProviderCalendars()
+
+            assertFalse(wasHit, "the SSRF guard should have refused the request before it was ever sent")
+            assertTrue(activityRepository.findByCreatedBy(provider).isEmpty())
+        } finally {
+            server.stop(0)
+        }
     }
 }

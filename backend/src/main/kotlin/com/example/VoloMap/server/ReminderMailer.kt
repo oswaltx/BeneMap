@@ -6,6 +6,7 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import org.springframework.web.util.HtmlUtils
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -22,6 +23,12 @@ class ReminderMailer(
         try {
             val whenText = dateTime.format(formatter)
             val whereText = addressText?.let { " in $it" } ?: ""
+            // activityName/addressText come from the provider (or an imported external
+            // calendar) and are shown to a different user — escape them for the HTML
+            // part so an attacker can't embed a live link/markup in a trusted-sender email.
+            // The plain-text part needs no escaping; it's never rendered as markup.
+            val safeActivityName = HtmlUtils.htmlEscape(activityName)
+            val safeWhereText = addressText?.let { " in ${HtmlUtils.htmlEscape(it)}" } ?: ""
             val mimeMessage = mailSender.createMimeMessage()
             val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
             helper.setFrom(fromAddress)
@@ -32,7 +39,7 @@ class ReminderMailer(
                     "kurze Erinnerung: \"$activityName\" findet morgen am $whenText$whereText statt.\n\n" +
                     "Bis dahin!",
                 "<p>Hallo,</p>" +
-                    "<p>kurze Erinnerung: <strong>$activityName</strong> findet morgen am $whenText$whereText statt.</p>" +
+                    "<p>kurze Erinnerung: <strong>$safeActivityName</strong> findet morgen am $whenText$safeWhereText statt.</p>" +
                     "<p>Bis dahin!</p>"
             )
             mailSender.send(mimeMessage)
