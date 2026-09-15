@@ -24,6 +24,10 @@
 .idea/shelf/
 *.iml
 
+# Local tooling state — never commit user-specific IDE/AI-tool internals
+/.claude/
+/.idea/
+
 # OS
 .DS_Store
 
