@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# ============================================================================
+# Benemap deploy script — TEMPLATE.
+# Copy this file to `deploy.sh` on your workstation, fill in BENEMAP_HOST
+# and BENEMAP_SSH_KEY, and make it executable (`chmod +x deploy.sh`).
+#
+# This script is intentionally NOT committed (see /deploy.sh in .gitignore)
+# because it embeds local workstation state (SSH key path, host alias).
+# The real `deploy.sh` lives only on operator workstations; this template
+# documents the contract for the deploy pipeline.
+#
+# See README.md → "Deployment" for the full architecture overview.
+# ============================================================================
+set -euo pipefail
+cd "$(dirname "$0")"
+
+# ---- required: configure for your environment ----
+SSH_HOST="${BENEMAP_HOST:-user@netcup1}"
+SSH_KEY="${BENEMAP_SSH_KEY:-$HOME/.ssh/id_ed25519}"
+REMOTE_DIR="${BENEMAP_REMOTE_DIR:-/home/david/services/benemap}"
+SERVICE_NAME="benemap"
+
+echo "==> Target: $SSH_HOST  ($REMOTE_DIR)"
+
+echo "==> Building frontend..."
+(cd frontend && npm install && npm run build)
+
+echo "==> Bundling frontend into backend static resources..."
+rm -rf backend/src/main/resources/static
+mkdir -p backend/src/main/resources/static
+cp -r frontend/dist/* backend/src/main/resources/static/
+
+echo "==> Building backend jar..."
+if [ "${SKIP_TESTS:-}" = "1" ]; then
+    (cd backend && ./gradlew bootJar -x test)
+else
+    (cd backend && ./gradlew bootJar)
+fi
+
+JAR=$(ls backend/build/libs/*.jar | grep -v -- -plain.jar | head -1)
+if [ -z "$JAR" ]; then
+    echo "ERROR: no backend jar found under backend/build/libs/" >&2
+    exit 1
+fi
+echo "==> Built $JAR"
+
+echo "==> Rotating previous deployment on $SERVICE_NAME..."
+ssh -i "$SSH_KEY" "$SSH_HOST" "
+    set -euo pipefail
+    cd '$REMOTE_DIR'
+    if [ -f app.jar ]; then
+        cp -p app.jar app.jar.previous
+    fi
+    mkdir -p backups
+    if [ -f app.log ]; then
+        cp -p app.log \"backups/app.\$(date +%Y%m%d-%H%M%S).log\" || true
+    fi
+"
+
+echo "==> Uploading $JAR ..."
+scp -i "$SSH_KEY" "$JAR" "$SSH_HOST:$REMOTE_DIR/app.jar.new"
+
+echo "==> Atomic swap and systemctl restart $SERVICE_NAME..."
+ssh -i "$SSH_KEY" "$SSH_HOST" "
+    set -euo pipefail
+    cd '$REMOTE_DIR'
+    mv app.jar.new app.jar
+    systemctl restart $SERVICE_NAME
+"
+
+echo "==> Waiting for $SERVICE_NAME to become active..."
+ACTIVE=""
+for i in 1 2 3 4 5 6 7 8 9 10; do
+    sleep 2
+    if ssh -i "$SSH_KEY" "$SSH_HOST" "systemctl is-active --quiet $SERVICE_NAME"; then
+        ACTIVE="yes"
+        echo "    $SERVICE_NAME is active (after ${i}x2s)"
+        break
+    fi
+    echo "    waiting... ($i/10)"
+done
+
+if [ -z "$ACTIVE" ]; then
+    echo "ERROR: $SERVICE_NAME did not become active in time." >&2
+    echo "       Check: ssh $SSH_HOST 'journalctl -u $SERVICE_NAME -n 100 --no-pager'" >&2
+    exit 1
+fi
+
+echo "==> Health check..."
+ssh -i "$SSH_KEY" "$SSH_HOST" "curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://127.0.0.1:48100/"
+
+echo "==> Done: https://benemap.org  (rollback: see $REMOTE_DIR/app.jar.previous)"

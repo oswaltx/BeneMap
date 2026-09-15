@@ -88,6 +88,48 @@ npm run build
 * Copy `frontend/dist/` → `backend/src/main/resources/static/`
 * Spring Boot will now serve both frontend (`/`) and backend (`/api`) from **one server**
 
+### Deployment
+
+Production runs on a Netcup VPS (`netcup1`, 37.221.194.246) since 2026-09-11. Caddy terminates
+TLS for `benemap.org` and reverse-proxies to `127.0.0.1:48100` where Spring Boot listens as a
+local-only systemd service (`/etc/systemd/system/benemap.service`). The H2 database file
+lives at `~/services/benemap/data/volomap.mv.db`; a daily backup runs at 03:00 via
+`crontab` → `~/services/benemap/backup.sh`.
+
+To deploy a new build from a workstation:
+
+```bash
+# One-time setup on the operator workstation:
+cp deploy.sh.example deploy.sh             # local-only script (in .gitignore)
+chmod +x deploy.sh
+# edit deploy.sh and set BENEMAP_HOST / BENEMAP_SSH_KEY for your environment
+
+# Then for each deploy:
+./deploy.sh                                # build + test + deploy
+SKIP_TESTS=1 ./deploy.sh                   # skip the backend test suite
+BENEMAP_HOST=user@netcup1 BENEMAP_SSH_KEY=~/.ssh/id_ed25519 ./deploy.sh   # override target
+```
+
+The `deploy.sh` script itself is intentionally not committed (it embeds local
+workstation state — SSH key path, host alias). `deploy.sh.example` is the
+template.
+
+The script:
+
+1. Builds the frontend (`npm install && npm run build`)
+2. Bundles the frontend into `backend/src/main/resources/static/`
+3. Builds the backend jar (`./gradlew bootJar`)
+4. On the server, rotates `app.jar` → `app.jar.previous` (one-step rollback)
+5. Uploads the new jar as `app.jar.new` and atomically swaps it into place
+6. `systemctl restart benemap` and waits up to 20s for the service to come back up
+7. Health-checks `http://127.0.0.1:48100/` over the local backend port
+
+Configuration on the server lives in `~/services/benemap/.env` (SMTP credentials, base URL)
+and is sourced via systemd's `EnvironmentFile=`. Never commit `.env`.
+
+The pre-2026-09-11 Uberspace deploy script is preserved at `deploy.uberspace.sh.disabled`
+for historical reference; do not run it.
+
 ### Notes
 
 * No HTML templates in backend — frontend Svelte SPA handles UI
@@ -101,8 +143,6 @@ npm run build
 Full backlog lives in [`orga/board.md`](orga/board.md). Before a public beta, the
 priorities are:
 
-- [ ] **E-Mail-Verifizierung bei Registrierung** — prevents typo'd/fake addresses that
-  would otherwise permanently lock users out via password reset
 - [ ] **Schritt-für-Schritt-Anleitung für Anbieter** — the target audience (Vereine,
   Vermittlungsstellen) skews older and less app-experienced
 
